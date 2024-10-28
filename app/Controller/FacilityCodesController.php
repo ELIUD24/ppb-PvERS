@@ -41,7 +41,7 @@ class FacilityCodesController extends AppController
 						'facility_code' => null,//$this->verify_code($row[0]),
 						'facility_name' => $row[0],
 						'keph_level' => null,//$row[4],
-						'type' => $row[0],
+						'type' => $row[1],
 						'owner' => null,//$row[7],
 						'beds' => null,//$row[10],
 						'cots' =>null,// $row[11],
