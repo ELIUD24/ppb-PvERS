@@ -65,6 +65,7 @@ class TransfusionsController extends AppController
 
         // add deleted=false to criteria
         $criteria['Transfusion.deleted'] = false;
+        $criteria['Transfusion.archived'] = false;
         if (isset($this->request->query['submitted'])) {
             if ($this->request->query['submitted'] == 1) {
                 $criteria['Transfusion.submitted'] = array(0, 1);
@@ -106,6 +107,7 @@ class TransfusionsController extends AppController
 
         // add deleted=false to criteria
         $criteria['Transfusion.deleted'] = false;
+        $criteria['Transfusion.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Transfusion.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Designation', 'Pint');
@@ -138,6 +140,7 @@ class TransfusionsController extends AppController
         $criteria = $this->Transfusion->parseCriteria($this->passedArgs);
         // add deleted=false to criteria
         $criteria['Transfusion.deleted'] = false;
+        $criteria['Transfusion.archived'] = false;
         $criteria['Transfusion.user_id'] = $this->Auth->User('id');
         $criteria['Transfusion.submitted'] = array(1, 2);
         $this->paginate['conditions'] = $criteria;
@@ -208,6 +211,8 @@ class TransfusionsController extends AppController
         $criteria = $this->Transfusion->parseCriteria($this->passedArgs);
         // $criteria['Transfusion.submitted'] = 2;
         $criteria['Transfusion.copied !='] = '1';
+        $criteria['Transfusion.deleted'] = false;
+        $criteria['Transfusion.archived'] = false;
         if (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 1) {
             $criteria['Transfusion.submitted'] = array(0, 1);
         } else {
@@ -708,8 +713,8 @@ class TransfusionsController extends AppController
                 'message' => CakeText::insert($message['Message']['content'], $variables)
             );
             $this->loadModel('Queue.QueuedTask');
-            $this->QueuedTask->createJob('GenericEmail', $datum);
-            $this->QueuedTask->createJob('GenericNotification', $datum);
+            // $this->QueuedTask->createJob('GenericEmail', $datum);
+            // $this->QueuedTask->createJob('GenericNotification', $datum);
         }
     }
     public function api_add($id = null)

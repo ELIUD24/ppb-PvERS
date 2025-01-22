@@ -144,9 +144,9 @@ class PqmpsController extends AppController
         if ($pqmp['Pqmp']['particulate_matter']) {
             $complaints[] = "Particulate matter in infusions/injectables";
         }
-        // if ($pqmp['Pqmp']['complaint_other']) {
-        //     $complaints[] = "Other: " . $pqmp['Pqmp']['complaint_other'];
-        // }
+        if ($pqmp['Pqmp']['complaint_other']) {
+            $complaints[] = $pqmp['Pqmp']['complaint_other'];
+        }
     
         return $complaints;
     }
@@ -254,17 +254,7 @@ class PqmpsController extends AppController
 
         // try {
         $photolist = $this->convertAttachmentToBase64($pqmp['Attachment']);
-
-        // You can now use $base64Image to display the image or save it
-        //     debug($base64Image);
-        // } catch (\Exception $e) {
-        //     // Handle any errors (e.g., file not found)
-        //     debug($e->getMessage());
-        // }
-
-
-        // debug($pqmp);
-        // exit;
+ 
 
         $flattenedManufactureDate = $this->flattenDateArray($pqmp['Pqmp']['manufacture_date']);
 
@@ -302,7 +292,9 @@ class PqmpsController extends AppController
             "receiptDate" => $receipt_date_formatted,
             "manufacturerName" => $pqmp['Pqmp']['name_of_manufacturer'],
             "manufacturerAddress" => "", //$pqmp['Pqmp'][''],
-            "manufacturerCountryOfOrigin" => $pqmp['Country']['name'],
+            // "manufacturerCountryOfOrigin" => $pqmp['Country']['name'],
+            "manufacturerCountryOfOrigin" => !empty($pqmp['Country']['name']) ? $pqmp['Country']['name'] : "",
+
             "complaintDescription" => $pqmp['Pqmp']['complaint_description'],
             "coldChainMaintained" => isset($pqmp['Pqmp']['cold_chain']) && !empty($pqmp['Pqmp']['cold_chain']), // $pqmp['Pqmp']['cold_chain'], //Boolean
             "productRequiresRefrigeration" => isset($pqmp['Pqmp']['require_refrigeration']) && !empty($pqmp['Pqmp']['require_refrigeration']), //$pqmp['Pqmp']['require_refrigeration'], //Boolean
@@ -325,7 +317,7 @@ class PqmpsController extends AppController
             "reportDate" => $reporter_date_formatted, //"String (format=>yyyy-MM-dd)",
             "facility" => array(
                 "county" => $pqmp['County']['county_name'], //"String (optional)",
-                "subCounty" => $pqmp['SubCounty']['sub_county_name'], //"String (optional)",
+                "subCounty" => !empty($pqmp['SubCounty']['sub_county_name']) ? $pqmp['SubCounty']['sub_county_name'] : "",//$pqmp[''][''], //"String (optional)",
                 "address" => $pqmp['Pqmp']['facility_address'], //"String (optional)",
                 "mobileNo" => $pqmp['Pqmp']['facility_phone'], //"String (optional)"
             ),
@@ -444,7 +436,8 @@ class PqmpsController extends AppController
             }
         }
         $criteria['Pqmp.deleted'] = false;
-
+        $criteria['Pqmp.archived'] = false;
+        
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Pqmp.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Country', 'Designation');
@@ -478,7 +471,8 @@ class PqmpsController extends AppController
 
         $criteria = $this->Pqmp->parseCriteria($this->passedArgs);
         $criteria['Pqmp.user_id'] = $this->Auth->User('id');
-
+        $criteria['Pqmp.deleted'] = false;
+        $criteria['Pqmp.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Pqmp.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Country', 'Designation');
@@ -513,6 +507,7 @@ class PqmpsController extends AppController
         $criteria['Pqmp.submitted'] = array(1, 2);
         // add deleted to criteria
         $criteria['Pqmp.deleted'] = false;
+        $criteria['Pqmp.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Pqmp.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Country', 'Designation');
@@ -569,15 +564,15 @@ class PqmpsController extends AppController
 
         $phones = array();
 
-        foreach ($data as $dt) {
+        // foreach ($data as $dt) {
 
-            $email = $dt['Pqmp']['user_id'];
-            $this->loadModel('User');
-            $user = $this->User->findById($email);
-            $phone_no = $user['User']['phone_no'];
-            $phones[] = $phone_no;
-            // update the dt with the phone number
-        }
+        //     $email = $dt['Pqmp']['user_id'];
+        //     $this->loadModel('User');
+        //     $user = $this->User->findById($email);
+        //     $phone_no = $user['User']['phone_no'];
+        //     $phones[] = $phone_no;
+        //     // update the dt with the phone number
+        // }
         // debug($phones);
         // exit;
         //end pdf export
@@ -606,7 +601,8 @@ class PqmpsController extends AppController
         } else {
             $criteria['Pqmp.submitted'] = array(2, 3);
         }
-
+        $criteria['Pqmp.deleted'] = false;
+        $criteria['Pqmp.archived'] = false;
         $criteria['Pqmp.assigned_to'] = $this->Auth->User('id');
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Pqmp.created' => 'desc');
@@ -950,9 +946,9 @@ class PqmpsController extends AppController
     {
 
         $count = $this->Pqmp->find('count',  array(
-            'fields' => 'Pqmp.reference_no',
+            'fields' => 'Pqmp.reference_no', 
             'conditions' => array(
-                'Pqmp.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                'Pqmp.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
                 'Pqmp.reference_no !=' => 'new'
             )
         ));
@@ -1024,7 +1020,9 @@ class PqmpsController extends AppController
             "receiptDate" => $receipt_date_formatted,
             "manufacturerName" => $pqmp['Pqmp']['name_of_manufacturer'],
             "manufacturerAddress" => "", //$pqmp['Pqmp'][''],
-            "manufacturerCountryOfOrigin" => $pqmp['Country']['name'],
+            // "manufacturerCountryOfOrigin" => $pqmp['Country']['name'],
+
+            "manufacturerCountryOfOrigin" => !empty($pqmp['Country']['name']) ? $pqmp['Country']['name'] : "",
             "complaintDescription" => $pqmp['Pqmp']['complaint_description'],
             "coldChainMaintained" => isset($pqmp['Pqmp']['cold_chain']) && !empty($pqmp['Pqmp']['cold_chain']), // $pqmp['Pqmp']['cold_chain'], //Boolean
             "productRequiresRefrigeration" => isset($pqmp['Pqmp']['require_refrigeration']) && !empty($pqmp['Pqmp']['require_refrigeration']), //$pqmp['Pqmp']['require_refrigeration'], //Boolean
@@ -1047,7 +1045,8 @@ class PqmpsController extends AppController
             "reportDate" => $reporter_date_formatted, //"String (format=>yyyy-MM-dd)",
             "facility" => array(
                 "county" => $pqmp['County']['county_name'], //"String (optional)",
-                "subCounty" => $pqmp['SubCounty']['sub_county_name'], //"String (optional)",
+                // "subCounty" => $pqmp['SubCounty']['sub_county_name'], //"String (optional)",
+                "subCounty" => !empty($pqmp['SubCounty']['sub_county_name']) ? $pqmp['SubCounty']['sub_county_name'] : "",
                 "address" => $pqmp['Pqmp']['facility_address'], //"String (optional)",
                 "mobileNo" => $pqmp['Pqmp']['facility_phone'], //"String (optional)"
             ),
@@ -1286,12 +1285,12 @@ class PqmpsController extends AppController
                 'OR' => array(
                     array(
                         'User.group_id' => 2,
-                        'User.is_active' => '1'
+                        'User.is_active' => 1
                     ),
                     array(
                         'User.county_id' => $county_id,
                         'User.user_type' => 'County Pharmacist',
-                        'User.is_active' => '1'
+                        'User.is_active' => 1
                     )
                 )
             ),
@@ -1333,8 +1332,8 @@ class PqmpsController extends AppController
                 'message' => CakeText::insert($message['Message']['content'], $variables)
             );
             $this->loadModel('Queue.QueuedTask');
-            $this->QueuedTask->createJob('GenericEmail', $datum);
-            $this->QueuedTask->createJob('GenericNotification', $datum);
+            // $this->QueuedTask->createJob('GenericEmail', $datum);
+            // $this->QueuedTask->createJob('GenericNotification', $datum);
         }
     }
     public function api_add()

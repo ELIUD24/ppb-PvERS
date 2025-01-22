@@ -16,7 +16,7 @@
     <div class="row-fluid">
         <div class="span12">
         <?php
-          $routes = ['Intramuscular' => 'Intramuscular', 'Subcutaneous' => 'Subcutaneous', 'Intradermal' => 'Intradermal'];
+          $routes = ['Intramuscular' => 'Intramuscular', 'Subcutaneous' => 'Subcutaneous', 'Intradermal' => 'Intradermal','Oral'=>'Oral'];
           echo $this->Form->input('liboso', array('type' => 'select', 'options' => $vaccines, 'empty' => true, 'label' => false, 'style' => 'display: none;'));
           echo $this->Form->input('mlishi', array('type' => 'select', 'options' => $routes, 'empty' => true, 'label' => false, 'style' => 'display: none;'));
         ?>

@@ -95,7 +95,7 @@ class PadrsController extends AppController
         else $this->paginate['limit'] = reset($this->page_options);
 
         $criteria = $this->Padr->parseCriteria($this->passedArgs); 
-
+        $criteria['Padr.archived'] = false;
         $criteria['Padr.assigned_to'] = $this->Auth->User('id');
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Padr.id' => 'DESC');

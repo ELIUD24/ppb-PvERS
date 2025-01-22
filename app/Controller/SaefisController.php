@@ -53,6 +53,8 @@ class SaefisController extends AppController
 
         // Added criteria for reporter
         $criteria['Saefi.deleted'] = false;
+        $criteria['Saefi.archived'] = false;
+        
         if (isset($this->request->query['submitted'])) {
             if ($this->request->query['submitted'] == 1) {
                 $criteria['Saefi.submitted'] = array(0, 1);
@@ -94,6 +96,8 @@ class SaefisController extends AppController
         $criteria = $this->Saefi->parseCriteria($this->passedArgs);
         $criteria['Saefi.name_of_institution'] = $this->Auth->User('name_of_institution');
         $criteria['Saefi.submitted'] = array(1, 2);
+        $criteria['Saefi.deleted'] = false;
+        $criteria['Saefi.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Saefi.created' => 'desc');
         $this->paginate['contain'] = array('County', 'AefiListOfVaccine', 'AefiDescription', 'AefiListOfVaccine.Vaccine', 'Designation');

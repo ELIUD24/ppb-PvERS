@@ -525,7 +525,12 @@ class Aefi extends AppModel
 
     public function ageOrDate($field = null)
     {
-        return !empty($this->data['Aefi']['date_of_birth']['year']) || !empty($this->data['Aefi']['age_months'])|| !empty($this->data['Aefi']['age_group']);
+        return !empty($this->data['Aefi']['date_of_birth']['year']) ||
+            !empty($this->data['Aefi']['age_years']) ||
+            !empty($this->data['Aefi']['age_months']) ||
+            !empty($this->data['Aefi']['age_weeks']) ||
+            !empty($this->data['Aefi']['age_days']) ||
+            !empty($this->data['Aefi']['age_group']);
     }
 
     public function treatOrSpecimen($field = null)

@@ -18,7 +18,7 @@ $this->Html->css('aefi', false, array('inline' => false));
 <div class="row-fluid srollable">
   <div class="span12">
     <?php
-    $routes = ['Intramuscular' => 'Intramuscular', 'Subcutaneous' => 'Subcutaneous', 'Intradermal' => 'Intradermal'];
+    $routes = ['Intramuscular' => 'Intramuscular', 'Subcutaneous' => 'Subcutaneous', 'Intradermal' => 'Intradermal','Oral'=>'Oral'];
     echo $this->Form->input('liboso', array('type' => 'select', 'options' => $vaccines, 'empty' => true, 'label' => false, 'style' => 'display: none;'));
     echo $this->Form->input('mlishi', array('type' => 'select', 'options' => $routes, 'empty' => true, 'label' => false, 'style' => 'display: none;'));
     ?>
@@ -63,23 +63,32 @@ $this->Html->css('aefi', false, array('inline' => false));
                   //   'label' => false, 'between' => false,
                   //   'after' => false, 'class' => 'span11 autosave-ignore vaxname',));
                   echo $this->Form->input('AefiListOfVaccine.' . $i . '.vaccine_id', array(
-                    'empty' => true, 'label' => false, 'between' => false, 'after' => false, 'class' => 'span12 autosave-ignore',
+                    'empty' => true,
+                    'label' => false,
+                    'between' => false,
+                    'after' => false,
+                    'class' => 'span12 autosave-ignore',
                     'type' => 'select',
                     'error' => array('attributes' => array('class' => 'help-block')),
                     'options' => $vaccines,
                   ));
                   echo '<small class="help-block">If not in list above</small>';
                   echo $this->Form->input('AefiListOfVaccine.' . $i . '.vaccine_name', array(
-                    'label' => false, 'between' => false, 'placeholder' => 'vaccine name',
-                    'after' => false, 'class' => 'span11 autosave-ignore vaxname',
+                    'label' => false,
+                    'between' => false,
+                    'placeholder' => 'vaccine name',
+                    'after' => false,
+                    'class' => 'span11 autosave-ignore vaxname',
                   ));
                   ?>
               </td>
               <td>
                 <?php
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.dosage', array(
-                  'label' => false, 'between' => false,
-                  'after' => false, 'class' => 'span11 autosave-ignore',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span11 autosave-ignore',
                 ));
                 ?>
               </td>
@@ -87,13 +96,22 @@ $this->Html->css('aefi', false, array('inline' => false));
                 <?php
                 echo '<small class="help-block">Date</small>';
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.vaccination_date', array(
-                  'type' => 'text', 'label' => false, 'between' => false,
-                  'after' => false, 'class' => 'span11 autosave-ignore date-pick-field',
+                  'type' => 'text',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span11 autosave-ignore date-pick-field',
                 ));
                 echo '<small class="help-block">Time</small>';
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.vaccination_time', array(
-                  'type' => 'time', 'timeFormat' => 24, 'interval' => 5, 'class' => 'span5', 'style' => 'display: inline;',
-                  'label' => false, 'between' => false, 'after' => false,
+                  'type' => 'time',
+                  'timeFormat' => 24,
+                  'interval' => 5,
+                  'class' => 'span5',
+                  'style' => 'display: inline;',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
                 ));
                 ?>
               </td>
@@ -103,7 +121,11 @@ $this->Html->css('aefi', false, array('inline' => false));
                 //   'label' => false, 'between' => false,
                 //   'after' => false, 'class' => 'span11 autosave-ignore',));
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.vaccination_route', array(
-                  'empty' => true, 'label' => false, 'between' => false, 'after' => false, 'class' => 'span12 autosave-ignore',
+                  'empty' => true,
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span12 autosave-ignore',
                   'type' => 'select',
                   'error' => array('attributes' => array('class' => 'help-block')),
                   'options' => $routes,
@@ -113,30 +135,39 @@ $this->Html->css('aefi', false, array('inline' => false));
               <td>
                 <?php
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.vaccination_site', array(
-                  'label' => false, 'between' => false,
-                  'after' => false, 'class' => 'span11 autosave-ignore',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span11 autosave-ignore',
                 ));
                 ?>
               </td>
               <td><?php
                   echo $this->Form->input('AefiListOfVaccine.' . $i . '.batch_number', array(
-                    'label' => false, 'between' => false,
-                    'after' => false, 'class' => 'span11 autosave-ignore',
+                    'label' => false,
+                    'between' => false,
+                    'after' => false,
+                    'class' => 'span11 autosave-ignore',
                   ));
                   ?>
               </td>
               <td><?php
                   echo $this->Form->input('AefiListOfVaccine.' . $i . '.vaccine_manufacturer', array(
-                    'label' => false, 'between' => false,
-                    'after' => false, 'class' => 'span11 autosave-ignore',
+                    'label' => false,
+                    'between' => false,
+                    'after' => false,
+                    'class' => 'span11 autosave-ignore',
                   ));
                   ?>
               </td>
               <td>
                 <?php
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.expiry_date', array(
-                  'type' => 'text', 'label' => false, 'between' => false,
-                  'after' => false, 'class' => 'span11 autosave-ignore date-pick-expire',
+                  'type' => 'text',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span11 autosave-ignore date-pick-expire',
                 ));
                 ?>
               </td>
@@ -144,24 +175,31 @@ $this->Html->css('aefi', false, array('inline' => false));
               <td>
                 <?php
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.diluent_batch_number', array(
-                  'label' => false, 'between' => false,
-                  'after' => false, 'class' => 'span11 autosave-ignore',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span11 autosave-ignore',
                 ));
                 ?>
               </td>
               <td>
                 <?php
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.diluent_manufacturer', array(
-                  'label' => false, 'between' => false,
-                  'after' => false, 'class' => 'span11 autosave-ignore',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span11 autosave-ignore',
                 ));
                 ?>
               </td>
               <td>
                 <?php
                 echo $this->Form->input('AefiListOfVaccine.' . $i . '.diluent_expiry_date', array(
-                  'type' => 'text', 'label' => false, 'between' => false,
-                  'after' => false, 'class' => 'span11 autosave-ignore date-pick-expire',
+                  'type' => 'text',
+                  'label' => false,
+                  'between' => false,
+                  'after' => false,
+                  'class' => 'span11 autosave-ignore date-pick-expire',
                 ));
                 ?>
               </td>

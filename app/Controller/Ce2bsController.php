@@ -55,15 +55,25 @@ class Ce2bsController extends AppController
             $this->redirect($this->referer());
         }
 
-       
 
-        // $html = $ce2b['Ce2b']['e2b_content'];
 
+
+
+        $version = $ce2b['Ce2b']['e2b_type'];
+
+        if ($version == "R2") {
+            $ce2b['Ce2b']['e2b_content'] = $this->manipulated_content($ce2b['Ce2b']['e2b_content']);
+        }
+        // if ($version == "R3") {
+        //     $ce2b['Ce2b']['e2b_content'] = $this->manipulated_r3content($ce2b['Ce2b']['e2b_content']);
+        // }
         $view = new View($this, false);
         $view->viewPath = 'Ce2bs/xml';  // Directory inside view directory to search for .ctp files
         $view->layout = false; // if you want to disable layout
         $view->set('ce2b', $ce2b); // set your variables for view here
         $html = $view->render('download');
+
+
 
         // debug($html);
         // exit;
@@ -164,6 +174,7 @@ class Ce2bsController extends AppController
         }
         // add deleted condition to criteria
         $criteria['Ce2b.deleted'] = false;
+        $criteria['Ce2b.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Ce2b.created' => 'desc');
         $this->set('ce2bs', Sanitize::clean($this->paginate(), array('encode' => false)));
@@ -194,6 +205,111 @@ class Ce2bsController extends AppController
         $this->set('ce2bs', Sanitize::clean($this->paginate(), array('encode' => false)));
         $this->set('page_options', $this->page_options);
     }
+    public function manipulated_content($file)
+    {
+
+        // Load the XML from the string content
+        $xml = Xml::build($file); // Parse the XML from the string content
+        $xmlArray = Xml::toArray($xml);  // Convert XML to array for easy manipulation
+
+        // Check if <sender> exists and remove it
+        if (!empty($xmlArray['ichicsr']['safetyreport']['sender'])) {
+            unset($xmlArray['ichicsr']['safetyreport']['sender']); // Remove existing <sender> content
+        }
+
+        // Add the new <sender> content
+        $xmlArray['ichicsr']['safetyreport']['sender'] = [
+            'sendertype' => '3',
+            'senderorganization' => 'Pharmacy and Poisons Board',
+            'senderdepartment' => 'Department of Pharmacovigilance',
+            'sendertitle' => 'Dr.',
+            'sendergivename' => 'Christabel',
+            'sendermiddlename' => 'N.',
+            'senderfamilyname' => 'Khaemba',
+            'senderstreetaddress' => 'P.O. Box:27663-00506',
+            'sendercity' => 'Nairobi',
+            'senderstate' => '', // Empty field
+            'senderpostcode' => '00506',
+            'sendercountrycode' => 'KE',
+            'sendertel' => '720608811',
+            'sendertelextension' => '', // Empty field
+            'sendertelcountrycode' => '254',
+            'senderfax' => '2713409',
+            'senderfaxextension' => '20',
+            'senderfaxcountrycode' => '254',
+            'senderemailaddress' => 'pv@pharmacyboardkenya.org'
+        ];
+
+
+
+        //Remove the receiver details
+
+        // Check if <receiver> exists and replace it
+        if (!empty($xmlArray['ichicsr']['safetyreport']['receiver'])) {
+            unset($xmlArray['ichicsr']['safetyreport']['receiver']); // Remove existing <receiver> content
+        }
+
+        // Add new <receiver> content
+        $xmlArray['ichicsr']['safetyreport']['receiver'] = [
+            'receivertype' => '',
+            'receiverorganization' => '',
+            'receiverdepartment' => '',
+            'receivertitle' => '',
+            'receivergivename' => '',
+            'receivermiddlename' => '',
+            'receiverfamilyname' => '',
+            'receiverstreetaddress' => '',
+            'receivercity' => '',
+            'receiverstate' => '',
+            'receiverpostcode' => '',
+            'receivercountrycode' => '',
+            'receivertel' => '',
+            'receivertelextension' => '',
+            'receivertelcountrycode' => '',
+            'receiverfax' => '',
+            'receiverfaxextension' => '',
+            'receiverfaxcountrycode' => '',
+            'receiveremailaddress' => ''
+        ];
+
+
+
+        // Extract specific sections if they exist
+        $primarysource = $xmlArray['ichicsr']['safetyreport']['patient'];
+        $sender = $xmlArray['ichicsr']['safetyreport']['sender'];
+        $receiver = $xmlArray['ichicsr']['safetyreport']['receiver'];
+        $patient = $xmlArray['ichicsr']['safetyreport']['patient'];
+
+        // Remove the original tags so we can reassign in the correct order
+        unset($xmlArray['ichicsr']['safetyreport']['patient']);
+        unset($xmlArray['ichicsr']['safetyreport']['sender']);
+        unset($xmlArray['ichicsr']['safetyreport']['receiver']);
+
+        // Reassign with desired order and keep remaining details
+        $orderedSafetyReport = $xmlArray['ichicsr']['safetyreport'] + [
+            'primarysource' => $primarysource, // Replace <patient> with <primarysource>
+            'sender' => $sender,
+            'receiver' => $receiver,
+            'patient' => $patient,
+        ]; // Append remaining sections
+
+        // Set ordered report back in the main array
+        $xmlArray['ichicsr']['safetyreport'] = $orderedSafetyReport;
+        $xmlArray['ichicsr']['ichicsrmessageheader']['messagesenderidentifier'] = 'PPB';
+        $xmlArray['ichicsr']['ichicsrmessageheader']['messagereceiveridentifier'] = 'KE';
+
+        $xml = Xml::fromArray($xmlArray, ['format' => 'tags']);
+        $xmlString = $xml->asXML();
+
+        // Format the XML string with indentation and line breaks
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML($xmlString);
+        $formattedXmlContent = $dom->saveXML();
+
+        return $formattedXmlContent;
+    }
     public function download($id = null)
     {
         $this->Ce2b->id = $id;
@@ -204,15 +320,22 @@ class Ce2bsController extends AppController
 
         $ce2b = $this->Ce2b->find('first', array(
             'conditions' => array('Ce2b.id' => $id),
-        )); 
+        ));
         $e2b_content = $ce2b['Ce2b']['e2b_content'];
-        $filename = 'CE2B_'.$ce2b['Ce2b']['id'] . ".xml";
+        $filename = 'CE2B_' . $ce2b['Ce2b']['id'] . ".xml";
         // // Set the HTTP headers for file download
+        $version = $ce2b['Ce2b']['e2b_type'];
+
+        if ($version == "R2") {
+            $ce2b['Ce2b']['e2b_content'] = $this->manipulated_content($ce2b['Ce2b']['e2b_content']);
+        }
+        // debug($ce2b['Ce2b']['e2b_content']);
+        // exit;
         header('Content-Type: application/xml');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
-
+        $this->set('ce2b', $ce2b);
         // // Output the XML content
-        echo $e2b_content;
+        // echo $e2b_content;
         // $ce2b = Sanitize::clean($ce2b, array('escape' => true));
         // $this->set('ce2b', $ce2b);
         // $this->response->download('CE2B_' . $ce2b['Ce2b']['id'] . '.xml');
@@ -258,7 +381,7 @@ class Ce2bsController extends AppController
         $data_save['user_id'] = $this->Auth->User('id');;
         $this->Ce2b->saveField('copied', 1);
         $data_save['copied'] = 2;
-        $data_save['submitted'] = 1;
+        $data_save['submitted'] = 2;
 
         if ($this->Ce2b->saveAssociated($data_save, array('deep' => true, 'validate' => false))) {
             $this->Session->setFlash(__('Clean copy of ' . $data_save['reference_no'] . ' has been created'), 'alerts/flash_info');
@@ -455,7 +578,8 @@ class Ce2bsController extends AppController
                         $count = $this->Ce2b->find('count',  array(
                             'fields' => 'Ce2b.reference_no',
                             'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Ce2b.reference_no !=' => 'new'
+                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                                'Ce2b.reference_no !=' => 'new'
                             )
                         ));
                         $count++;
@@ -472,7 +596,8 @@ class Ce2bsController extends AppController
                         $count = $this->Ce2b->find('count',  array(
                             'fields' => 'Ce2b.reference_no',
                             'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Ce2b.reference_no !=' => 'new'
+                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                                'Ce2b.reference_no !=' => 'new'
                             )
                         ));
                         $count++;
@@ -604,7 +729,8 @@ class Ce2bsController extends AppController
                         $count = $this->Ce2b->find('count',  array(
                             'fields' => 'Ce2b.reference_no',
                             'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Ce2b.reference_no !=' => 'new'
+                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                                'Ce2b.reference_no !=' => 'new'
                             )
                         ));
                         $count++;
@@ -620,7 +746,8 @@ class Ce2bsController extends AppController
                     $html = new HtmlHelper(new ThemeView());
                     $message = $this->Message->find('first', array('conditions' => array('name' => 'reporter_ce2b_submit')));
                     $variables = array(
-                        'name' => $this->Auth->User('name'), 'reference_no' => $ce2b['Ce2b']['reference_no'],
+                        'name' => $this->Auth->User('name'),
+                        'reference_no' => $ce2b['Ce2b']['reference_no'],
                         'reference_link' => $html->link(
                             $ce2b['Ce2b']['reference_no'],
                             array('controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true),
@@ -630,7 +757,10 @@ class Ce2bsController extends AppController
                     );
                     $datum = array(
                         'email' => $ce2b['Ce2b']['reporter_email'],
-                        'id' => $id, 'user_id' => $this->Auth->User('id'), 'type' => 'reporter_ce2b_submit', 'model' => 'Ce2b',
+                        'id' => $id,
+                        'user_id' => $this->Auth->User('id'),
+                        'type' => 'reporter_ce2b_submit',
+                        'model' => 'Ce2b',
                         'subject' => CakeText::insert($message['Message']['subject'], $variables),
                         'message' => CakeText::insert($message['Message']['content'], $variables)
                     );
@@ -658,7 +788,8 @@ class Ce2bsController extends AppController
                     ));
                     foreach ($users as $user) {
                         $variables = array(
-                            'name' => $user['User']['name'], 'reference_no' => $ce2b['Ce2b']['reference_no'],
+                            'name' => $user['User']['name'],
+                            'reference_no' => $ce2b['Ce2b']['reference_no'],
                             'reference_link' => $html->link(
                                 $ce2b['Ce2b']['reference_no'],
                                 array('controller' => 'Ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'manager' => true, 'full_base' => true),
@@ -668,7 +799,10 @@ class Ce2bsController extends AppController
                         );
                         $datum = array(
                             'email' => $user['User']['email'],
-                            'id' => $id, 'user_id' => $user['User']['id'], 'type' => 'reporter_ce2b_submit', 'model' => 'Ce2b',
+                            'id' => $id,
+                            'user_id' => $user['User']['id'],
+                            'type' => 'reporter_ce2b_submit',
+                            'model' => 'Ce2b',
                             'subject' => CakeText::insert($message['Message']['subject'], $variables),
                             'message' => CakeText::insert($message['Message']['content'], $variables)
                         );
@@ -820,7 +954,8 @@ class Ce2bsController extends AppController
                         $count = $this->Ce2b->find('count',  array(
                             'fields' => 'Ce2b.reference_no',
                             'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Ce2b.reference_no !=' => 'new'
+                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                                'Ce2b.reference_no !=' => 'new'
                             )
                         ));
                         $count++;
@@ -836,7 +971,8 @@ class Ce2bsController extends AppController
                     $html = new HtmlHelper(new ThemeView());
                     $message = $this->Message->find('first', array('conditions' => array('name' => 'reporter_ce2b_submit')));
                     $variables = array(
-                        'name' => $this->Auth->User('name'), 'reference_no' => $ce2b['Ce2b']['reference_no'],
+                        'name' => $this->Auth->User('name'),
+                        'reference_no' => $ce2b['Ce2b']['reference_no'],
                         'reference_link' => $html->link(
                             $ce2b['Ce2b']['reference_no'],
                             array('controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true),
@@ -846,7 +982,10 @@ class Ce2bsController extends AppController
                     );
                     $datum = array(
                         'email' => $ce2b['Ce2b']['reporter_email'],
-                        'id' => $id, 'user_id' => $this->Auth->User('id'), 'type' => 'reporter_ce2b_submit', 'model' => 'Ce2b',
+                        'id' => $id,
+                        'user_id' => $this->Auth->User('id'),
+                        'type' => 'reporter_ce2b_submit',
+                        'model' => 'Ce2b',
                         'subject' => CakeText::insert($message['Message']['subject'], $variables),
                         'message' => CakeText::insert($message['Message']['content'], $variables)
                     );
@@ -874,7 +1013,8 @@ class Ce2bsController extends AppController
                     ));
                     foreach ($users as $user) {
                         $variables = array(
-                            'name' => $user['User']['name'], 'reference_no' => $ce2b['Ce2b']['reference_no'],
+                            'name' => $user['User']['name'],
+                            'reference_no' => $ce2b['Ce2b']['reference_no'],
                             'reference_link' => $html->link(
                                 $ce2b['Ce2b']['reference_no'],
                                 array('controller' => 'Ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'manager' => true, 'full_base' => true),
@@ -884,7 +1024,10 @@ class Ce2bsController extends AppController
                         );
                         $datum = array(
                             'email' => $user['User']['email'],
-                            'id' => $id, 'user_id' => $user['User']['id'], 'type' => 'reporter_ce2b_submit', 'model' => 'Ce2b',
+                            'id' => $id,
+                            'user_id' => $user['User']['id'],
+                            'type' => 'reporter_ce2b_submit',
+                            'model' => 'Ce2b',
                             'subject' => CakeText::insert($message['Message']['subject'], $variables),
                             'message' => CakeText::insert($message['Message']['content'], $variables)
                         );
@@ -1376,7 +1519,8 @@ class Ce2bsController extends AppController
         $count = $this->Ce2b->find('count',  array(
             'fields' => 'Ce2b.reference_no',
             'conditions' => array(
-                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Ce2b.reference_no !=' => 'new'
+                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                'Ce2b.reference_no !=' => 'new'
             )
         ));
         $count++;

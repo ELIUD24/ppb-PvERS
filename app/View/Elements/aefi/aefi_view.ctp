@@ -75,11 +75,23 @@
 						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['patient_phone'] ?>		</strong></td>
 					</tr>
 					<tr>
-						<td style="width: 25%;">Age in months </td>
-						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['age_months'] ?>	</strong></td>
+						<td style="width: 25%;">Age in Years </td>
+						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['age_years'] ?>	</strong></td>
 						<td style="width: 25%;">VILLAGE</td>
 						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['patient_village'] ?>	</strong></td>
 					</tr>
+					<tr>
+						<td style="width: 25%;">Age in months </td>
+						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['age_months'] ?>	</strong></td>
+					 </tr>
+					<tr>
+						<td style="width: 25%;">Age in Weeks </td>
+						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['age_weeks'] ?>	</strong></td>
+					 </tr>
+					 <tr>
+						<td style="width: 25%;">Age in days </td>
+						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['age_days'] ?>	</strong></td>
+					 </tr>
 					<tr>
 						<td style="width: 25%;">COUNTY </td>
 						<td style="width: 25%;"><strong><?php echo $aefi['Aefi']['patient_county'] ?>	</strong></td>

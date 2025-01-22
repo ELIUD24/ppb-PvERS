@@ -30,7 +30,8 @@ echo $this->Session->flash();
         <?php
         echo $this->Form->create('Ce2b', array(
             'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-            'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+            'class' => 'ctr-groups',
+            'style' => array('padding:9px;', 'background-color: #F5F5F5'),
         ));
         ?>
         <table class="table table-condensed" style="margin-bottom: 2px;">
@@ -43,7 +44,8 @@ echo $this->Session->flash();
                             array(
                                 'div' => false,
                                 'placeholder' => 'e2b/2023',
-                                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Reference No.')
+                                'class' => 'span12',
+                                'label' => array('class' => 'required', 'text' => 'Reference No.')
                             )
                         );
                         ?>
@@ -53,8 +55,10 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'company_name',
                             array(
-                                'div' => false, 'placeholder' => '',
-                                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Company Name ')
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index',
+                                'label' => array('class' => 'required', 'text' => 'Company Name ')
                             )
                         );
                         ?>
@@ -64,8 +68,10 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'reporter_email',
                             array(
-                                'div' => false, 'placeholder' => '',
-                                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Reporter Email ')
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index',
+                                'label' => array('class' => 'required', 'text' => 'Reporter Email ')
                             )
                         );
                         ?>
@@ -75,17 +81,24 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'start_date',
                             array(
-                                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index', 'after' => '-to-',
-                                'label' => array('class' => 'required', 'text' => 'Report Dates'), 'placeHolder' => 'Start Date'
+                                'div' => false,
+                                'type' => 'text',
+                                'class' => 'input-small unauthorized_index',
+                                'after' => '-to-',
+                                'label' => array('class' => 'required', 'text' => 'Report Dates'),
+                                'placeHolder' => 'Start Date'
                             )
                         );
                         echo $this->Form->input(
                             'end_date',
                             array(
-                                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index',
+                                'div' => false,
+                                'type' => 'text',
+                                'class' => 'input-small unauthorized_index',
                                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                               <em class="accordion-toggle">clear!</em></a>',
-                                'label' => false, 'placeHolder' => 'End Date'
+                                'label' => false,
+                                'placeHolder' => 'End Date'
                             )
                         );
                         ?>
@@ -98,8 +111,10 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'drug_name',
                             array(
-                                'div' => false, 'placeholder' => 'drug name',
-                                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Drug Name')
+                                'div' => false,
+                                'placeholder' => 'drug name',
+                                'class' => 'span12 unauthorized_index',
+                                'label' => array('class' => 'required', 'text' => 'Drug Name')
                             )
                         );
                         ?>
@@ -107,7 +122,8 @@ echo $this->Session->flash();
                         <h5>Serious?</h5>
                         <?php
                         echo $this->Form->input('serious', array(
-                            'options' => array('1' => 'Yes', '0' => 'No'), 'legend' => false,
+                            'options' => array('1' => 'Yes', '0' => 'No'),
+                            'legend' => false,
                             'type' => 'radio'
                         ));
                         ?>
@@ -144,7 +160,10 @@ echo $this->Session->flash();
                     <td>
                         <?php
                         echo $this->Form->input('pages', array(
-                            'type' => 'select', 'div' => false, 'class' => 'input-small', 'selected' => $this->request->params['paging']['Ce2b']['limit'],
+                            'type' => 'select',
+                            'div' => false,
+                            'class' => 'input-small',
+                            'selected' => $this->request->params['paging']['Ce2b']['limit'],
                             'empty' => true,
                             'options' => $page_options,
                             'label' => false,
@@ -160,7 +179,9 @@ echo $this->Session->flash();
                     <td>
                         <?php
                         echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-                            'class' => 'btn btn-primary', 'div' => 'control-group', 'div' => false,
+                            'class' => 'btn btn-primary',
+                            'div' => 'control-group',
+                            'div' => false,
                             'formnovalidate' => 'formnovalidate',
                             'style' => array('margin-bottom: 5px')
                         ));
@@ -209,6 +230,7 @@ echo $this->Session->flash();
                     <th><?php echo $this->Paginator->sort('company_name'); ?></th>
                     <th><?php echo $this->Paginator->sort('reporter_email'); ?></th>
                     <th><?php echo $this->Paginator->sort('e2b_file_type'); ?></th>
+                    <?php if ($redir == 'manager' || $redir == 'reviewer') { ?><th><?php echo $this->Paginator->sort('vigiflow_ref'); ?></th> <?php } ?>
                     <th><?php echo $this->Paginator->sort('created'); ?></th>
                     <th><?php echo $this->Paginator->sort('submitted_date', 'Date Submitted'); ?></th>
                     <th class="actions"><?php echo __('Actions'); ?></th>
@@ -242,6 +264,10 @@ echo $this->Session->flash();
                             ?>&nbsp;</td>
                         <td><?php echo h($ce2b['Ce2b']['reporter_email']); ?>&nbsp;</td>
                         <td><?php echo h($ce2b['Ce2b']['e2b_type']); ?>&nbsp;</td>
+                        <?php if ($redir == 'manager' || $redir == 'reviewer') { ?>
+                            <td><?php echo h($ce2b['Ce2b']['vigiflow_ref']);
+                                echo "\n" . $ce2b['Ce2b']['vigiflow_date']; ?>&nbsp;</td>
+                        <?php } ?>
                         <td><?php echo h($ce2b['Ce2b']['created']); ?>&nbsp;</td>
                         <td><?php echo h($ce2b['Ce2b']['submitted_date']); ?>&nbsp;</td>
                         <td class="actions">
@@ -304,12 +330,12 @@ echo $this->Session->flash();
                                     array('controller' => 'ce2bs', 'action' => 'edit', $ce2b['Ce2b']['id']),
                                     array('escape' => false)
                                 );
-                                echo "&nbsp;"; 
+                                echo "&nbsp;";
                                 if (($redir == 'reporter' || $redir == 'manager') && $ce2b['Ce2b']['submitted'] == 0) {
                                     echo "&nbsp;";
                                     echo $this->Form->postLink('<span class="label label-warning tooltipper" title="Delete"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete </span>', array('controller' => 'ce2bs', 'action' => 'delete', $ce2b['Ce2b']['id']), array('escape' => false), __('Are you sure you want to delete this report?
                                     Note: This action cannot be undone.'));
-                                  }
+                                }
                                 echo "&nbsp;";
                                 if ($redir == 'manager' || $redir == 'reviewer') echo $this->Html->link(
                                     '<span class="label label-info tooltipper" title="View"><i class="fa fa-eye" aria-hidden="true"></i> View </span>',

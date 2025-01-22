@@ -729,6 +729,7 @@ class AefisController extends AppController
 
         // Added criteria for reporter
         $criteria['Aefi.deleted'] = false;
+        $criteria['Aefi.archived'] = false;
         if (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 1) {
             $criteria['Aefi.submitted'] = array(0, 1);
         } elseif (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 2) {
@@ -766,6 +767,8 @@ class AefisController extends AppController
 
         $criteria = $this->Aefi->parseCriteria($this->passedArgs);
         $criteria['Aefi.user_id'] = $this->Auth->User('id');
+        $criteria['Aefi.deleted'] = false;
+        $criteria['Aefi.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Aefi.created' => 'desc');
         $this->paginate['contain'] = array('County', 'AefiListOfVaccine', 'AefiDescription', 'AefiListOfVaccine.Vaccine', 'Designation');
@@ -797,6 +800,8 @@ class AefisController extends AppController
         $criteria = $this->Aefi->parseCriteria($this->passedArgs);
         $criteria['Aefi.name_of_institution'] = $this->Auth->User('name_of_institution');
         $criteria['Aefi.submitted'] = array(1, 2);
+        $criteria['Aefi.deleted'] = false;
+        $criteria['Aefi.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Aefi.created' => 'desc');
         $this->paginate['contain'] = array('County', 'AefiListOfVaccine', 'AefiDescription', 'AefiListOfVaccine.Vaccine', 'Designation');
@@ -873,7 +878,8 @@ class AefisController extends AppController
         else $this->paginate['limit'] = reset($this->page_options);
 
         $criteria = $this->Aefi->parseCriteria($this->passedArgs);
-        // $criteria['Aefi.submitted'] = 2;
+        $criteria['Aefi.deleted'] = false;
+        $criteria['Aefi.archived'] = false;
         $criteria['Aefi.copied !='] = '1';
         if (isset($this->request->query['submitted'])) {
             if ($this->request->query['submitted'] == 1) {
@@ -1882,12 +1888,12 @@ class AefisController extends AppController
                 'OR' => array(
                     array(
                         'User.group_id' => 2,
-                        'User.is_active' => '1'
+                        'User.is_active' => 1
                     ),
                     array(
                         'User.county_id' => $county_id,
                         'User.user_type' => 'County Pharmacist',
-                        'User.is_active' => '1'
+                        'User.is_active' => 1
                     )
                 )
             ),
@@ -1928,8 +1934,8 @@ class AefisController extends AppController
                 'message' => CakeText::insert($message['Message']['content'], $variables)
             );
             $this->loadModel('Queue.QueuedTask');
-            $this->QueuedTask->createJob('GenericEmail', $datum);
-            $this->QueuedTask->createJob('GenericNotification', $datum);
+            // $this->QueuedTask->createJob('GenericEmail', $datum);
+            // $this->QueuedTask->createJob('GenericNotification', $datum);
         }
     }
     public function reporter_sedit($id = null)

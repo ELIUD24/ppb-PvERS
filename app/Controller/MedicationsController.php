@@ -73,6 +73,7 @@ class MedicationsController extends AppController
 
         //add deleted=false to criteria
         $criteria['Medication.deleted'] = false;
+        $criteria['Medication.archived'] = false;
 
         if (isset($this->request->query['submitted'])) {
 
@@ -117,6 +118,7 @@ class MedicationsController extends AppController
         $criteria['Medication.user_id'] = $this->Auth->User('id');
         //add deleted=false to criteria
         $criteria['Medication.deleted'] = false;
+        $criteria['Medication.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Medication.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Designation', 'MedicationProduct');
@@ -151,6 +153,7 @@ class MedicationsController extends AppController
         $criteria['Medication.submitted'] = array(1, 2);
         //add deleted=false to criteria
         $criteria['Medication.deleted'] = false;
+        $criteria['Medication.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Medication.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Designation', 'MedicationProduct');
@@ -224,6 +227,7 @@ class MedicationsController extends AppController
         $criteria = $this->Medication->parseCriteria($this->passedArgs);
         //add deleted=false to criteria
         $criteria['Medication.deleted'] = false;
+        $criteria['Medication.archived'] = false;
         $criteria['Medication.copied !='] = '1';
         if (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 1) {
             $criteria['Medication.submitted'] = array(0, 1);
@@ -802,8 +806,8 @@ class MedicationsController extends AppController
                 'message' => CakeText::insert($message['Message']['content'], $variables)
             );
             $this->loadModel('Queue.QueuedTask');
-            $this->QueuedTask->createJob('GenericEmail', $datum);
-            $this->QueuedTask->createJob('GenericNotification', $datum);
+            // $this->QueuedTask->createJob('GenericEmail', $datum);
+            // $this->QueuedTask->createJob('GenericNotification', $datum);
         }
     }
     public function api_add($id = null)

@@ -53,9 +53,9 @@ class DevicesController extends AppController
             } else {
                 $criteria['Device.user_id'] = $this->Auth->User('id');
             }
-        }
+        } 
         $criteria['Device.deleted'] = false;
-
+        $criteria['Device.archived'] = false;
         if (isset($this->request->query['submitted'])) {
 
             if ($this->request->query['submitted'] == 1) {
@@ -97,7 +97,8 @@ class DevicesController extends AppController
 
         $criteria = $this->Device->parseCriteria($this->passedArgs);
         $criteria['Device.user_id'] = $this->Auth->User('id');
-
+        $criteria['Device.deleted'] = false;
+        $criteria['Device.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Device.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Designation', 'ListOfDevice');
@@ -130,7 +131,9 @@ class DevicesController extends AppController
         $criteria['Device.name_of_institution'] = $this->Auth->User('name_of_institution');
         $criteria['Device.submitted'] = array(1, 2);
         //add deleted = 0 to criteria
+        
         $criteria['Device.deleted'] = false;
+        $criteria['Device.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Device.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Designation', 'ListOfDevice');
@@ -182,6 +185,8 @@ class DevicesController extends AppController
             ));
         }
         //end pdf export
+        $counties = $this->Device->County->find('list', array('order' => array('County.county_name' => 'ASC')));
+        $this->set(compact('counties'));
         $this->set('page_options', $this->page_options);
         $this->set('devices', Sanitize::clean($this->paginate(), array('encode' => false)));
     }
@@ -202,6 +207,8 @@ class DevicesController extends AppController
             $criteria['Device.submitted'] = array(2, 3);
         }
 
+        $criteria['Device.deleted'] = false;
+        $criteria['Device.archived'] = false;
         $criteria['Device.assigned_to'] = $this->Auth->User('id');
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Device.created' => 'desc');
@@ -522,7 +529,7 @@ class DevicesController extends AppController
         $count = $this->Device->find('count',  array(
             'fields' => 'Device.reference_no',
             'conditions' => array(
-                'Device.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Device.reference_no !=' => 'new'
+                'Device.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Device.reference_no !=' => 'new'
             )
         ));
         $count++;
@@ -569,9 +576,19 @@ class DevicesController extends AppController
                     // debug($device);
                     // exit;
                     if (!empty($device['Device']['reference_no']) && $device['Device']['reference_no'] == 'new') {
-                        $reference = $this->generateReferenceNumber();
-
-                        $this->Device->saveField('reference_no', $reference);
+                        // $reference = $this->generateReferenceNumber();
+                        $count = $this->Device->find('count',  array(
+                            'fields' => 'Device.reference_no',
+                            'conditions' => array(
+                                'Device.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Device.reference_no !=' => 'new'
+                            )
+                        ));
+                        $count++;
+                        $count = ($count < 10) ? "0$count" : $count;
+                
+                        $reference_no = 'MD/' . date('Y') . '/' . $count;
+                
+                        $this->Device->saveField('reference_no', $reference_no);
                     }
                     //bokelo
                     $device = $this->Device->read(null, $id);
@@ -716,8 +733,8 @@ class DevicesController extends AppController
                 'message' => CakeText::insert($message['Message']['content'], $variables)
             );
             $this->loadModel('Queue.QueuedTask');
-            $this->QueuedTask->createJob('GenericEmail', $datum);
-            $this->QueuedTask->createJob('GenericNotification', $datum);
+            // $this->QueuedTask->createJob('GenericEmail', $datum);
+            // $this->QueuedTask->createJob('GenericNotification', $datum);
         }
     }
     public function api_add()
@@ -735,7 +752,7 @@ class DevicesController extends AppController
             $count = $this->Device->find('count',  array(
                 'fields' => 'Device.reference_no',
                 'conditions' => array(
-                    'Device.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Device.reference_no !=' => 'new'
+                    'Device.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Device.reference_no !=' => 'new'
                 )
             ));
             $count++;

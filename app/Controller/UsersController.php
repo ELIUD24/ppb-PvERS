@@ -33,7 +33,7 @@ class UsersController extends AppController
         parent::beforeFilter();
         // remove initDb
         // $this->initDB();
-        $this->Auth->allow('register','initDb', 'login', 'api_auth', 'api_register', 'api_token', 'api_forgotPassword', 'activate_account', 'forgotPassword', 'resetPassword', 'logout', 'mpublic', 'provider', 'holder', 'guest');
+        $this->Auth->allow('register', 'initDb', 'login', 'api_auth', 'api_register', 'api_token', 'api_forgotPassword', 'activate_account', 'forgotPassword', 'resetPassword', 'logout', 'mpublic', 'provider', 'holder', 'guest');
     }
 
     public function guest()
@@ -368,7 +368,8 @@ class UsersController extends AppController
                 $html = new HtmlHelper(new ThemeView());
                 $user_email = $this->Message->find('first', array('conditions' => array('name' => 'forgot_password')));
                 $variables = array(
-                    'name' => $user['User']['name'], 'username' => $user['User']['username'],
+                    'name' => $user['User']['name'],
+                    'username' => $user['User']['username'],
                     'email' => $user['User']['email'],
                     'reset_link' => $html->link(
                         'RESET',
@@ -378,8 +379,12 @@ class UsersController extends AppController
                     'password' => date('Ymdhis', strtotime($user['User']['created'])),
                 );
                 $datum = array(
-                    'email' => $user['User']['email'], 'cc' => ((!empty($user['User']['sponsor_email'])) ? $user['User']['sponsor_email'] : null),
-                    'id' => $user['User']['id'], 'user_id' => $user['User']['id'], 'type' => 'user_registration', 'model' => 'User',
+                    'email' => $user['User']['email'],
+                    'cc' => ((!empty($user['User']['sponsor_email'])) ? $user['User']['sponsor_email'] : null),
+                    'id' => $user['User']['id'],
+                    'user_id' => $user['User']['id'],
+                    'type' => 'user_registration',
+                    'model' => 'User',
                     'subject' => CakeText::insert($user_email['Message']['subject'], $variables),
                     'message' => CakeText::insert($user_email['Message']['content'], $variables)
                 );
@@ -414,7 +419,8 @@ class UsersController extends AppController
                 $html = new HtmlHelper(new ThemeView());
                 $user_email = $this->Message->find('first', array('conditions' => array('name' => 'forgot_password')));
                 $variables = array(
-                    'name' => $user['User']['name'], 'username' => $user['User']['username'],
+                    'name' => $user['User']['name'],
+                    'username' => $user['User']['username'],
                     'email' => $user['User']['email'],
                     'reset_link' => $html->link(
                         'RESET',
@@ -424,8 +430,12 @@ class UsersController extends AppController
                     'password' => date('Ymdhis', strtotime($user['User']['created'])),
                 );
                 $datum = array(
-                    'email' => $user['User']['email'], 'cc' => ((!empty($user['User']['sponsor_email'])) ? $user['User']['sponsor_email'] : null),
-                    'id' => $user['User']['id'], 'user_id' => $user['User']['id'], 'type' => 'user_registration', 'model' => 'User',
+                    'email' => $user['User']['email'],
+                    'cc' => ((!empty($user['User']['sponsor_email'])) ? $user['User']['sponsor_email'] : null),
+                    'id' => $user['User']['id'],
+                    'user_id' => $user['User']['id'],
+                    'type' => 'user_registration',
+                    'model' => 'User',
                     'subject' => CakeText::insert($user_email['Message']['subject'], $variables),
                     'message' => CakeText::insert($user_email['Message']['content'], $variables)
                 );
@@ -611,7 +621,8 @@ class UsersController extends AppController
                 $user_email = $this->Message->find('first', array('conditions' => array('name' => 'user_registration')));
                 $manager_nt = $this->Message->find('first', array('conditions' => array('name' => 'manager_registration')));
                 $variables = array(
-                    'name' => $user['User']['name'], 'username' => $user['User']['username'],
+                    'name' => $user['User']['name'],
+                    'username' => $user['User']['username'],
                     'email' => $user['User']['email'],
                     'reference_link' => $html->link(
                         'Activate',
@@ -621,7 +632,10 @@ class UsersController extends AppController
                 );
                 $datum = array(
                     'email' => $user['User']['email'],
-                    'id' => $id, 'user_id' => $user['User']['id'], 'type' => 'user_registration', 'model' => 'User',
+                    'id' => $id,
+                    'user_id' => $user['User']['id'],
+                    'type' => 'user_registration',
+                    'model' => 'User',
                     'subject' => CakeText::insert($user_email['Message']['subject'], $variables),
                     'message' => CakeText::insert($user_email['Message']['content'], $variables)
                 );
@@ -639,7 +653,8 @@ class UsersController extends AppController
                 ));
                 foreach ($managers as $manager) {
                     $variables = array(
-                        'name' => $user['User']['name'], 'username' => $user['User']['username'],
+                        'name' => $user['User']['name'],
+                        'username' => $user['User']['username'],
                         'email' => $user['User']['email'],
                         'reference_link' => $html->link(
                             'Activate',
@@ -649,7 +664,10 @@ class UsersController extends AppController
                     );
                     $datum = array(
                         'email' => $user['User']['email'],
-                        'id' => $manager['User']['id'], 'user_id' => $manager['User']['id'], 'type' => 'manager_registration', 'model' => 'User',
+                        'id' => $manager['User']['id'],
+                        'user_id' => $manager['User']['id'],
+                        'type' => 'manager_registration',
+                        'model' => 'User',
                         'subject' => CakeText::insert($manager_nt['Message']['subject'], $variables),
                         'message' => CakeText::insert($manager_nt['Message']['content'], $variables)
                     );
@@ -689,7 +707,8 @@ class UsersController extends AppController
                 $user_email = $this->Message->find('first', array('conditions' => array('name' => 'user_registration')));
                 $manager_nt = $this->Message->find('first', array('conditions' => array('name' => 'manager_registration')));
                 $variables = array(
-                    'name' => $user['User']['name'], 'username' => $user['User']['username'],
+                    'name' => $user['User']['name'],
+                    'username' => $user['User']['username'],
                     'email' => $user['User']['email'],
                     'reference_link' => $html->link(
                         'Activate',
@@ -699,7 +718,10 @@ class UsersController extends AppController
                 );
                 $datum = array(
                     'email' => $user['User']['email'],
-                    'id' => $id, 'user_id' => $user['User']['id'], 'type' => 'user_registration', 'model' => 'User',
+                    'id' => $id,
+                    'user_id' => $user['User']['id'],
+                    'type' => 'user_registration',
+                    'model' => 'User',
                     'subject' => CakeText::insert($user_email['Message']['subject'], $variables),
                     'message' => CakeText::insert($user_email['Message']['content'], $variables)
                 );
@@ -715,7 +737,8 @@ class UsersController extends AppController
                 ));
                 foreach ($managers as $manager) {
                     $variables = array(
-                        'name' => $user['User']['name'], 'username' => $user['User']['username'],
+                        'name' => $user['User']['name'],
+                        'username' => $user['User']['username'],
                         'email' => $user['User']['email'],
                         'reference_link' => $html->link(
                             'Activate',
@@ -725,7 +748,10 @@ class UsersController extends AppController
                     );
                     $datum = array(
                         'email' => $user['User']['email'],
-                        'id' => $manager['User']['id'], 'user_id' => $manager['User']['id'], 'type' => 'manager_registration', 'model' => 'User',
+                        'id' => $manager['User']['id'],
+                        'user_id' => $manager['User']['id'],
+                        'type' => 'manager_registration',
+                        'model' => 'User',
                         'subject' => CakeText::insert($manager_nt['Message']['subject'], $variables),
                         'message' => CakeText::insert($manager_nt['Message']['content'], $variables)
                     );
@@ -786,12 +812,14 @@ class UsersController extends AppController
     public function reporter_dashboard()
     {
         $sadrs = $this->User->Sadr->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Sadr.id', 'Sadr.user_id', 'Sadr.created', 'Sadr.report_title', 'Sadr.submitted', 'Sadr.reference_no', 'Sadr.created', 'Sadr.serious'),
             'order' => array('Sadr.created' => 'desc'),
             'conditions' => array(
                 // only show SADRs that have been not been deleted 
-                'Sadr.deleted' => false,
+                'Sadr.deleted' => false, 
+                 'Sadr.archived' => false,
                 'Sadr.user_id' => $this->Auth->User('id')
             ),
         ));
@@ -801,30 +829,33 @@ class UsersController extends AppController
 
         $conditions = array(
             'Aefi.deleted' => false,
+            'Aefi.archived' => false,
             'Aefi.user_id' => $user_id
         );
         $conditionb = array(
             'Sadr.deleted' => false,
+            'Sadr.archived' => false,
             'Sadr.user_id' => $user_id
         );
         $cmed = array(
-            'Medication.deleted' => false,
+            'Medication.deleted' => false,  'Medication.archived' => false,
             'Medication.user_id' => $user_id
         );
         $cpq = array(
-            'Pqmp.deleted' => false,
+            'Pqmp.deleted' => false,  'Pqmp.archived' => false,
             'Pqmp.user_id' => $user_id
         );
         $cdev = array(
-            'Device.deleted' => false,
+            'Device.deleted' => false,  'Device.archived' => false,
             'Device.user_id' => $user_id
         );
         $cblood = array(
-            'Transfusion.deleted' => false,
+            'Transfusion.deleted' => false,  'Transfusion.archived' => false,
             'Transfusion.user_id' => $user_id
         );
         $aefis = $this->User->Aefi->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Aefi.id', 'Aefi.user_id', 'Aefi.created', 'Aefi.submitted', 'Aefi.reference_no', 'Aefi.created', 'Aefi.serious'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Aefi.created' => 'desc'),
@@ -891,7 +922,8 @@ class UsersController extends AppController
             );
         }
         $serious_aefis = $this->User->Aefi->find('all', array(
-            'limit' => 2, 'contain' => array(),
+            'limit' => 2,
+            'contain' => array(),
             'fields' => array('Aefi.id', 'Aefi.user_id', 'Aefi.created', 'Aefi.submitted', 'Aefi.reference_no', 'Aefi.serious'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Aefi.created' => 'desc'),
@@ -901,7 +933,8 @@ class UsersController extends AppController
         $this->set('serious_aefis', $serious_aefis);
         // Transfusion Serious Reports
         $serious_trans = $this->User->Transfusion->find('all', array(
-            'limit' => 2, 'contain' => array(),
+            'limit' => 2,
+            'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.created', 'Transfusion.submitted', 'Transfusion.reference_no', 'Transfusion.faint'),
             'order' => array('Transfusion.created' => 'desc'),
             'conditions' => $cblood,
@@ -911,7 +944,8 @@ class UsersController extends AppController
         $this->set('serious_trans', $serious_trans);
         // SADR Serious Reports
         $serious_sadr = $this->User->Sadr->find('all', array(
-            'limit' => 2, 'contain' => array(),
+            'limit' => 2,
+            'contain' => array(),
             'fields' => array('Sadr.id', 'Sadr.report_title', 'Sadr.user_id', 'Sadr.created', 'Sadr.submitted', 'Sadr.reference_no', 'Sadr.serious'),
             'order' => array('Sadr.created' => 'desc'),
             'conditions' => $conditionb,
@@ -924,7 +958,8 @@ class UsersController extends AppController
 
         // Serious Medications 
         $serious_med = $this->User->Medication->find('all', array(
-            'limit' => 2, 'contain' => array(),
+            'limit' => 2,
+            'contain' => array(),
             'fields' => array('Medication.id', 'Medication.user_id', 'Medication.created', 'Medication.submitted', 'Medication.reference_no', 'Medication.outcome'),
             'order' => array('Medication.created' => 'desc'),
             'conditions' => $cmed,
@@ -933,7 +968,8 @@ class UsersController extends AppController
         $this->set('serious_med', $serious_med);
         // Serious PQHPTS 
         $serious_pqmp = $this->User->Pqmp->find('all', array(
-            'limit' => 2, 'contain' => array(),
+            'limit' => 2,
+            'contain' => array(),
             'fields' => array('Pqmp.id', 'Pqmp.user_id', 'Pqmp.created', 'Pqmp.submitted', 'Pqmp.reference_no'),
             'order' => array('Pqmp.created' => 'desc'),
             'conditions' => $cpq,
@@ -942,7 +978,8 @@ class UsersController extends AppController
         $this->set('serious_pqmp', $serious_pqmp);
         // Serious PQHPTS 
         $serious_dev = $this->User->Device->find('all', array(
-            'limit' => 2, 'contain' => array(),
+            'limit' => 2,
+            'contain' => array(),
             'fields' => array('Device.id', 'Device.user_id', 'Device.created', 'Device.submitted', 'Device.reference_no', 'Device.serious'),
             'order' => array('Device.created' => 'desc'),
             'conditions' => $cdev,
@@ -952,7 +989,8 @@ class UsersController extends AppController
 
         // SAEFIs Reports
         $saefis = $this->User->Saefi->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Saefi.id', 'Saefi.user_id', 'Saefi.created', 'Saefi.submitted', 'Saefi.reference_no', 'Saefi.created'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Saefi.created' => 'desc'),
@@ -971,7 +1009,8 @@ class UsersController extends AppController
 
 
         $pqmps = $this->User->Pqmp->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Pqmp.id', 'Pqmp.user_id', 'Pqmp.created', 'Pqmp.submitted', 'Pqmp.brand_name', 'Pqmp.reference_no', 'Pqmp.created', 'Pqmp.product_formulation', 'Pqmp.therapeutic_ineffectiveness', 'Pqmp.particulate_matter'),
             'order' => array('Pqmp.created' => 'desc'),
             'conditions' => array(
@@ -985,7 +1024,8 @@ class UsersController extends AppController
         $this->set('pqmps', $pqmps);
 
         $devices = $this->User->Device->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Device.id', 'Device.user_id', 'Device.created', 'Device.submitted', 'Device.report_title', 'Device.reference_no', 'Device.created', 'Device.serious'),
             'order' => array('Device.created' => 'desc'),
             'conditions' => array(
@@ -999,7 +1039,8 @@ class UsersController extends AppController
         $this->set('devices', $devices);
 
         $medications = $this->User->Medication->find('all', array(
-            'limit' => 7, 'contain' => array('MedicationProduct'),
+            'limit' => 7,
+            'contain' => array('MedicationProduct'),
             'fields' => array('Medication.id', 'Medication.user_id', 'Medication.submitted', 'Medication.created', 'Medication.reference_no', 'Medication.created'),
             'order' => array('Medication.created' => 'desc'),
             'conditions' => array(
@@ -1013,7 +1054,8 @@ class UsersController extends AppController
         $this->set('medications', $medications);
 
         $transfusions = $this->User->Transfusion->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.reference_no', 'Transfusion.diagnosis', 'Transfusion.submitted', 'Transfusion.created', 'Transfusion.created'),
             'order' => array('Transfusion.created' => 'desc'),
             'conditions' => array(
@@ -1028,7 +1070,8 @@ class UsersController extends AppController
 
         // CE2Bs
         $ce2bs = $this->User->Ce2b->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Ce2b.id', 'Ce2b.user_id', 'Ce2b.created', 'Ce2b.submitted', 'Ce2b.reference_no'),
             'order' => array('Ce2b.created' => 'desc'),
             'conditions' => array(
@@ -1040,7 +1083,9 @@ class UsersController extends AppController
         $this->set('ce2bs', $ce2bs);
 
         $this->set('notifications', $this->User->Notification->find('all', array(
-            'conditions' => array('Notification.user_id' => $this->Auth->User('id')), 'order' => 'Notification.created DESC', 'limit' => 6
+            'conditions' => array('Notification.user_id' => $this->Auth->User('id')),
+            'order' => 'Notification.created DESC',
+            'limit' => 6
         )));
         $this->set('messages', $this->Message->find('list', array('fields' => array('name', 'style'))));
     }
@@ -1048,134 +1093,195 @@ class UsersController extends AppController
     public function manager_dashboard()
     {
         $sadrs = $this->User->Sadr->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Sadr.id', 'Sadr.user_id', 'Sadr.report_title', 'Sadr.submitted', 'Sadr.reference_no', 'Sadr.created', 'Sadr.serious'),
             'order' => array('Sadr.created' => 'desc'),
-            'conditions' => array('Sadr.submitted >' => 1),
+            'conditions' => array(
+                'Sadr.submitted >' => 1,
+                'Sadr.deleted' => false,
+                'Sadr.archived' => false
+            ),
         ));
         $this->set('sadrs', $sadrs);
 
         $aefis = $this->User->Aefi->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Aefi.id', 'Aefi.user_id', 'Aefi.submitted', 'Aefi.reference_no', 'Aefi.created', 'Aefi.serious'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Aefi.created' => 'desc'),
-            'conditions' => array('Aefi.submitted >' => 1),
+            'conditions' => array(
+                'Aefi.submitted >' => 1,
+                'Aefi.deleted' => false,
+                'Aefi.archived' => false
+            ),
         ));
         $this->set('aefis', $aefis);
 
         $pqmps = $this->User->Pqmp->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Pqmp.id', 'Pqmp.user_id', 'Pqmp.submitted', 'Pqmp.brand_name', 'Pqmp.reference_no', 'Pqmp.created', 'Pqmp.product_formulation', 'Pqmp.therapeutic_ineffectiveness', 'Pqmp.particulate_matter'),
             'order' => array('Pqmp.created' => 'desc'),
-            'conditions' => array('Pqmp.submitted >' => 1),
+            'conditions' => array(
+                'Pqmp.submitted >' => 1,
+                'Pqmp.deleted' => false,
+                'Pqmp.archived' => false
+            ),
         ));
         $this->set('pqmps', $pqmps);
 
         $devices = $this->User->Device->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Device.id', 'Device.user_id', 'Device.submitted', 'Device.report_title', 'Device.reference_no', 'Device.created', 'Device.serious'),
             'order' => array('Device.created' => 'desc'),
-            'conditions' => array('Device.submitted >' => 1),
+            'conditions' => array(
+                'Device.submitted >' => 1,
+                'Device.deleted' => false,
+                'Device.archived' => false
+            ),
         ));
         $this->set('devices', $devices);
 
         $medications = $this->User->Medication->find('all', array(
-            'limit' => 7, 'contain' => array('MedicationProduct'),
+            'limit' => 7,
+            'contain' => array('MedicationProduct'),
             'fields' => array('Medication.id', 'Medication.user_id', 'Medication.submitted', 'Medication.reference_no', 'Medication.created'),
             'order' => array('Medication.created' => 'desc'),
-            'conditions' => array('Medication.submitted >' => 1),
+            'conditions' => array(
+                'Medication.submitted >' => 1,
+                'Medication.deleted' => false,
+                'Medication.archived' => false
+            ),
         ));
         $this->set('medications', $medications);
 
         $transfusions = $this->User->Transfusion->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.reference_no', 'Transfusion.diagnosis', 'Transfusion.submitted', 'Transfusion.created', 'Transfusion.created'),
             'order' => array('Transfusion.created' => 'desc'),
-            'conditions' => array('Transfusion.submitted >' => 1),
+            'conditions' => array('Transfusion.submitted >' => 1,
+            'Transfusion.deleted' => false,
+            'Transfusion.archived' => false),
         ));
         $this->set('transfusions', $transfusions);
 
         $padrs = $this->User->Padr->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Padr.id', 'Padr.reporter_name', 'Padr.patient_name', 'Padr.reference_no', 'Padr.created'),
             'order' => array('Padr.created' => 'desc'),
+            'conditions' => array(
+            'Padr.deleted' => false,
+            'Padr.archived' => false),
+        
         ));
         $this->set('padrs', $padrs);
 
         $saes = $this->User->Sae->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Sae.id', 'Sae.form_type', 'Sae.reference_no', 'Sae.created'),
             'order' => array('Sae.created' => 'desc'),
         ));
         $this->set('saes', $saes);
 
         $this->set('notifications', $this->User->Notification->find('all', array(
-            'conditions' => array('Notification.user_id' => $this->Auth->User('id')), 'order' => 'Notification.created DESC', 'limit' => 6
+            'conditions' => array('Notification.user_id' => $this->Auth->User('id')),
+            'order' => 'Notification.created DESC',
+            'limit' => 6
         )));
         $this->set('messages', $this->Message->find('list', array('fields' => array('name', 'style'))));
     }
     public function reviewer_dashboard()
     {
         $sadrs = $this->User->Sadr->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Sadr.id', 'Sadr.user_id', 'Sadr.report_title', 'Sadr.submitted', 'Sadr.reference_no', 'Sadr.created', 'Sadr.serious'),
             'order' => array('Sadr.created' => 'desc'),
-            'conditions' => array('Sadr.submitted >' => 1, 'Sadr.assigned_to' => $this->Auth->User('id')),
+            'conditions' => array(
+                'Sadr.submitted >' => 1, 
+                'Sadr.assigned_to' => $this->Auth->User('id'),
+                'Sadr.deleted' => false,
+                'Sadr.archived' => false
+            ),
         ));
         $this->set('sadrs', $sadrs);
 
         $aefis = $this->User->Aefi->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Aefi.id', 'Aefi.user_id', 'Aefi.submitted', 'Aefi.reference_no', 'Aefi.created', 'Aefi.serious'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Aefi.created' => 'desc'),
-            'conditions' => array('Aefi.submitted >' => 1, 'Aefi.assigned_to' => $this->Auth->User('id')),
+            'conditions' => array('Aefi.submitted >' => 1, 'Aefi.assigned_to' => $this->Auth->User('id'),
+            'Aefi.deleted' => false,
+            'Aefi.archived' => false),
         ));
         $this->set('aefis', $aefis);
 
         $pqmps = $this->User->Pqmp->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Pqmp.id', 'Pqmp.user_id', 'Pqmp.submitted', 'Pqmp.brand_name', 'Pqmp.reference_no', 'Pqmp.created', 'Pqmp.product_formulation', 'Pqmp.therapeutic_ineffectiveness', 'Pqmp.particulate_matter'),
             'order' => array('Pqmp.created' => 'desc'),
-            'conditions' => array('Pqmp.submitted >' => 1, 'Pqmp.assigned_to' => $this->Auth->User('id')),
+            'conditions' => array('Pqmp.submitted >' => 1, 'Pqmp.assigned_to' => $this->Auth->User('id'),
+            'Pqmp.deleted' => false,
+            'Pqmp.archived' => false),
         ));
         $this->set('pqmps', $pqmps);
 
         $devices = $this->User->Device->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Device.id', 'Device.user_id', 'Device.submitted', 'Device.report_title', 'Device.reference_no', 'Device.created', 'Device.serious'),
             'order' => array('Device.created' => 'desc'),
-            'conditions' => array('Device.submitted >' => 1, 'Device.assigned_to' => $this->Auth->User('id')),
+            'conditions' => array('Device.submitted >' => 1, 'Device.assigned_to' => $this->Auth->User('id'),
+            'Device.deleted' => false,
+            'Device.archived' => false),
         ));
         $this->set('devices', $devices);
 
         $medications = $this->User->Medication->find('all', array(
-            'limit' => 7, 'contain' => array('MedicationProduct'),
+            'limit' => 7,
+            'contain' => array('MedicationProduct'),
             'fields' => array('Medication.id', 'Medication.user_id', 'Medication.submitted', 'Medication.reference_no', 'Medication.created'),
             'order' => array('Medication.created' => 'desc'),
-            'conditions' => array('Medication.submitted >' => 1, 'Medication.assigned_to' => $this->Auth->User('id')),
+            'conditions' => array('Medication.submitted >' => 1, 'Medication.assigned_to' => $this->Auth->User('id'),
+            'Medication.deleted' => false,
+            'Medication.archived' => false),
         ));
         $this->set('medications', $medications);
 
         $transfusions = $this->User->Transfusion->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.reference_no', 'Transfusion.diagnosis', 'Transfusion.submitted', 'Transfusion.created', 'Transfusion.created'),
             'order' => array('Transfusion.created' => 'desc'),
-            'conditions' => array('Transfusion.submitted >' => 1, 'Transfusion.assigned_to' => $this->Auth->User('id')),
+            'conditions' => array('Transfusion.submitted >' => 1, 'Transfusion.assigned_to' => $this->Auth->User('id'),
+            'Transfusion.deleted' => false,
+            'Transfusion.archived' => false),
         ));
         $this->set('transfusions', $transfusions);
 
         $padrs = $this->User->Padr->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Padr.id', 'Padr.reporter_name', 'Padr.patient_name', 'Padr.reference_no', 'Padr.created', 'Padr.assigned_to'),
             'order' => array('Padr.created' => 'desc'),
-            'conditions' => array('Padr.assigned_to' => $this->Auth->User('id')),
+            'conditions' => array('Padr.assigned_to' => $this->Auth->User('id'),
+            'Padr.deleted' => false,
+            'Padr.archived' => false),
         ));
         $this->set('padrs', $padrs);
 
         $saes = $this->User->Sae->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Sae.id', 'Sae.form_type', 'Sae.reference_no', 'Sae.created'),
             'order' => array('Sae.created' => 'desc'),
             'conditions' => array('Sae.assigned_to' => $this->Auth->User('id'))
@@ -1183,63 +1289,85 @@ class UsersController extends AppController
         $this->set('saes', $saes);
 
         $this->set('notifications', $this->User->Notification->find('all', array(
-            'conditions' => array('Notification.user_id' => $this->Auth->User('id')), 'order' => 'Notification.created DESC', 'limit' => 12
+            'conditions' => array('Notification.user_id' => $this->Auth->User('id')),
+            'order' => 'Notification.created DESC',
+            'limit' => 12
         )));
         $this->set('messages', $this->Message->find('list', array('fields' => array('name', 'style'))));
     }
     public function partner_dashboard()
     {
         $sadrs = $this->User->Sadr->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Sadr.id', 'Sadr.user_id', 'Sadr.created', 'Sadr.report_title', 'Sadr.submitted', 'Sadr.reference_no', 'Sadr.created', 'Sadr.serious'),
             'order' => array('Sadr.created' => 'desc'),
-            'conditions' => array('Sadr.name_of_institution' => $this->Auth->User('name_of_institution')),
+            'conditions' => array('Sadr.name_of_institution' => $this->Auth->User('name_of_institution'),
+            'Sadr.deleted' => false,
+            'Sadr.archived' => false),
         ));
         $this->set('sadrs', $sadrs);
 
         $aefis = $this->User->Aefi->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Aefi.id', 'Aefi.user_id', 'Aefi.created', 'Aefi.submitted', 'Aefi.reference_no', 'Aefi.created', 'Aefi.serious'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Aefi.created' => 'desc'),
-            'conditions' => array('Aefi.name_of_institution' => $this->Auth->User('name_of_institution')),
+            'conditions' => array('Aefi.name_of_institution' => $this->Auth->User('name_of_institution'),
+            'Aefi.deleted' => false,
+            'Aefi.archived' => false),
         ));
         $this->set('aefis', $aefis);
 
         $pqmps = $this->User->Pqmp->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Pqmp.id', 'Pqmp.user_id', 'Pqmp.created', 'Pqmp.submitted', 'Pqmp.brand_name', 'Pqmp.reference_no', 'Pqmp.created', 'Pqmp.product_formulation', 'Pqmp.therapeutic_ineffectiveness', 'Pqmp.particulate_matter'),
             'order' => array('Pqmp.created' => 'desc'),
-            'conditions' => array('Pqmp.facility_name' => $this->Auth->User('name_of_institution')),
+            'conditions' => array('Pqmp.facility_name' => $this->Auth->User('name_of_institution'),
+            'Pqmp.deleted' => false,
+            'Pqmp.archived' => false),
         ));
         $this->set('pqmps', $pqmps);
 
         $devices = $this->User->Device->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Device.id', 'Device.user_id', 'Device.created', 'Device.submitted', 'Device.report_title', 'Device.reference_no', 'Device.created', 'Device.serious'),
             'order' => array('Device.created' => 'desc'),
-            'conditions' => array('Device.name_of_institution' => $this->Auth->User('name_of_institution')),
+            'conditions' => array('Device.name_of_institution' => $this->Auth->User('name_of_institution'),
+            'Device.deleted' => false,
+            'Device.archived' => false),
         ));
         $this->set('devices', $devices);
 
         $medications = $this->User->Medication->find('all', array(
-            'limit' => 7, 'contain' => array('MedicationProduct'),
+            'limit' => 7,
+            'contain' => array('MedicationProduct'),
             'fields' => array('Medication.id', 'Medication.user_id', 'Medication.submitted', 'Medication.created', 'Medication.reference_no', 'Medication.created'),
             'order' => array('Medication.created' => 'desc'),
-            'conditions' => array('Medication.name_of_institution' => $this->Auth->User('name_of_institution')),
+            'conditions' => array('Medication.name_of_institution' => $this->Auth->User('name_of_institution'),
+            'Medication.deleted' => false,
+            'Medication.archived' => false),
         ));
         $this->set('medications', $medications);
 
         $transfusions = $this->User->Transfusion->find('all', array(
-            'limit' => 7, 'contain' => array(),
+            'limit' => 7,
+            'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.reference_no', 'Transfusion.diagnosis', 'Transfusion.submitted', 'Transfusion.created', 'Transfusion.created'),
             'order' => array('Transfusion.created' => 'desc'),
-            'conditions' => array('Transfusion.user_id' => $this->Auth->User('id')),
+            'conditions' => array('Transfusion.user_id' => $this->Auth->User('id'),
+            'Transfusion.deleted' => false,
+            'Transfusion.archived' => false),
         ));
         $this->set('transfusions', $transfusions);
 
         $this->set('notifications', $this->User->Notification->find('all', array(
-            'conditions' => array('Notification.user_id' => $this->Auth->User('id')), 'order' => 'Notification.created DESC', 'limit' => 12
+            'conditions' => array('Notification.user_id' => $this->Auth->User('id')),
+            'order' => 'Notification.created DESC',
+            'limit' => 12
         )));
         $this->set('messages', $this->Message->find('list', array('fields' => array('name', 'style'))));
     }
@@ -1327,7 +1455,8 @@ class UsersController extends AppController
                 'status' => 'success',
                 'message' => 'User profile details!',
                 'user' => $this->User->find('first', [
-                    'conditions' => ['User.id' => $id], 'contain' => ['Designation', 'County'],
+                    'conditions' => ['User.id' => $id],
+                    'contain' => ['Designation', 'County'],
                     //'fields' => ['User.id', 'User.designation_id', 'User.county_id', 'User.username', 'User.name', 'User.email', 'User.group_id', 'User.name_of_institution', 'User.institution_address', 'User.institution_code', 'User.institution_contact', 'User.institution_email', 'User.ward', 'User.user_type', 'User.sponsor_email', 'User.phone_no', 'User.forgot_password', 'User.initial_email', 'User.is_active',  'User.created', 'User.modified', 'User.health_program']
                 ]),
                 '_serialize' => ['status', 'message', 'user']

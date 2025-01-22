@@ -110,6 +110,7 @@ class SadrsController extends AppController
         }
         // add deleted condition to criteria
         $criteria['Sadr.deleted'] = false;
+        $criteria['Sadr.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Sadr.created' => 'desc');
         $this->paginate['contain'] = array('County', 'SadrListOfDrug', 'SadrDescription', 'Designation', 'SadrListOfMedicine');
@@ -141,7 +142,8 @@ class SadrsController extends AppController
 
         $criteria = $this->Sadr->parseCriteria($this->passedArgs);
         $criteria['Sadr.user_id'] = $this->Auth->User('id');
-
+        $criteria['Sadr.deleted'] = false;
+        $criteria['Sadr.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Sadr.created' => 'desc');
         $this->paginate['contain'] = array('County', 'SadrListOfDrug', 'SadrListOfMedicine', 'SadrDescription', 'Designation');
@@ -179,6 +181,7 @@ class SadrsController extends AppController
         }
         // add deleted condition to criteria
         $criteria['Sadr.deleted'] = false;
+        $criteria['Sadr.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Sadr.created' => 'desc');
         $this->paginate['contain'] = array('County', 'SadrListOfDrug', 'SadrListOfMedicine', 'SadrDescription', 'Designation');
@@ -260,6 +263,8 @@ class SadrsController extends AppController
         else $this->paginate['limit'] = reset($this->page_options);
         //  $criteria['Sadr.submitted'] = 2;
         $criteria['Sadr.copied !='] = '1';
+        $criteria['Sadr.deleted'] = false;
+        $criteria['Sadr.archived'] = false;
         // check if the user has select unsubmited sadrs
         if (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 1) {
             $criteria['Sadr.submitted'] = array(0, 1);
@@ -903,12 +908,12 @@ class SadrsController extends AppController
                 'OR' => array(
                     array(
                         'User.group_id' => 2,
-                        'User.is_active' => '1'
+                        'User.is_active' => 1
                     ),
                     array(
                         'User.county_id' => $county_id,
                         'User.user_type' => 'County Pharmacist',
-                        'User.is_active' => '1'
+                        'User.is_active' => 1
                     )
                 )
             ),
@@ -947,8 +952,8 @@ class SadrsController extends AppController
                 'message' => CakeText::insert($message['Message']['content'], $variables)
             );
             $this->loadModel('Queue.QueuedTask');
-            $this->QueuedTask->createJob('GenericEmail', $datum);
-            $this->QueuedTask->createJob('GenericNotification', $datum);
+            // $this->QueuedTask->createJob('GenericEmail', $datum);
+            // $this->QueuedTask->createJob('GenericNotification', $datum);
         }
     }
     public function api_add()
