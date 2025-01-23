@@ -83,6 +83,11 @@ $this->assign('MED', 'active');
                 'label' => false, 'placeHolder' => 'End Date'
               )
             );
+            echo $this->Form->input('filter_by', [
+              'type' => 'checkbox',
+              'hiddenField' => false,
+              'label' => 'Filter by date reported',
+          ]);
             ?>
           </td>
           <td>
