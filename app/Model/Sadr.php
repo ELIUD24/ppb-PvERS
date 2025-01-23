@@ -21,8 +21,10 @@ class Sadr extends AppModel
         'name_of_institution' => array('type' => 'like', 'encode' => true),
         'serious' => array('type' => 'like', 'encode' => true),
         'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Sadr.submitted_date as DATE) BETWEEN ? AND ?'),
+        'reportrange' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Sadr.reporter_date as DATE) BETWEEN ? AND ?'),
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
+        'filter_by' => array('type' => 'query', 'method' => 'dummy'),
         'county_id' => array('type' => 'value'),
         'mah' => array('type' => 'query', 'method' => 'findByMarketAuthority', 'encode' => true),
         'drug_name' => array('type' => 'query', 'method' => 'findByDrugName', 'encode' => true),
@@ -156,15 +158,15 @@ class Sadr extends AppModel
     }
 
     public function findByVigiflowStatus($data = array())
-    { 
-        $cond = array(); 
-        if (isset($data['vigiflow'])) { 
+    {
+        $cond = array();
+        if (isset($data['vigiflow'])) {
             if ($data['vigiflow'] == 0) {
                 $cond = array(
                     $this->alias . '.vigiflow_ref IS NOT NULL'
                 );
             } else {
-                $cond=array(
+                $cond = array(
                     $this->alias . '.vigiflow_ref IS NULL'
                 );
             }
