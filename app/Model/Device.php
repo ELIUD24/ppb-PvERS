@@ -15,7 +15,9 @@ class Device extends AppModel
     public $filterArgs = array(
         'reference_no' => array('type' => 'like', 'encode' => true),
         'brand_name' => array('type' => 'query', 'method' => 'findByBrandName', 'encode' => true),
-        'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'Device.reporter_date BETWEEN ? AND ?'),
+        'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'Device.submitted_date BETWEEN ? AND ?'),
+        'reportrange' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Device.reporter_date as DATE) BETWEEN ? AND ?'),
+        'filter_by' => array('type' => 'query', 'method' => 'dummy'),
         'mah' => array('type' => 'query', 'method' => 'findByMarketAuthority', 'encode' => true),
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),

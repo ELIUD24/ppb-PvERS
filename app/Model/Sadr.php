@@ -22,9 +22,10 @@ class Sadr extends AppModel
         'serious' => array('type' => 'like', 'encode' => true),
         'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Sadr.submitted_date as DATE) BETWEEN ? AND ?'),
         'reportrange' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Sadr.reporter_date as DATE) BETWEEN ? AND ?'),
+        'filter_by' => array('type' => 'query', 'method' => 'dummy'),
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
-        'filter_by' => array('type' => 'query', 'method' => 'dummy'),
+       
         'county_id' => array('type' => 'value'),
         'mah' => array('type' => 'query', 'method' => 'findByMarketAuthority', 'encode' => true),
         'drug_name' => array('type' => 'query', 'method' => 'findByDrugName', 'encode' => true),

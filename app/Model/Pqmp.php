@@ -14,7 +14,9 @@ class Pqmp extends AppModel
     public $filterArgs = array(
         'reference_no' => array('type' => 'like', 'encode' => true),
         'brand_name' => array('type' => 'like', 'encode' => true),
-        'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'Pqmp.reporter_date BETWEEN ? AND ?'),
+        'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'Pqmp.submitted_date BETWEEN ? AND ?'),
+       'reportrange' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Pqmp.reporter_date as DATE) BETWEEN ? AND ?'),
+        'filter_by' => array('type' => 'query', 'method' => 'dummy'),
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
         'facility_name' => array('type' => 'like', 'encode' => true),
