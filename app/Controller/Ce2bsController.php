@@ -544,85 +544,7 @@ class Ce2bsController extends AppController
             return null;
         }
     }
-    public function general_editor_alt($id)
-    {
-        $this->Ce2b->id = $id;
-        if (!$this->Ce2b->exists()) {
-            throw new NotFoundException(__('Invalid E2b'));
-        }
-        $ce2b = $this->Ce2b->read(null, $id);
-        if ($ce2b['Ce2b']['submitted'] > 1) {
-            $this->Session->setFlash(__('The E2b has been submitted'), 'alerts/flash_info');
-            $this->redirect(array('action' => 'view', $this->Ce2b->id));
-        }
-        if ($ce2b['Ce2b']['user_id'] !== $this->Auth->user('id')) {
-            $this->Session->setFlash(__('You don\'t have permission to edit this E2b!!'), 'alerts/flash_error');
-            $this->redirect(array('controller' => 'users', 'action' => 'dashboard'));
-        }
-        if ($this->request->is('post') || $this->request->is('put')) {
-
-            if (isset($this->request->data['submitReport'])) {
-                if ($this->request->data['Ce2b']['e2b_type'] == "R2") {
-                    try {
-                        $file = $this->request->data['Ce2b']['e2b_file_data'];
-                        $xmlString = file_get_contents($file['tmp_name']);
-                        $xml = Xml::build($xmlString);
-                        $xmlString = $xml->asXML();
-                        $this->Ce2b->saveField('e2b_content', $xmlString);
-                    } catch (Exception $e) {
-                        $this->Session->setFlash(__('Whoops! experienced problems uploading file. Please try again later'), 'alerts/flash_error');
-                        $this->redirect(array('action' => 'edit', $this->Ce2b->id));
-                    }
-
-                    if (!empty($ce2b['Ce2b']['reference_no']) && $ce2b['Ce2b']['reference_no'] == 'new') {
-                        $count = $this->Ce2b->find('count',  array(
-                            'fields' => 'Ce2b.reference_no',
-                            'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
-                                'Ce2b.reference_no !=' => 'new'
-                            )
-                        ));
-                        $count++;
-                        $count = ($count < 10) ? "0$count" : $count;
-                        $reference = 'E2B/' . date('Y') . '/' . $count;
-                        $this->Ce2b->saveField('reference_no', $reference);
-                        $this->Ce2b->saveField('submitted', 2);
-                        $this->Ce2b->saveField('submitted_date', date("Y-m-d H:i:s"));
-                    }
-                    $this->Session->setFlash(__('The E2b has been submitted to PPB'), 'alerts/flash_success');
-                    $this->redirect(array('action' => 'view', $this->Ce2b->id));
-                } else  if ($this->request->data['Ce2b']['e2b_type'] == "R3") {
-                    if (!empty($ce2b['Ce2b']['reference_no']) && $ce2b['Ce2b']['reference_no'] == 'new') {
-                        $count = $this->Ce2b->find('count',  array(
-                            'fields' => 'Ce2b.reference_no',
-                            'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
-                                'Ce2b.reference_no !=' => 'new'
-                            )
-                        ));
-                        $count++;
-                        $count = ($count < 10) ? "0$count" : $count;
-                        $reference = 'E2B/' . date('Y') . '/' . $count;
-                        $this->Ce2b->saveField('reference_no', $reference);
-                        $this->Ce2b->saveField('submitted', 2);
-                        $this->Ce2b->saveField('submitted_date', date("Y-m-d H:i:s"));
-                    }
-                    $this->Session->setFlash(__('The E2b has been submitted to PPB'), 'alerts/flash_success');
-                    $this->redirect(array('action' => 'view', $this->Ce2b->id));
-                }
-            }
-
-            $ce2b = $this->Ce2b->read(null, $id);
-        } else {
-            $this->request->data = $this->Ce2b->read(null, $id);
-        }
-        $counties = $this->Ce2b->County->find('list', array('order' => array('County.county_name' => 'ASC')));
-        $this->set(compact('counties'));
-        $sub_counties = $this->Ce2b->SubCounty->find('list', array('order' => array('SubCounty.sub_county_name' => 'ASC')));
-        $this->set(compact('sub_counties'));
-        $designations = $this->Ce2b->Designation->find('list', array('order' => array('Designation.name' => 'ASC')));
-        $this->set(compact('designations'));
-    }
+   
     public function general_editor($id = null)
     {
 
@@ -647,6 +569,8 @@ class Ce2bsController extends AppController
             $xmlString = null;
             $validate = false;
             if (isset($this->request->data['submitReport'])) {
+
+ 
                 $validate = 'first';
                 try {
 
@@ -656,7 +580,7 @@ class Ce2bsController extends AppController
                     $xml = Xml::build($xmlString);
                     $xmlString = $xml->asXML();
 
-                    $filePath = WWW_ROOT . 'files' . DS . $file['name'];
+                    $filePath = WWW_ROOT . 'files' . DS .'ce2bs'. DS . $file['name'];
                     move_uploaded_file($file['tmp_name'], $filePath);
 
                     $xmlArray = Xml::toArray(Xml::build($filePath));
