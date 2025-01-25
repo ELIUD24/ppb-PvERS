@@ -284,7 +284,8 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             echo $this->Form->input('environmental', array('label' => 'Environmental', 'hiddenField' => false));
             echo $this->Form->input('results', array('label' => 'Results', 'hiddenField' => false));
             echo $this->Form->input('readings', array('label' => 'Readings', 'hiddenField' => false));
-            ?>
+
+            ?> 
           </td>
           <td>
             <?php
@@ -293,6 +294,16 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
               array('div' => false, 'class' => 'input-small unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Reporter'), 'placeholder' => 'Name/Email')
             );
             ?>
+             <?php
+              if ($redir == 'manager') { ?>
+            <h6>Archived Status:</h6>
+          <?php
+                echo $this->Form->input('archived', [
+                  'type' => 'checkbox',
+                  'hiddenField' => false,
+                  'label' => 'Show',
+                ]);
+              } ?>
           </td>
           <td>
             <?php
@@ -326,6 +337,7 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             //   'label' => array('class' => '', 'text' => 'Include Unsubmitted?')
             // ));
             ?>
+            
           </td>
           <td></td>
           <td>
@@ -426,11 +438,17 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
                 );
                 echo "&nbsp;";
                 if (($redir == 'manager' || $redir == 'reviewer') && $pqmp['Pqmp']['copied'] == 0) echo $this->Form->postLink('<span class="badge badge-success tooltipper" data-toggle="tooltip" title="Copy & Edit"> <i class="fa fa-copy" aria-hidden="true"></i> Copy </span>', array('controller' => 'pqmps', 'action' => 'copy', $pqmp['Pqmp']['id']), array('escape' => false), __('Create a clean copy to edit?'));
-                if (($redir == 'manager' || $redir == 'reviewer')) echo $this->Html->link(
-                  '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+                if ($redir == 'manager' && $pqmp['Pqmp']['archived'] == 0)  echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
                   array('controller' => 'pqmps', 'action' => 'archive', $pqmp['Pqmp']['id']),
                   array('escape' => false),
                   __('Are you sure you want to archive the report?')
+                );
+                if ($redir == 'manager' && $pqmp['Pqmp']['archived'] == 1) echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                  array('controller' => 'pqmps', 'action' => 'restore_archive', $pqmp['Pqmp']['id']),
+                  array('escape' => false),
+                  __('Are you sure you want to restore archive the report?')
                 );
               } else {
                 if ($redir == 'reporter' and $this->Session->read('Auth.User.user_type') != 'Public Health Program') {

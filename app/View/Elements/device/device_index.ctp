@@ -35,7 +35,8 @@ $this->assign('DEV', 'active');
     <?php
     echo $this->Form->create('Device', array(
       'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-      'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+      'class' => 'ctr-groups',
+      'style' => array('padding:9px;', 'background-color: #F5F5F5'),
     ));
     ?>
     <table class="table table-condensed" style="margin-bottom: 2px;">
@@ -48,7 +49,8 @@ $this->assign('DEV', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'device/2020',
-                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Reference No.')
+                'class' => 'span12',
+                'label' => array('class' => 'required', 'text' => 'Reference No.')
               )
             );
             ?>
@@ -60,7 +62,8 @@ $this->assign('DEV', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'brand name',
-                'class' => 'unauthorized_index span10', 'label' => array('class' => 'required', 'text' => 'Brand name')
+                'class' => 'unauthorized_index span10',
+                'label' => array('class' => 'required', 'text' => 'Brand name')
               )
             );
             ?>
@@ -70,24 +73,31 @@ $this->assign('DEV', 'active');
             echo $this->Form->input(
               'start_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index', 'after' => '-to-',
-                'label' => array('class' => 'required', 'text' => 'Report Dates'), 'placeHolder' => 'Start Date'
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
+                'after' => '-to-',
+                'label' => array('class' => 'required', 'text' => 'Report Dates'),
+                'placeHolder' => 'Start Date'
               )
             );
             echo $this->Form->input(
               'end_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index',
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                               <em class="accordion-toggle">clear!</em></a>',
-                'label' => false, 'placeHolder' => 'End Date'
+                'label' => false,
+                'placeHolder' => 'End Date'
               )
             );
             echo $this->Form->input('filter_by', [
               'type' => 'checkbox',
               'hiddenField' => false,
               'label' => 'Filter by date reported',
-          ]);
+            ]);
             ?>
           </td>
           <td>
@@ -95,8 +105,10 @@ $this->assign('DEV', 'active');
             echo $this->Form->input(
               'name_of_institution',
               array(
-                'div' => false, 'placeholder' => 'institution',
-                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Institution')
+                'div' => false,
+                'placeholder' => 'institution',
+                'class' => 'span12',
+                'label' => array('class' => 'required', 'text' => 'Institution')
               )
             );
             ?>
@@ -108,7 +120,8 @@ $this->assign('DEV', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'Report title',
-                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Report Title')
+                'class' => 'span12',
+                'label' => array('class' => 'required', 'text' => 'Report Title')
               )
             );
             ?>
@@ -118,8 +131,10 @@ $this->assign('DEV', 'active');
             echo $this->Form->input(
               'county_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'County')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'County')
               )
             );
             ?>
@@ -130,7 +145,8 @@ $this->assign('DEV', 'active');
             <?php
             echo $this->Form->input('serious', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input',
+              'empty' => true,
+              'class' => 'input',
               'options' => array(
                 'Fatal' => 'Fatal',
                 'Serious' => 'Serious',
@@ -146,7 +162,8 @@ $this->assign('DEV', 'active');
             <?php
             echo $this->Form->input('serious_yes', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input',
+              'empty' => true,
+              'class' => 'input',
               'options' => array(
                 'Death' => 'Death',
                 'Life-threatening' => 'Life-threatening',
@@ -162,7 +179,8 @@ $this->assign('DEV', 'active');
             <?php
             echo $this->Form->input('outcome', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input',
+              'empty' => true,
+              'class' => 'input',
               'options' => array(
                 'Recovered' => 'Recovered',
                 'Recovering' => 'Recovering',
@@ -182,7 +200,8 @@ $this->assign('DEV', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'common name',
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Common name')
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Common name')
               )
             );
             ?>
@@ -194,7 +213,8 @@ $this->assign('DEV', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'manufacturer',
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Manufacturer')
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Manufacturer')
               )
             );
             ?>
@@ -203,7 +223,8 @@ $this->assign('DEV', 'active');
             <h5>Problem noted prior?</h5>
             <?php
             echo $this->Form->input('problem_noted', array(
-              'options' => array('Yes' => 'Yes', 'No' => 'No'), 'legend' => false,
+              'options' => array('Yes' => 'Yes', 'No' => 'No'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -215,8 +236,10 @@ $this->assign('DEV', 'active');
             echo $this->Form->input(
               'patient_name',
               array(
-                'div' => false, 'placeholder' => 'Patient name',
-                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Patient Name')
+                'div' => false,
+                'placeholder' => 'Patient name',
+                'class' => 'span12 unauthorized_index',
+                'label' => array('class' => 'required', 'text' => 'Patient Name')
               )
             );
             echo $this->Form->input('submitted', array(
@@ -235,15 +258,22 @@ $this->assign('DEV', 'active');
             <h5>Report Type?</h5>
             <?php
             echo $this->Form->input('report_type', array(
-              'options' => array('Initial' => 'Initial', 'Followup' => 'Followup'), 'legend' => false,
+              'options' => array('Initial' => 'Initial', 'Followup' => 'Followup'),
+              'legend' => false,
               'type' => 'radio'
             ));
             echo $this->Form->input('health_program', array(
-              'type' => 'select', 'options' => [
-                'Malaria program' => 'Malaria program', 'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
-                'Neglected tropical diseases program' => 'Neglected tropical diseases program', 'MNCAH Priority Medicines' => 'MNCAH Priority Medicines', 'TB program' => 'TB program',
-                'NASCOP program' => 'NASCOP program', 'Cancer/Oncology program' => 'Cancer/Oncology program'
-              ], 'empty' => true,
+              'type' => 'select',
+              'options' => [
+                'Malaria program' => 'Malaria program',
+                'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
+                'Neglected tropical diseases program' => 'Neglected tropical diseases program',
+                'MNCAH Priority Medicines' => 'MNCAH Priority Medicines',
+                'TB program' => 'TB program',
+                'NASCOP program' => 'NASCOP program',
+                'Cancer/Oncology program' => 'Cancer/Oncology program'
+              ],
+              'empty' => true,
               'label' => array('class' => 'control-label', 'text' => 'Public Health Program'),
               'class' => 'input-xlarge'
             ));
@@ -253,7 +283,8 @@ $this->assign('DEV', 'active');
             <?php
             echo $this->Form->input('operator', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Healthcare professional' => 'Healthcare professional',
                 'Patient' => 'Patient',
@@ -269,7 +300,8 @@ $this->assign('DEV', 'active');
             <?php
             echo $this->Form->input('device_usage', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Single use' => 'Single use',
                 'Reuse of reusable' => 'Reuse of reusable',
@@ -288,10 +320,12 @@ $this->assign('DEV', 'active');
             );
 
             echo $this->Form->input('sending_device', array(
-              'type' => 'select', 'options' => [
+              'type' => 'select',
+              'options' => [
                 '1' => 'Web',
                 '2' => 'Mobile',
-              ], 'empty' => true,
+              ],
+              'empty' => true,
               'label' => array('class' => 'control-label', 'text' => 'Sending Device'),
               'class' => 'input-xlarge'
             ));  ?>
@@ -301,8 +335,10 @@ $this->assign('DEV', 'active');
             echo $this->Form->input(
               'designation_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Designation')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Designation')
               )
             );
             echo $this->Form->input('mah', array(
@@ -321,10 +357,21 @@ $this->assign('DEV', 'active');
             <h5>Gender</h5>
             <?php
             echo $this->Form->input('gender', array(
-              'options' => array('Male' => 'Male', 'Female' => 'Female', 'Unknown' => 'Unknown'), 'legend' => false,
+              'options' => array('Male' => 'Male', 'Female' => 'Female', 'Unknown' => 'Unknown'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
+            <?php
+            if ($redir == 'manager') { ?>
+              <h6>Archived Status:</h6>
+            <?php
+              echo $this->Form->input('archived', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+            } ?>
           </td>
         </tr>
         <tr>
@@ -332,7 +379,10 @@ $this->assign('DEV', 'active');
           <td>
             <?php
             echo $this->Form->input('pages', array(
-              'type' => 'select', 'div' => false, 'class' => 'input-small', 'selected' => $this->request->params['paging']['Device']['limit'],
+              'type' => 'select',
+              'div' => false,
+              'class' => 'input-small',
+              'selected' => $this->request->params['paging']['Device']['limit'],
               'empty' => true,
               'options' => $page_options,
               'label' => false,
@@ -352,7 +402,9 @@ $this->assign('DEV', 'active');
           <td>
             <?php
             echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-              'class' => 'btn btn-primary', 'div' => 'control-group', 'div' => false,
+              'class' => 'btn btn-primary',
+              'div' => 'control-group',
+              'div' => false,
               'formnovalidate' => 'formnovalidate',
               'style' => array('margin-bottom: 5px')
             ));
@@ -454,11 +506,17 @@ $this->assign('DEV', 'active');
                 );
                 echo "&nbsp;";
                 if (($redir == 'manager' || $redir == 'reviewer') && $device['Device']['copied'] == 0) echo $this->Form->postLink('<span class="badge badge-success tooltipper" data-toggle="tooltip" title="Copy & Edit"> <i class="fa fa-copy" aria-hidden="true"></i> Copy </span>', array('controller' => 'devices', 'action' => 'copy', $device['Device']['id']), array('escape' => false), __('Create a clean copy to edit?'));
-                if (($redir == 'manager' || $redir == 'reviewer')) echo $this->Html->link(
-                  '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+                if ($redir == 'manager' && $device['Device']['archived'] == 0)  echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
                   array('controller' => 'devices', 'action' => 'archive', $device['Device']['id']),
                   array('escape' => false),
                   __('Are you sure you want to archive the report?')
+                );
+                if ($redir == 'manager' && $device['Device']['archived'] == 1) echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                  array('controller' => 'devices', 'action' => 'restore_archive', $device['Device']['id']),
+                  array('escape' => false),
+                  __('Are you sure you want to restore archive the report?')
                 );
               } else {
                 echo $this->Html->link(

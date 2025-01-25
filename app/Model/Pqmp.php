@@ -22,6 +22,7 @@ class Pqmp extends AppModel
         'facility_name' => array('type' => 'like', 'encode' => true),
         'supplier_name' => array('type' => 'like', 'encode' => true),
         'county_id' => array('type' => 'value'),
+        'archived' => array('type' => 'value'),
         'country_id' => array('type' => 'value'),
         'generic_name' => array('type' => 'like', 'encode' => true),
         'health_program' => array('type' => 'query', 'method' => 'findByHealthProgram', 'encode' => true),

@@ -519,7 +519,11 @@ class AggregatesController extends AppController
 		$criteria['Aggregate.copied !='] = '1';
 		// add deleted condition to criteria
 		$criteria['Aggregate.deleted'] = false;
-		$criteria['Aggregate.archived'] = false;
+		if (!empty($this->passedArgs['archived'])) {
+            $criteria['Aggregate.archived'] = true;
+        }else{
+            $criteria['Aggregate.archived'] = false;
+        }
 		$this->paginate['conditions'] = $criteria;
 		$this->paginate['order'] = array('Aggregate.submitted_date' => 'desc');
 		$this->set('aggregates', Sanitize::clean($this->paginate(), array('encode' => false)));
@@ -627,7 +631,22 @@ class AggregatesController extends AppController
 		$this->redirect($this->referer());
 	}
 
-
+	public function manager_restore_archive($id = null)
+	{
+		$this->Aggregate->id = $id;
+		if (!$this->Aggregate->exists()) {
+			throw new NotFoundException(__('Invalid Aggregate'));
+		}
+		$aggregate = $this->Aggregate->read(null, $id);
+		$aggregate['Aggregate']['archived'] = 0;
+		// $aggregate['Aggregate']['archived_date'] = date("Y-m-d H:i:s");
+		if ($this->Aggregate->save($aggregate, array('validate' => false))) {
+			$this->Session->setFlash(__('Aggregate Report Archive Restored successfully'), 'alerts/flash_success');
+			$this->redirect(array('action' => 'index'));
+		}
+		$this->Session->setFlash(__('Aggregate Report was not restored'), 'alerts/flash_error');
+		$this->redirect($this->referer());
+	}
 	public function reporter_delete($id = null)
 	{
 		# code...

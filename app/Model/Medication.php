@@ -25,6 +25,7 @@ class Medication extends AppModel
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
         'county_id' => array('type' => 'value'),
+        'archived' => array('type' => 'value'),
         'process_occur' => array('type' => 'value'),
         'outcome' => array('type' => 'value'),
         'error_cause_inexperience' => array('type' => 'value'),

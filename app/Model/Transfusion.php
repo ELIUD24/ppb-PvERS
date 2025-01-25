@@ -22,6 +22,7 @@ class Transfusion extends AppModel
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
         'previous_transfusion' => array('type' => 'value'),
         'previous_reactions' => array('type' => 'value'),
+        'archived' => array('type' => 'value'),
         'ward' => array('type' => 'like', 'encode' => true),
         'reaction_fever' => array('type' => 'value'),
         'reaction_chills' => array('type' => 'value'),

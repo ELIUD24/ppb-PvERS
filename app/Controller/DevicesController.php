@@ -188,7 +188,11 @@ class DevicesController extends AppController
         }
         //add deleted = 0 to criteria
         $criteria['Device.deleted'] = false;
-        $criteria['Device.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Device.archived'] = true;
+        }else{
+            $criteria['Device.archived'] = false;
+        }
 
         // if (!isset($this->passedArgs['submit'])) $criteria['Device.submitted'] = array(2, 3);
         $this->paginate['conditions'] = $criteria;
@@ -1235,6 +1239,22 @@ class DevicesController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('DEVICE was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }
+    public function manager_restore_archive($id = null)
+    {
+        $this->Device->id = $id;
+        if (!$this->Device->exists()) {
+            throw new NotFoundException(__('Invalid DEVICE'));
+        }
+        $report = $this->Device->read(null, $id);
+        $report['Device']['archived'] = 0;
+        // $report['Device']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Device->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('DEVICE Archive restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('DEVICE was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }

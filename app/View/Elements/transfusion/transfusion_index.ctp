@@ -35,7 +35,8 @@ $this->assign('TRN', 'active');
     <?php
     echo $this->Form->create('Transfusion', array(
       'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-      'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+      'class' => 'ctr-groups',
+      'style' => array('padding:9px;', 'background-color: #F5F5F5'),
     ));
     ?>
     <table class="table table-condensed" style="margin-bottom: 2px;">
@@ -48,7 +49,8 @@ $this->assign('TRN', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'trn/2020',
-                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Reference No.')
+                'class' => 'span12',
+                'label' => array('class' => 'required', 'text' => 'Reference No.')
               )
             );
             ?>
@@ -60,7 +62,8 @@ $this->assign('TRN', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'diagnosis',
-                'class' => 'unauthorized_index span10', 'label' => array('class' => 'required', 'text' => 'Diagnosis')
+                'class' => 'unauthorized_index span10',
+                'label' => array('class' => 'required', 'text' => 'Diagnosis')
               )
             );
             ?>
@@ -70,31 +73,39 @@ $this->assign('TRN', 'active');
             echo $this->Form->input(
               'start_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index', 'after' => '-to-',
-                'label' => array('class' => 'required', 'text' => 'Report Dates'), 'placeHolder' => 'Start Date'
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
+                'after' => '-to-',
+                'label' => array('class' => 'required', 'text' => 'Report Dates'),
+                'placeHolder' => 'Start Date'
               )
             );
             echo $this->Form->input(
               'end_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index',
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                               <em class="accordion-toggle">clear!</em></a>',
-                'label' => false, 'placeHolder' => 'End Date'
+                'label' => false,
+                'placeHolder' => 'End Date'
               )
             );
             echo $this->Form->input('filter_by', [
               'type' => 'checkbox',
               'hiddenField' => false,
               'label' => 'Filter by date reported',
-          ]);
+            ]);
             ?>
           </td>
           <td>
             <h5>Previous transfusion</h5>
             <?php
             echo $this->Form->input('previous_transfusion', array(
-              'options' => array('Yes' => 'Yes', 'No' => 'No'), 'legend' => false,
+              'options' => array('Yes' => 'Yes', 'No' => 'No'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -103,7 +114,8 @@ $this->assign('TRN', 'active');
             <h5>Previous reactions?</h5>
             <?php
             echo $this->Form->input('previous_reactions', array(
-              'options' => array('Yes' => 'Yes', 'No' => 'No'), 'legend' => false,
+              'options' => array('Yes' => 'Yes', 'No' => 'No'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -115,7 +127,8 @@ $this->assign('TRN', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'ward',
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Ward')
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Ward')
               )
             );
             ?>
@@ -126,7 +139,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('reaction_general', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'span12',
+              'empty' => true,
+              'class' => 'span12',
               'options' => array(
                 'Fever' => 'Fever',
                 'Chills/Rigors' => 'Chills/Rigors',
@@ -141,7 +155,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('reaction_dermatological', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Urticaria' => 'Urticaria',
                 'Other skin rash' => 'Other skin rash'
@@ -154,7 +169,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('reaction_cardiac', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Chest pain' => 'Chest pain',
                 'Dyspnoea' => 'Dyspnoea',
@@ -169,7 +185,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('reaction_renal', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Haemoglobinuria- Dark urine' => 'Haemoglobinuria- Dark urine',
                 'Oliguria' => 'Oliguria',
@@ -184,7 +201,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('reaction_haematological', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Unexplained bleeding' => 'Unexplained bleeding'
               ),
@@ -196,7 +214,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('lab_hemolysis', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Present' => 'Present',
                 'Absent' => 'Absent',
@@ -210,7 +229,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('lab_hemolysis_present', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Mild' => 'Mild',
                 'Moderate' => 'Moderate',
@@ -226,7 +246,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('recipient_blood', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input',
+              'empty' => true,
+              'class' => 'input',
               'options' => array(
                 'Present' => 'Present',
                 'Absent' => 'Absent'
@@ -239,7 +260,8 @@ $this->assign('TRN', 'active');
             <?php
             echo $this->Form->input('donor_hemolysis', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input-small',
+              'empty' => true,
+              'class' => 'input-small',
               'options' => array(
                 'Present' => 'Present',
                 'Absent' => 'Absent'
@@ -255,7 +277,8 @@ $this->assign('TRN', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'component',
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Component')
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Component')
               )
             );
             ?>
@@ -265,8 +288,10 @@ $this->assign('TRN', 'active');
             echo $this->Form->input(
               'patient_name',
               array(
-                'div' => false, 'placeholder' => 'Patient name',
-                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Patient Name')
+                'div' => false,
+                'placeholder' => 'Patient name',
+                'class' => 'span12 unauthorized_index',
+                'label' => array('class' => 'required', 'text' => 'Patient Name')
               )
             );
 
@@ -285,8 +310,10 @@ $this->assign('TRN', 'active');
             echo $this->Form->input(
               'designation_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Designation')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Designation')
               )
             );
             ?>
@@ -295,7 +322,8 @@ $this->assign('TRN', 'active');
             <h5>Gender</h5>
             <?php
             echo $this->Form->input('gender', array(
-              'options' => array('Male' => 'Male', 'Female' => 'Female'), 'legend' => false,
+              'options' => array('Male' => 'Male', 'Female' => 'Female'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -320,27 +348,40 @@ $this->assign('TRN', 'active');
           <td>
             <?php
             echo $this->Form->input('sending_device', array(
-              'type' => 'select', 'options' => [
+              'type' => 'select',
+              'options' => [
                 '1' => 'Web',
                 '2' => 'Mobile',
-              ], 'empty' => true,
+              ],
+              'empty' => true,
               'label' => array('class' => 'control-label', 'text' => 'Sending Device'),
               'class' => 'input-xlarge'
             ));  ?>
           </td>
           <td><?php
-            echo $this->Form->input('mah', array(
-              'type' => 'select',
-              'options' => [
-                '0' => 'MAH',
-                '1' => 'Non MAH',
-              ],
-              'empty' => true,
-              'label' => array('class' => 'control-label', 'text' => 'Reporter Role'),
-              'class' => 'input-xlarge'
-            ));
-          ?></td>
-          <td></td>
+              echo $this->Form->input('mah', array(
+                'type' => 'select',
+                'options' => [
+                  '0' => 'MAH',
+                  '1' => 'Non MAH',
+                ],
+                'empty' => true,
+                'label' => array('class' => 'control-label', 'text' => 'Reporter Role'),
+                'class' => 'input-xlarge'
+              ));
+              ?></td>
+          <td>
+            <?php
+            if ($redir == 'manager') { ?>
+              <h6>Archived Status:</h6>
+            <?php
+              echo $this->Form->input('archived', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+            } ?>
+          </td>
           <td></td>
           <td></td>
           <td></td>
@@ -351,7 +392,10 @@ $this->assign('TRN', 'active');
         <td>
           <?php
           echo $this->Form->input('pages', array(
-            'type' => 'select', 'div' => false, 'class' => 'input-small', 'selected' => $this->request->params['paging']['Transfusion']['limit'],
+            'type' => 'select',
+            'div' => false,
+            'class' => 'input-small',
+            'selected' => $this->request->params['paging']['Transfusion']['limit'],
             'empty' => true,
             'options' => $page_options,
             'label' => false,
@@ -371,7 +415,9 @@ $this->assign('TRN', 'active');
         <td>
           <?php
           echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-            'class' => 'btn btn-primary', 'div' => 'control-group', 'div' => false,
+            'class' => 'btn btn-primary',
+            'div' => 'control-group',
+            'div' => false,
             'formnovalidate' => 'formnovalidate',
             'style' => array('margin-bottom: 5px')
           ));
@@ -461,11 +507,17 @@ $this->assign('TRN', 'active');
                 echo "&nbsp;";
                 if (($redir == 'manager' || $redir == 'reviewer') && $transfusion['Transfusion']['copied'] == 0) echo $this->Form->postLink('<span class="badge badge-success tooltipper" data-toggle="tooltip" title="Copy & Edit"> <i class="fa fa-copy" aria-hidden="true"></i> Copy </span>', array('controller' => 'transfusions', 'action' => 'copy', $transfusion['Transfusion']['id']), array('escape' => false), __('Create a clean copy to edit?'));
 
-                if (($redir == 'manager' || $redir == 'reviewer'))                echo $this->Html->link(
-                  '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+                if ($redir == 'manager' && $transfusion['Transfusion']['archived'] == 0)  echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
                   array('controller' => 'transfusions', 'action' => 'archive', $transfusion['Transfusion']['id']),
                   array('escape' => false),
                   __('Are you sure you want to archive the report?')
+                );
+                if ($redir == 'manager' && $transfusion['Transfusion']['archived'] == 1) echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                  array('controller' => 'transfusions', 'action' => 'restore_archive', $transfusion['Transfusion']['id']),
+                  array('escape' => false),
+                  __('Are you sure you want to restore archive the report?')
                 );
               } else {
                 if ($redir == 'reporter') echo $this->Html->link(

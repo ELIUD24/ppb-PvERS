@@ -131,6 +131,18 @@ echo $this->Session->flash();
                         );
                         ?>
                     </td>
+                    <td>
+                        <?php
+                        if ($redir == 'manager') { ?>
+                            <h6>Archived Status:</h6>
+                        <?php
+                            echo $this->Form->input('archived', [
+                                'type' => 'checkbox',
+                                'hiddenField' => false,
+                                'label' => 'Show',
+                            ]);
+                        } ?>
+                    </td>
                 </tr>
                 <tr>
                     <td><label for="PadrPages" class="required">Pages</label></td>
@@ -258,12 +270,18 @@ echo $this->Session->flash();
                                 );
                                 echo "&nbsp;";
                                 // if (($redir == 'manager' || $redir == 'reviewer') && $aggregate['Aggregate']['copied'] == 0) echo $this->Form->postLink('<span class="badge badge-success tooltipper" data-toggle="tooltip" title="Copy & Edit"> <i class="fa fa-copy" aria-hidden="true"></i> Copy </span>', array('controller' => 'aggregates', 'action' => 'copy', $aggregate['Aggregate']['id']), array('escape' => false), __('Create a clean copy to edit?'));
-                                if (($redir == 'manager' || $redir == 'reviewer')) echo $this->Html->link(
-                                    '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+                                if ($redir == 'manager' && $aggregate['Aggregate']['archived'] == 0)  echo $this->Html->link(
+                                    '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
                                     array('controller' => 'aggregates', 'action' => 'archive', $aggregate['Aggregate']['id']),
                                     array('escape' => false),
                                     __('Are you sure you want to archive the report?')
-                                );
+                                  );
+                                  if ($redir == 'manager' && $aggregate['Aggregate']['archived'] == 1) echo $this->Html->link(
+                                    '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                                    array('controller' => 'aggregates', 'action' => 'restore_archive', $aggregate['Aggregate']['id']),
+                                    array('escape' => false),
+                                    __('Are you sure you want to restore archive the report?')
+                                  );
                             } else {
                                 if ($redir == 'reporter') echo $this->Html->link(
                                     '<span class="label label-success tooltipper" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit </span>',

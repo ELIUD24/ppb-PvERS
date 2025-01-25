@@ -462,7 +462,11 @@ class Ce2bsController extends AppController
             $criteria['Ce2b.submitted'] = array(2, 3);
         }
         $criteria['Ce2b.deleted'] = false;
-        $criteria['Ce2b.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Ce2b.archived'] = true;
+        }else{
+            $criteria['Ce2b.archived'] = false;
+        }
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Ce2b.created' => 'desc');
         $this->set('ce2bs', Sanitize::clean($this->paginate(), array('encode' => false)));
@@ -1976,6 +1980,22 @@ class Ce2bsController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('E2B was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }  public function manager_restore_archive($id = null)
+    {
+
+        $this->Ce2b->id = $id;
+        if (!$this->Ce2b->exists()) {
+            throw new NotFoundException(__('Invalid E2B'));
+        }
+        $report = $this->Ce2b->read(null, $id);
+        $report['Ce2b']['archived'] = 0;
+        // $report['Ce2b']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Ce2b->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('E2B Archive Restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('E2B was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }

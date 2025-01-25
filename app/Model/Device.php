@@ -24,6 +24,7 @@ class Device extends AppModel
         'name_of_institution' => array('type' => 'like', 'encode' => true),
         'report_title' => array('type' => 'like', 'encode' => true),
         'county_id' => array('type' => 'value'),
+        'archived' => array('type' => 'value'),
         'problem_noted' => array('type' => 'value'),
         'serious' => array('type' => 'value'),
         'serious_yes' => array('type' => 'value'),

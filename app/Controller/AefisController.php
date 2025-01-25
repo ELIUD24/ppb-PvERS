@@ -851,7 +851,11 @@ class AefisController extends AppController
 
         $criteria = $this->Aefi->parseCriteria($this->passedArgs);
         $criteria['Aefi.deleted'] = false;
-        $criteria['Aefi.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Aefi.archived'] = true;
+        }else{
+            $criteria['Aefi.archived'] = false;
+        }
         $criteria['Aefi.copied !='] = '1';
         if (isset($this->request->query['submitted'])) {
             if ($this->request->query['submitted'] == 1) {
@@ -2572,6 +2576,23 @@ class AefisController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('AEFI was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }
+    public function manager_restore_archive($id = null)
+    {
+
+        $this->Aefi->id = $id;
+        if (!$this->Aefi->exists()) {
+            throw new NotFoundException(__('Invalid AEFI'));
+        }
+        $report = $this->Aefi->read(null, $id);
+        $report['Aefi']['archived'] = 0;
+        // $report['Aefi']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Aefi->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('AEFI Archive Restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('AEFI was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }
