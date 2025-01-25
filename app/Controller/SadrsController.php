@@ -1502,7 +1502,7 @@ class SadrsController extends AppController
         }
         $sadr = $this->Sadr->read(null, $id);
         $sadr['Sadr']['archived'] = false;
-        $sadr['Sadr']['archived_date'] = date("Y-m-d H:i:s");
+        // $sadr['Sadr']['archived_date'] = date("Y-m-d H:i:s");
         if ($this->Sadr->save($sadr, array('validate' => false))) {
             $this->Session->setFlash(__('SADR Report Restored successfully'), 'alerts/flash_success');
             $this->redirect(array('action' => 'index'));
