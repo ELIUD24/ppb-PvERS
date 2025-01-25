@@ -242,7 +242,11 @@ class SadrsController extends AppController
         }
         // add deleted condition to criteria
         $criteria['Sadr.deleted'] = false;
-        $criteria['Sadr.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Sadr.archived'] = true;
+        }else{
+            $criteria['Sadr.archived'] = false;
+        }
 
         // if (!isset($this->passedArgs['submit'])) $criteria['Sadr.submitted'] = array(2, 3);
         $this->paginate['conditions'] = $criteria;
@@ -1488,6 +1492,22 @@ class SadrsController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('SADR was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }
+    public function manager_restore_archive($id = null)
+    {
+        $this->Sadr->id = $id;
+        if (!$this->Sadr->exists()) {
+            throw new NotFoundException(__('Invalid SADR'));
+        }
+        $sadr = $this->Sadr->read(null, $id);
+        $sadr['Sadr']['archived'] = false;
+        $sadr['Sadr']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Sadr->save($sadr, array('validate' => false))) {
+            $this->Session->setFlash(__('SADR Report Restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('SADR was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }

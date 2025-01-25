@@ -25,7 +25,7 @@ class Sadr extends AppModel
         'filter_by' => array('type' => 'query', 'method' => 'dummy'),
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
-       
+        'archived' => array('type' => 'value'),
         'county_id' => array('type' => 'value'),
         'mah' => array('type' => 'query', 'method' => 'findByMarketAuthority', 'encode' => true),
         'drug_name' => array('type' => 'query', 'method' => 'findByDrugName', 'encode' => true),

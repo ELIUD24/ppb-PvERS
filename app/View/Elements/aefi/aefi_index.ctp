@@ -305,7 +305,15 @@ $this->assign('Adverse Event Following Immunization', 'active');
             ));
             ?>
           </td>
-          <td></td>
+          <td>
+            <?php
+              echo $this->Form->input('filter_by', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show Archived Reports',
+            ]);
+            ?>
+          </td>
           <td></td>
         </tr>
         <tr>

@@ -292,7 +292,7 @@ $this->assign('SAEFI', 'active');
                   echo "<br> Initial: ";
                   echo $this->Html->link(
                     '<label class="label label-info">' . $aefi['Saefi']['reference_no'] . '</label>',
-                    array('action' => 'view', $aefi['Saefi']['aefi_id']),
+                    array('action' => 'view', $aefi['Saefi']['initial_id']),
                     array('escape' => false)
                   );
                 }
@@ -358,7 +358,7 @@ $this->assign('SAEFI', 'active');
 
 <script type="text/javascript">
   $(function() {
-    var adates = $('#AefiStartDate, #AefiEndDate').datepicker({
+    var adates = $('#SaefiStartDate, #SaefiEndDate').datepicker({
       minDate: "-100Y",
       maxDate: "-0D",
       dateFormat: 'dd-mm-yy',
@@ -369,9 +369,9 @@ $this->assign('SAEFI', 'active');
       changeYear: true,
       showAnim: 'show',
       onSelect: function(selectedDate) {
-        var option = this.id == "AefiStartDate" ? "minDate" : "maxDate",
+        var option = this.id == "SaefiStartDate" ? "minDate" : "maxDate",
           instance = $(this).data("datepicker"),
-          date = $.datepicker.parseDate(
+          date = $.datepicker.parseDate( 
             instance.settings.dateFormat ||
             $.datepicker._defaults.dateFormat,
             selectedDate, instance.settings);
