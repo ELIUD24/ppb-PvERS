@@ -19,7 +19,7 @@ class SadrsController extends AppController
         'Search.Prg',
         // 'RequestHandler'
     );
-    public $paginate = array(); 
+    public $paginate = array();
     public $presetVars = true;
     public $page_options = array('25' => '25', '50' => '50', '100' => '100');
 
@@ -35,7 +35,8 @@ class SadrsController extends AppController
             'all',
             array(
                 'conditions' => array(
-                    'Sadr.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Sadr.reference_no !=' => 'new'
+                    'Sadr.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                    'Sadr.reference_no !=' => 'new'
                 ),
                 'order' => array('Sadr.id' => 'DESC')
             )
@@ -52,7 +53,8 @@ class SadrsController extends AppController
         $count = $this->Sadr->find('count',  array(
             'fields' => 'Sadr.reference_no',
             'conditions' => array(
-                'Sadr.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Sadr.reference_no !=' => 'new'
+                'Sadr.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                'Sadr.reference_no !=' => 'new'
             )
         ));
         $count++;
@@ -71,7 +73,13 @@ class SadrsController extends AppController
     public function reporter_index()
     {
         $this->Prg->commonProcess();
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($this->page_options);
         //Health program fiasco
@@ -158,7 +166,8 @@ class SadrsController extends AppController
         //end csv export
 
         $this->set([
-            'page_options', $page_options,
+            'page_options',
+            $page_options,
             'sadrs' => Sanitize::clean($this->paginate(), array('encode' => false)),
             'paging' => $this->request->params['paging'],
             '_serialize' => ['sadrs', 'page_options', 'paging']
@@ -168,7 +177,13 @@ class SadrsController extends AppController
     public function partner_index()
     {
         $this->Prg->commonProcess();
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($this->page_options);
 
@@ -206,7 +221,13 @@ class SadrsController extends AppController
     {
         $this->Prg->commonProcess();
         // debug($this->request->query['pages']);
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (!empty($this->request->query['pages'])) $this->paginate['limit'] = $this->request->query['pages'];
         else $this->paginate['limit'] = reset($this->page_options);
 
@@ -221,7 +242,11 @@ class SadrsController extends AppController
         }
         // add deleted condition to criteria
         $criteria['Sadr.deleted'] = false;
-        $criteria['Sadr.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Sadr.archived'] = true;
+        }else{
+            $criteria['Sadr.archived'] = false;
+        }
 
         // if (!isset($this->passedArgs['submit'])) $criteria['Sadr.submitted'] = array(2, 3);
         $this->paginate['conditions'] = $criteria;
@@ -231,7 +256,7 @@ class SadrsController extends AppController
         //in case of csv export
         if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
 
-            $sadrs=$this->Sadr->find(
+            $sadrs = $this->Sadr->find(
                 'all',
                 array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 1000)
             );
@@ -258,7 +283,13 @@ class SadrsController extends AppController
 
         $this->Prg->commonProcess();
         // debug($this->request->query['pages']);
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (!empty($this->request->query['pages'])) $this->paginate['limit'] = $this->request->query['pages'];
         else $this->paginate['limit'] = reset($this->page_options);
         //  $criteria['Sadr.submitted'] = 2;
@@ -279,7 +310,7 @@ class SadrsController extends AppController
 
         //in case of csv export
         if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
-            $sadrs=$this->Sadr->find(
+            $sadrs = $this->Sadr->find(
                 'all',
                 array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 1000)
             );
@@ -418,8 +449,40 @@ class SadrsController extends AppController
         $sadr = $this->Sadr->find('first', array(
             'conditions' => array('Sadr.id' => $id),
             'contain' => array(
-                'SadrListOfDrug', 'SadrDescription', 'SadrReaction', 'SadrListOfDrug.Route', 'SadrListOfDrug.Frequency', 'SadrListOfDrug.Dose', 'SadrListOfMedicine', 'SadrListOfMedicine.Route', 'SadrListOfMedicine.Frequency', 'SadrListOfMedicine.Dose', 'County', 'SubCounty', 'Attachment', 'Designation', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment',
-                'SadrOriginal', 'SadrOriginal.SadrDescription', 'SadrOriginal.SadrListOfDrug', 'SadrOriginal.SadrListOfDrug.Route', 'SadrOriginal.SadrListOfDrug.Frequency', 'SadrOriginal.SadrListOfDrug.Dose', 'SadrOriginal.SadrListOfMedicine', 'SadrOriginal.SadrListOfMedicine.Route', 'SadrOriginal.SadrListOfMedicine.Frequency', 'SadrOriginal.SadrListOfMedicine.Dose', 'SadrOriginal.County', 'SadrOriginal.SubCounty', 'SadrOriginal.Attachment', 'SadrOriginal.Designation', 'SadrOriginal.ExternalComment', 'SadrOriginal.ReviewComment'
+                'SadrListOfDrug',
+                'SadrDescription',
+                'SadrReaction',
+                'SadrListOfDrug.Route',
+                'SadrListOfDrug.Frequency',
+                'SadrListOfDrug.Dose',
+                'SadrListOfMedicine',
+                'SadrListOfMedicine.Route',
+                'SadrListOfMedicine.Frequency',
+                'SadrListOfMedicine.Dose',
+                'County',
+                'SubCounty',
+                'Attachment',
+                'Designation',
+                'ExternalComment',
+                'ExternalComment.Attachment',
+                'ReviewComment',
+                'ReviewComment.Attachment',
+                'SadrOriginal',
+                'SadrOriginal.SadrDescription',
+                'SadrOriginal.SadrListOfDrug',
+                'SadrOriginal.SadrListOfDrug.Route',
+                'SadrOriginal.SadrListOfDrug.Frequency',
+                'SadrOriginal.SadrListOfDrug.Dose',
+                'SadrOriginal.SadrListOfMedicine',
+                'SadrOriginal.SadrListOfMedicine.Route',
+                'SadrOriginal.SadrListOfMedicine.Frequency',
+                'SadrOriginal.SadrListOfMedicine.Dose',
+                'SadrOriginal.County',
+                'SadrOriginal.SubCounty',
+                'SadrOriginal.Attachment',
+                'SadrOriginal.Designation',
+                'SadrOriginal.ExternalComment',
+                'SadrOriginal.ReviewComment'
             )
         ));
         $managers = $this->Sadr->User->find('list', array(
@@ -435,7 +498,7 @@ class SadrsController extends AppController
 
         if (strpos($this->request->url, 'pdf') !== false) {
             $this->pdfConfig = array('filename' => 'SADR_' . $id . '.pdf',  'orientation' => 'portrait');
-           
+
             $this->response->download('SADR_' . $sadr['Sadr']['id'] . '.pdf');
         }
     }
@@ -496,8 +559,34 @@ class SadrsController extends AppController
         $sadr = $this->Sadr->find('first', array(
             'conditions' => array('Sadr.id' => $id),
             'contain' => array(
-                'SadrListOfDrug', 'SadrDescription', 'SadrListOfDrug.Route', 'SadrListOfDrug.Frequency', 'SadrListOfDrug.Dose', 'SadrListOfMedicine', 'SadrListOfMedicine.Route', 'SadrListOfMedicine.Frequency', 'SadrListOfMedicine.Dose', 'County', 'SubCounty', 'Attachment', 'Designation', 'ExternalComment',
-                'SadrOriginal', 'SadrOriginal.SadrListOfDrug', 'SadrOriginal.SadrListOfDrug.Route', 'SadrOriginal.SadrListOfDrug.Frequency', 'SadrOriginal.SadrListOfDrug.Dose', 'SadrOriginal.SadrListOfMedicine', 'SadrOriginal.SadrListOfMedicine.Route', 'SadrOriginal.SadrListOfMedicine.Frequency', 'SadrOriginal.SadrListOfMedicine.Dose', 'SadrOriginal.County', 'SadrOriginal.SubCounty', 'SadrOriginal.Attachment', 'SadrOriginal.Designation', 'SadrOriginal.ExternalComment'
+                'SadrListOfDrug',
+                'SadrDescription',
+                'SadrListOfDrug.Route',
+                'SadrListOfDrug.Frequency',
+                'SadrListOfDrug.Dose',
+                'SadrListOfMedicine',
+                'SadrListOfMedicine.Route',
+                'SadrListOfMedicine.Frequency',
+                'SadrListOfMedicine.Dose',
+                'County',
+                'SubCounty',
+                'Attachment',
+                'Designation',
+                'ExternalComment',
+                'SadrOriginal',
+                'SadrOriginal.SadrListOfDrug',
+                'SadrOriginal.SadrListOfDrug.Route',
+                'SadrOriginal.SadrListOfDrug.Frequency',
+                'SadrOriginal.SadrListOfDrug.Dose',
+                'SadrOriginal.SadrListOfMedicine',
+                'SadrOriginal.SadrListOfMedicine.Route',
+                'SadrOriginal.SadrListOfMedicine.Frequency',
+                'SadrOriginal.SadrListOfMedicine.Dose',
+                'SadrOriginal.County',
+                'SadrOriginal.SubCounty',
+                'SadrOriginal.Attachment',
+                'SadrOriginal.Designation',
+                'SadrOriginal.ExternalComment'
             )
         ));
         $this->set('sadr', $sadr);
@@ -737,7 +826,8 @@ class SadrsController extends AppController
         $count = $this->Sadr->find('count',  array(
             'fields' => 'Sadr.reference_no',
             'conditions' => array(
-                'Sadr.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Sadr.reference_no !=' => 'new'
+                'Sadr.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                'Sadr.reference_no !=' => 'new'
             )
         ));
         $count++;
@@ -787,7 +877,8 @@ class SadrsController extends AppController
                         $count = $this->Sadr->find('count',  array(
                             'fields' => 'Sadr.reference_no',
                             'conditions' => array(
-                                'Sadr.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Sadr.reference_no !=' => 'new'
+                                'Sadr.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                                'Sadr.reference_no !=' => 'new'
                             )
                         ));
                         $count++;
@@ -803,7 +894,8 @@ class SadrsController extends AppController
                     $html = new HtmlHelper(new ThemeView());
                     $message = $this->Message->find('first', array('conditions' => array('name' => 'reporter_sadr_submit')));
                     $variables = array(
-                        'name' => $this->Auth->User('name'), 'reference_no' => $sadr['Sadr']['reference_no'],
+                        'name' => $this->Auth->User('name'),
+                        'reference_no' => $sadr['Sadr']['reference_no'],
                         'reference_link' => $html->link(
                             $sadr['Sadr']['reference_no'],
                             array('controller' => 'sadrs', 'action' => 'view', $sadr['Sadr']['id'], 'reporter' => true, 'full_base' => true),
@@ -813,7 +905,10 @@ class SadrsController extends AppController
                     );
                     $datum = array(
                         'email' => $sadr['Sadr']['reporter_email'],
-                        'id' => $id, 'user_id' => $this->Auth->User('id'), 'type' => 'reporter_sadr_submit', 'model' => 'Sadr',
+                        'id' => $id,
+                        'user_id' => $this->Auth->User('id'),
+                        'type' => 'reporter_sadr_submit',
+                        'model' => 'Sadr',
                         'subject' => CakeText::insert($message['Message']['subject'], $variables),
                         'message' => CakeText::insert($message['Message']['content'], $variables)
                     );
@@ -838,7 +933,8 @@ class SadrsController extends AppController
                     ));
                     foreach ($users as $user) {
                         $variables = array(
-                            'name' => $user['User']['name'], 'reference_no' => $sadr['Sadr']['reference_no'],
+                            'name' => $user['User']['name'],
+                            'reference_no' => $sadr['Sadr']['reference_no'],
                             'reference_link' => $html->link(
                                 $sadr['Sadr']['reference_no'],
                                 array('controller' => 'sadrs', 'action' => 'view', $sadr['Sadr']['id'], 'manager' => true, 'full_base' => true),
@@ -848,7 +944,10 @@ class SadrsController extends AppController
                         );
                         $datum = array(
                             'email' => $user['User']['email'],
-                            'id' => $id, 'user_id' => $user['User']['id'], 'type' => 'reporter_sadr_submit', 'model' => 'Sadr',
+                            'id' => $id,
+                            'user_id' => $user['User']['id'],
+                            'type' => 'reporter_sadr_submit',
+                            'model' => 'Sadr',
                             'subject' => CakeText::insert($message['Message']['subject'], $variables),
                             'message' => CakeText::insert($message['Message']['content'], $variables)
                         );
@@ -929,12 +1028,14 @@ class SadrsController extends AppController
             }
 
             $variables = array(
-                'name' => $user['User']['name'], 'reference_no' => $sadr['Sadr']['reference_no'],
+                'name' => $user['User']['name'],
+                'reference_no' => $sadr['Sadr']['reference_no'],
                 'reference_link' => $html->link(
                     $sadr['Sadr']['reference_no'],
                     array(
                         'controller' => 'sadrs',
-                        'action' => 'view', $sadr['Sadr']['id'],
+                        'action' => 'view',
+                        $sadr['Sadr']['id'],
                         $model => true,
                         'full_base' => true
                     ),
@@ -972,7 +1073,8 @@ class SadrsController extends AppController
             $count = $this->Sadr->find('count',  array(
                 'fields' => 'Sadr.reference_no',
                 'conditions' => array(
-                    'Sadr.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")), 'Sadr.reference_no !=' => 'new'
+                    'Sadr.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                    'Sadr.reference_no !=' => 'new'
                 )
             ));
             $count++;
@@ -997,7 +1099,8 @@ class SadrsController extends AppController
                 $html = new HtmlHelper(new ThemeView());
                 $message = $this->Message->find('first', array('conditions' => array('name' => 'reporter_sadr_submit')));
                 $variables = array(
-                    'name' => $this->Auth->User('name'), 'reference_no' => $sadr['Sadr']['reference_no'],
+                    'name' => $this->Auth->User('name'),
+                    'reference_no' => $sadr['Sadr']['reference_no'],
                     'reference_link' => $html->link(
                         $sadr['Sadr']['reference_no'],
                         array('controller' => 'sadrs', 'action' => 'view', $sadr['Sadr']['id'], 'reporter' => true, 'full_base' => true),
@@ -1007,7 +1110,10 @@ class SadrsController extends AppController
                 );
                 $datum = array(
                     'email' => $sadr['Sadr']['reporter_email'],
-                    'id' => $id, 'user_id' => $this->Auth->User('id'), 'type' => 'reporter_sadr_submit', 'model' => 'Sadr',
+                    'id' => $id,
+                    'user_id' => $this->Auth->User('id'),
+                    'type' => 'reporter_sadr_submit',
+                    'model' => 'Sadr',
                     'subject' => CakeText::insert($message['Message']['subject'], $variables),
                     'message' => CakeText::insert($message['Message']['content'], $variables)
                 );
@@ -1031,7 +1137,8 @@ class SadrsController extends AppController
                 ));
                 foreach ($users as $user) {
                     $variables = array(
-                        'name' => $user['User']['name'], 'reference_no' => $sadr['Sadr']['reference_no'],
+                        'name' => $user['User']['name'],
+                        'reference_no' => $sadr['Sadr']['reference_no'],
                         'reference_link' => $html->link(
                             $sadr['Sadr']['reference_no'],
                             array('controller' => 'sadrs', 'action' => 'view', $sadr['Sadr']['id'], 'manager' => true, 'full_base' => true),
@@ -1041,7 +1148,10 @@ class SadrsController extends AppController
                     );
                     $datum = array(
                         'email' => $user['User']['email'],
-                        'id' => $id, 'user_id' => $user['User']['id'], 'type' => 'reporter_sadr_submit', 'model' => 'Sadr',
+                        'id' => $id,
+                        'user_id' => $user['User']['id'],
+                        'type' => 'reporter_sadr_submit',
+                        'model' => 'Sadr',
                         'subject' => CakeText::insert($message['Message']['subject'], $variables),
                         'message' => CakeText::insert($message['Message']['content'], $variables)
                     );
@@ -1288,7 +1398,10 @@ class SadrsController extends AppController
                     );
                     $datum = array(
                         'email' => $sadr['Sadr']['reporter_email'],
-                        'id' => $id, 'user_id' => $this->Auth->User('id'), 'type' => 'reporter_sadr_submit', 'model' => 'Sadr',
+                        'id' => $id,
+                        'user_id' => $this->Auth->User('id'),
+                        'type' => 'reporter_sadr_submit',
+                        'model' => 'Sadr',
                         'subject' => CakeText::insert($message['Message']['subject'], $variables),
                         'message' => CakeText::insert($message['Message']['content'], $variables)
                     );
@@ -1313,7 +1426,8 @@ class SadrsController extends AppController
                     ));
                     foreach ($users as $user) {
                         $variables = array(
-                            'name' => $user['User']['name'], 'reference_no' => $sadr['Sadr']['reference_no'],
+                            'name' => $user['User']['name'],
+                            'reference_no' => $sadr['Sadr']['reference_no'],
                             'reference_link' => $html->link(
                                 $sadr['Sadr']['reference_no'],
                                 array('controller' => 'sadrs', 'action' => 'view', $sadr['Sadr']['id'], 'manager' => true, 'full_base' => true),
@@ -1323,7 +1437,10 @@ class SadrsController extends AppController
                         );
                         $datum = array(
                             'email' => $user['User']['email'],
-                            'id' => $id, 'user_id' => $user['User']['id'], 'type' => 'reporter_sadr_submit', 'model' => 'Sadr',
+                            'id' => $id,
+                            'user_id' => $user['User']['id'],
+                            'type' => 'reporter_sadr_submit',
+                            'model' => 'Sadr',
                             'subject' => CakeText::insert($message['Message']['subject'], $variables),
                             'message' => CakeText::insert($message['Message']['content'], $variables)
                         );
@@ -1375,6 +1492,22 @@ class SadrsController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('SADR was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }
+    public function manager_restore_archive($id = null)
+    {
+        $this->Sadr->id = $id;
+        if (!$this->Sadr->exists()) {
+            throw new NotFoundException(__('Invalid SADR'));
+        }
+        $sadr = $this->Sadr->read(null, $id);
+        $sadr['Sadr']['archived'] = false;
+        // $sadr['Sadr']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Sadr->save($sadr, array('validate' => false))) {
+            $this->Session->setFlash(__('SADR Report Restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('SADR was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }

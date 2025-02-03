@@ -103,9 +103,7 @@ echo $this->Session->flash();
                         );
                         ?>
                     </td>
-                </tr>
 
-                <tr>
                     <td>
                         <?php
                         echo $this->Form->input(
@@ -118,7 +116,11 @@ echo $this->Session->flash();
                             )
                         );
                         ?>
+                    </td>
+                </tr>
 
+                <tr>
+                    <td>
                         <h5>Serious?</h5>
                         <?php
                         echo $this->Form->input('serious', array(
@@ -128,6 +130,7 @@ echo $this->Session->flash();
                         ));
                         ?>
                     </td>
+                   
                     <td>
                         <?php
                         echo $this->Form->input(
@@ -153,6 +156,18 @@ echo $this->Session->flash();
                         ?>
 
 
+                    </td>
+                    <td>
+                        <?php
+                        if ($redir == 'manager') { ?>
+                            <h6>Archived Status:</h6>
+                        <?php
+                            echo $this->Form->input('archived', [
+                                'type' => 'checkbox',
+                                'hiddenField' => false,
+                                'label' => 'Show',
+                            ]);
+                        } ?>
                     </td>
                 </tr>
                 <tr>
@@ -313,14 +328,18 @@ echo $this->Session->flash();
                                     array('controller' => 'ce2bs', 'action' => 'view', 'ext' => 'pdf', $ce2b['Ce2b']['id']),
                                     array('escape' => false)
                                 );
-                                if (($redir == 'manager' || $redir == 'reviewer')) {
-                                    echo $this->Html->link(
-                                        '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
-                                        array('controller' => 'ce2bs', 'action' => 'archive', $ce2b['Ce2b']['id']),
-                                        array('escape' => false),
-                                        __('Are you sure you want to archive the report?')
-                                    );
-                                }
+                                if ($redir == 'manager' && $ce2b['Ce2b']['archived'] == 0)  echo $this->Html->link(
+                                    '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+                                    array('controller' => 'ce2bs', 'action' => 'archive', $ce2b['Ce2b']['id']),
+                                    array('escape' => false),
+                                    __('Are you sure you want to archive the report?')
+                                  );
+                                  if ($redir == 'manager' && $ce2b['Ce2b']['archived'] == 1) echo $this->Html->link(
+                                    '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                                    array('controller' => 'ce2bs', 'action' => 'restore_archive', $ce2b['Ce2b']['id']),
+                                    array('escape' => false),
+                                    __('Are you sure you want to restore archive the report?')
+                                  );
 
                                 // PDF Download
 

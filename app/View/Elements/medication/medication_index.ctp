@@ -35,7 +35,8 @@ $this->assign('MED', 'active');
     <?php
     echo $this->Form->create('Medication', array(
       'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-      'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+      'class' => 'ctr-groups',
+      'style' => array('padding:9px;', 'background-color: #F5F5F5'),
     ));
     ?>
     <table class="table table-condensed" style="margin-bottom: 2px;">
@@ -48,7 +49,8 @@ $this->assign('MED', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'me/2020',
-                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Reference No.')
+                'class' => 'span12',
+                'label' => array('class' => 'required', 'text' => 'Reference No.')
               )
             );
             ?>
@@ -60,7 +62,8 @@ $this->assign('MED', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'intended product',
-                'class' => 'unauthorized_index span10', 'label' => array('class' => 'required', 'text' => 'Generic name')
+                'class' => 'unauthorized_index span10',
+                'label' => array('class' => 'required', 'text' => 'Generic name')
               )
             );
             ?>
@@ -70,19 +73,31 @@ $this->assign('MED', 'active');
             echo $this->Form->input(
               'start_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index', 'after' => '-to-',
-                'label' => array('class' => 'required', 'text' => 'Report Dates'), 'placeHolder' => 'Start Date'
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
+                'after' => '-to-',
+                'label' => array('class' => 'required', 'text' => 'Report Dates'),
+                'placeHolder' => 'Start Date'
               )
             );
             echo $this->Form->input(
               'end_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index',
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                               <em class="accordion-toggle">clear!</em></a>',
-                'label' => false, 'placeHolder' => 'End Date'
+                'label' => false,
+                'placeHolder' => 'End Date'
               )
             );
+            echo $this->Form->input('filter_by', [
+              'type' => 'checkbox',
+              'hiddenField' => false,
+              'label' => 'Filter by date reported',
+            ]);
             ?>
           </td>
           <td>
@@ -90,8 +105,10 @@ $this->assign('MED', 'active');
             echo $this->Form->input(
               'name_of_institution',
               array(
-                'div' => false, 'placeholder' => 'institution',
-                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Institution')
+                'div' => false,
+                'placeholder' => 'institution',
+                'class' => 'span12',
+                'label' => array('class' => 'required', 'text' => 'Institution')
               )
             );
             ?>
@@ -100,7 +117,8 @@ $this->assign('MED', 'active');
             <h5>Error reach patient?</h5>
             <?php
             echo $this->Form->input('reach_patient', array(
-              'options' => array('Yes' => 'Yes', 'No' => 'No'), 'legend' => false,
+              'options' => array('Yes' => 'Yes', 'No' => 'No'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -110,8 +128,10 @@ $this->assign('MED', 'active');
             echo $this->Form->input(
               'county_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'County')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'County')
               )
             );
             ?>
@@ -122,7 +142,8 @@ $this->assign('MED', 'active');
             <?php
             echo $this->Form->input('process_occur', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'span12',
+              'empty' => true,
+              'class' => 'span12',
               'options' => array(
                 'Prescribing' => 'Prescribing',
                 'Dispensing (includes filling)' => 'Dispensing (includes filling)',
@@ -135,8 +156,10 @@ $this->assign('MED', 'active');
             if (($this->Session->read('Auth.User.user_type') != 'Public Health Program'))  echo $this->Form->input(
               'patient_name',
               array(
-                'div' => false, 'placeholder' => 'Patient name',
-                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Patient Name')
+                'div' => false,
+                'placeholder' => 'Patient name',
+                'class' => 'span12 unauthorized_index',
+                'label' => array('class' => 'required', 'text' => 'Patient Name')
               )
             );
 
@@ -146,7 +169,8 @@ $this->assign('MED', 'active');
             <?php
             echo $this->Form->input('outcome', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input',
+              'empty' => true,
+              'class' => 'input',
               'options' => array(
                 'Treatment /intervention required-caused temporary harm' => 'Treatment /intervention required-caused temporary harm',
                 'Initial/prolonged hospitalization-caused temporary harm' => 'Initial/prolonged hospitalization-caused temporary harm',
@@ -205,8 +229,10 @@ $this->assign('MED', 'active');
             echo $this->Form->input(
               'generic_name_ii',
               array(
-                'div' => false, 'placeholder' => '(Error product)',
-                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Generic name')
+                'div' => false,
+                'placeholder' => '(Error product)',
+                'class' => 'span12 unauthorized_index',
+                'label' => array('class' => 'required', 'text' => 'Generic name')
               )
             );
             ?>
@@ -217,11 +243,17 @@ $this->assign('MED', 'active');
           <td>
             <?php
             echo $this->Form->input('health_program', array(
-              'type' => 'select', 'options' => [
-                'Malaria program' => 'Malaria program', 'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
-                'Neglected tropical diseases program' => 'Neglected tropical diseases program', 'MNCAH Priority Medicines' => 'MNCAH Priority Medicines', 'TB program' => 'TB program',
-                'NASCOP program' => 'NASCOP program', 'Cancer/Oncology program' => 'Cancer/Oncology program'
-              ], 'empty' => true,
+              'type' => 'select',
+              'options' => [
+                'Malaria program' => 'Malaria program',
+                'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
+                'Neglected tropical diseases program' => 'Neglected tropical diseases program',
+                'MNCAH Priority Medicines' => 'MNCAH Priority Medicines',
+                'TB program' => 'TB program',
+                'NASCOP program' => 'NASCOP program',
+                'Cancer/Oncology program' => 'Cancer/Oncology program'
+              ],
+              'empty' => true,
               'label' => array('class' => 'control-label', 'text' => 'Public Health Program'),
               'class' => 'input-xlarge'
             ));
@@ -230,10 +262,12 @@ $this->assign('MED', 'active');
           <td>
             <?php
             echo $this->Form->input('sending_device', array(
-              'type' => 'select', 'options' => [
+              'type' => 'select',
+              'options' => [
                 '1' => 'Web',
                 '2' => 'Mobile',
-              ], 'empty' => true,
+              ],
+              'empty' => true,
               'label' => array('class' => 'control-label', 'text' => 'Sending Device'),
               'class' => 'input-xlarge'
             ));  ?>
@@ -251,8 +285,10 @@ $this->assign('MED', 'active');
             echo $this->Form->input(
               'designation_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Designation')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Designation')
               )
             );
             ?>
@@ -273,10 +309,23 @@ $this->assign('MED', 'active');
             <h5>Gender</h5>
             <?php
             echo $this->Form->input('gender', array(
-              'options' => array('Male' => 'Male', 'Female' => 'Female', 'Unknown' => 'Unknown'), 'legend' => false,
+              'options' => array('Male' => 'Male', 'Female' => 'Female', 'Unknown' => 'Unknown'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
+          </td>
+          <td>
+            <?php
+            if ($redir == 'manager') { ?>
+              <h6>Archived Status:</h6>
+            <?php
+              echo $this->Form->input('archived', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+            } ?>
           </td>
         </tr>
         <tr>
@@ -284,7 +333,10 @@ $this->assign('MED', 'active');
           <td>
             <?php
             echo $this->Form->input('pages', array(
-              'type' => 'select', 'div' => false, 'class' => 'input-small', 'selected' => $this->request->params['paging']['Medication']['limit'],
+              'type' => 'select',
+              'div' => false,
+              'class' => 'input-small',
+              'selected' => $this->request->params['paging']['Medication']['limit'],
               'empty' => true,
               'options' => $page_options,
               'label' => false,
@@ -304,7 +356,9 @@ $this->assign('MED', 'active');
           <td>
             <?php
             echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-              'class' => 'btn btn-primary', 'div' => 'control-group', 'div' => false,
+              'class' => 'btn btn-primary',
+              'div' => 'control-group',
+              'div' => false,
               'formnovalidate' => 'formnovalidate',
               'style' => array('margin-bottom: 5px')
             ));
@@ -367,20 +421,20 @@ $this->assign('MED', 'active');
               <?php
               if ($medication['Medication']['submitted'] > 1) {
                 echo $this->Html->link($medication['Medication']['reference_no'], array('action' => 'view', $medication['Medication']['id']), array('escape' => false, 'class' => 'text-' . (in_array($medication['Medication']['outcome'], array(
-                    "Treatment /intervention required-caused temporary harm",
-                    "Initial/prolonged hospitalization-caused temporary harm",
-                    "Caused permanent harm",
-                    "Near death event",
-                    "Death"
-                  )) ? 'error' : 'success')));
+                  "Treatment /intervention required-caused temporary harm",
+                  "Initial/prolonged hospitalization-caused temporary harm",
+                  "Caused permanent harm",
+                  "Near death event",
+                  "Death"
+                )) ? 'error' : 'success')));
               } else {
                 echo $this->Html->link($medication['Medication']['reference_no'], array('action' => (($redir == 'reporter') ? 'edit' : 'view'), $medication['Medication']['id']), array('escape' => false, 'class' => 'text-' . (in_array($medication['Medication']['outcome'], array(
-                    "Treatment /intervention required-caused temporary harm",
-                    "Initial/prolonged hospitalization-caused temporary harm",
-                    "Caused permanent harm",
-                    "Near death event",
-                    "Death"
-                  )) ? 'error' : 'success')));
+                  "Treatment /intervention required-caused temporary harm",
+                  "Initial/prolonged hospitalization-caused temporary harm",
+                  "Caused permanent harm",
+                  "Near death event",
+                  "Death"
+                )) ? 'error' : 'success')));
               }
               ?>&nbsp;
             </td>
@@ -424,11 +478,17 @@ $this->assign('MED', 'active');
                 );
                 echo "&nbsp;";
                 if (($redir == 'manager' || $redir == 'reviewer') && $medication['Medication']['copied'] == 0) echo $this->Form->postLink('<span class="badge badge-success tooltipper" data-toggle="tooltip" title="Copy & Edit"> <i class="fa fa-copy" aria-hidden="true"></i> Copy </span>', array('controller' => 'medications', 'action' => 'copy', $medication['Medication']['id']), array('escape' => false), __('Create a clean copy to edit?'));
-                if (($redir == 'manager' || $redir == 'reviewer')) echo $this->Html->link(
-                  '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+                if ($redir == 'manager' && $medication['Medication']['archived'] == 0)  echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
                   array('controller' => 'medications', 'action' => 'archive', $medication['Medication']['id']),
                   array('escape' => false),
                   __('Are you sure you want to archive the report?')
+                );
+                if ($redir == 'manager' && $medication['Medication']['archived'] == 1) echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                  array('controller' => 'medications', 'action' => 'restore_archive', $medication['Medication']['id']),
+                  array('escape' => false),
+                  __('Are you sure you want to restore archive the report?')
                 );
               } else {
                 // if($redir != 'manager' && $medication['Medication']['copied'] != 2) 

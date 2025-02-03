@@ -63,7 +63,11 @@ class PadrsController extends AppController
         $criteria = $this->Padr->parseCriteria($this->passedArgs);
 
         $criteria['Padr.copied !='] = '1';
-        $criteria['Padr.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Padr.archived'] = true;
+        }else{
+            $criteria['Padr.archived'] = false;
+        }
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Padr.id' => 'DESC');
         $this->paginate['contain'] = array('County');
@@ -969,6 +973,23 @@ class PadrsController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('PADR was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+	}
+       
+	public function manager_restore_archive($id=null) {
+
+        $this->Padr->id = $id;
+        if (!$this->Padr->exists()) {
+            throw new NotFoundException(__('Invalid PADR'));
+        }
+        $report = $this->Padr->read(null, $id);
+        $report['Padr']['archived'] = 0;
+        // $report['Padr']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Padr->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('PADR Archive Restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('PADR was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
 	}
 }

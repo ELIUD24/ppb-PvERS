@@ -1,0 +1,1 @@
+ALTER TABLE `aefis` ADD `age_years` INT(11) NULL DEFAULT NULL AFTER `age_months`, ADD `age_weeks` INT(11) NULL DEFAULT NULL AFTER `age_years`, ADD `age_days` INT(11) NULL DEFAULT NULL AFTER `age_weeks`;

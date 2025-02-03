@@ -35,7 +35,8 @@ echo $this->Session->flash();
     <?php
     echo $this->Form->create('Padr', array(
       'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-      'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+      'class' => 'ctr-groups',
+      'style' => array('padding:9px;', 'background-color: #F5F5F5'),
     ));
     ?>
     <table class="table table-condensed" style="margin-bottom: 2px;">
@@ -48,7 +49,8 @@ echo $this->Session->flash();
               array(
                 'div' => false,
                 'placeholder' => 'padr/2020',
-                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Reference No.')
+                'class' => 'span12',
+                'label' => array('class' => 'required', 'text' => 'Reference No.')
               )
             );
             ?>
@@ -58,8 +60,10 @@ echo $this->Session->flash();
             echo $this->Form->input(
               'drug_name',
               array(
-                'div' => false, 'placeholder' => 'drug name',
-                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Drug Name')
+                'div' => false,
+                'placeholder' => 'drug name',
+                'class' => 'span12 unauthorized_index',
+                'label' => array('class' => 'required', 'text' => 'Drug Name')
               )
             );
             ?>
@@ -69,17 +73,24 @@ echo $this->Session->flash();
             echo $this->Form->input(
               'start_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index', 'after' => '-to-',
-                'label' => array('class' => 'required', 'text' => 'Report Dates'), 'placeHolder' => 'Start Date'
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
+                'after' => '-to-',
+                'label' => array('class' => 'required', 'text' => 'Report Dates'),
+                'placeHolder' => 'Start Date'
               )
             );
             echo $this->Form->input(
               'end_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index',
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                               <em class="accordion-toggle">clear!</em></a>',
-                'label' => false, 'placeHolder' => 'End Date'
+                'label' => false,
+                'placeHolder' => 'End Date'
               )
             );
             ?>
@@ -89,8 +100,10 @@ echo $this->Session->flash();
             echo $this->Form->input(
               'county_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'County')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'County')
               )
             );
             ?>
@@ -112,8 +125,10 @@ echo $this->Session->flash();
             echo $this->Form->input(
               'patient_name',
               array(
-                'div' => false, 'placeholder' => 'Patient name',
-                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Patient Name')
+                'div' => false,
+                'placeholder' => 'Patient name',
+                'class' => 'span12 unauthorized_index',
+                'label' => array('class' => 'required', 'text' => 'Patient Name')
               )
             );
             ?>
@@ -122,7 +137,8 @@ echo $this->Session->flash();
             <h5>Report Type?</h5>
             <?php
             echo $this->Form->input('report_type', array(
-              'options' => array('Initial' => 'Initial', 'Followup' => 'Followup'), 'legend' => false,
+              'options' => array('Initial' => 'Initial', 'Followup' => 'Followup'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -131,7 +147,8 @@ echo $this->Session->flash();
             <h5>Is the reaction still on?</h5>
             <?php
             echo $this->Form->input('reaction_on', array(
-              'options' => array('Yes' => 'Yes', 'No' => 'No'), 'legend' => false,
+              'options' => array('Yes' => 'Yes', 'No' => 'No'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -154,8 +171,10 @@ echo $this->Session->flash();
             echo $this->Form->input(
               'designation_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Designation')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Designation')
               )
             );
             ?>
@@ -164,7 +183,8 @@ echo $this->Session->flash();
             <h5>Gender</h5>
             <?php
             echo $this->Form->input('gender', array(
-              'options' => array('Male' => 'Male', 'Female' => 'Female', 'Unknown' => 'Unknown'), 'legend' => false,
+              'options' => array('Male' => 'Male', 'Female' => 'Female', 'Unknown' => 'Unknown'),
+              'legend' => false,
               'type' => 'radio'
             ));
             ?>
@@ -187,27 +207,45 @@ echo $this->Session->flash();
         <td>
           <?php
           echo $this->Form->input('health_program', array(
-            'type' => 'select', 'options' => [
-              'Malaria program' => 'Malaria program', 'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
-              'Neglected tropical diseases program' => 'Neglected tropical diseases program', 'MNCAH Priority Medicines' => 'MNCAH Priority Medicines', 'TB program' => 'TB program',
-              'NASCOP program' => 'NASCOP program', 'Cancer/Oncology program' => 'Cancer/Oncology program'
-            ], 'empty' => true,
+            'type' => 'select',
+            'options' => [
+              'Malaria program' => 'Malaria program',
+              'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
+              'Neglected tropical diseases program' => 'Neglected tropical diseases program',
+              'MNCAH Priority Medicines' => 'MNCAH Priority Medicines',
+              'TB program' => 'TB program',
+              'NASCOP program' => 'NASCOP program',
+              'Cancer/Oncology program' => 'Cancer/Oncology program'
+            ],
+            'empty' => true,
             'label' => array('class' => 'control-label', 'text' => 'Public Health Program'),
             'class' => 'input-xlarge'
           ));  ?>
         </td>
         <td> <?php
               echo $this->Form->input('device', array(
-                'type' => 'select', 'options' => [
+                'type' => 'select',
+                'options' => [
                   '0' => 'Web',
                   '1' => 'Mobile',
                   '2' => 'USSD',
                   '3' => 'USSD 2',
-                ], 'empty' => true,
+                ],
+                'empty' => true,
                 'label' => array('class' => 'control-label', 'text' => 'Sending Device'),
                 'class' => 'input-xlarge'
               ));  ?></td>
-        <td></td>
+        <td> <?php
+              if ($redir == 'manager') { ?>
+            <h6>Archived Status:</h6>
+          <?php
+                echo $this->Form->input('archived', [
+                  'type' => 'checkbox',
+                  'hiddenField' => false,
+                  'label' => 'Show',
+                ]);
+              } ?>
+        </td>
         <td></td>
         <td></td>
         <td></td>
@@ -218,7 +256,10 @@ echo $this->Session->flash();
           <td>
             <?php
             echo $this->Form->input('pages', array(
-              'type' => 'select', 'div' => false, 'class' => 'input-small', 'selected' => $this->request->params['paging']['Padr']['limit'],
+              'type' => 'select',
+              'div' => false,
+              'class' => 'input-small',
+              'selected' => $this->request->params['paging']['Padr']['limit'],
               'empty' => true,
               'options' => $page_options,
               'label' => false,
@@ -238,7 +279,9 @@ echo $this->Session->flash();
           <td>
             <?php
             echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-              'class' => 'btn btn-primary', 'div' => 'control-group', 'div' => false,
+              'class' => 'btn btn-primary',
+              'div' => 'control-group',
+              'div' => false,
               'formnovalidate' => 'formnovalidate',
               'style' => array('margin-bottom: 5px')
             ));
@@ -346,10 +389,18 @@ echo $this->Session->flash();
                 );
                 echo "&nbsp;";
                 if (($redir == 'manager' || $redir == 'reviewer') && $padr['Padr']['copied'] == 0) echo $this->Form->postLink('<span class="badge badge-success tooltipper" data-toggle="tooltip" title="Copy & Edit"> <i class="fa fa-copy" aria-hidden="true"></i> Copy </span>', array('controller' => 'padrs', 'action' => 'copy', $padr['Padr']['id']), array('escape' => false), __('Create a clean copy to edit?'));
-                echo $this->Html->link(
-                  '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+
+                if ($redir == 'manager' && $padr['Padr']['archived'] == 0)  echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
                   array('controller' => 'padrs', 'action' => 'archive', $padr['Padr']['id']),
-                  array('escape' => false), __('Are you sure you want to archive the report?')
+                  array('escape' => false),
+                  __('Are you sure you want to archive the report?')
+                );
+                if ($redir == 'manager' && $padr['Padr']['archived'] == 1) echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                  array('controller' => 'padrs', 'action' => 'restore_archive', $padr['Padr']['id']),
+                  array('escape' => false),
+                  __('Are you sure you want to restore archive the report?')
                 );
               } else {
                 if ($redir == 'reporter' and $this->Session->read('Auth.User.user_type') != 'Public Health Program') echo $this->Html->link(

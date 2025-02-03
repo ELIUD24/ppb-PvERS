@@ -35,8 +35,272 @@ class Ce2bsController extends AppController
     public function beforeFilter()
     {
         parent::beforeFilter();
+        $this->Auth->allow('finalize');
     }
 
+    private function extractReactions($xml)
+    {
+        // Register the namespace
+        $xml->registerXPathNamespace('ns', 'urn:hl7-org:v3');
+
+        // Initialize an array for reactions
+        $reactions = [];
+
+        // Extract reaction information
+        foreach ($xml->xpath('//ns:observation[@classCode="OBS" and @moodCode="EVN"]') as $reaction) {
+            // Extract reaction details
+            $reactionId = (string)$reaction->id['root'];
+            $reactionCode = (string)$reaction->code['code'];
+            $reactionDisplayName = (string)$reaction->code['displayName'];
+            $reactionValue = (string)$reaction->value['code']; // Reaction value code
+            $reactionDescription = ''; // Initialize reaction translation or description
+
+            // Extract detailed reaction translation/description
+            $translationNode = $reaction->xpath('ns:outboundRelationship2/ns:observation[ns:code[@displayName="reactionForTranslation"]]/ns:value');
+            if (!empty($translationNode)) {
+                $reactionDescription = trim((string)$translationNode[0]);
+            }
+
+            // Add reaction data to the array
+            $reactions[] = [
+                'reaction_id' => $reactionId,
+                'code' => $reactionCode,
+                'display_name' => $reactionDisplayName,
+                'value' => $reactionValue,
+                'description' => $reactionDescription,
+            ];
+        }
+
+        return $reactions;
+    }
+    public function finalize($id = null)
+    {
+        $this->Ce2b->id = $id;
+        if (!$this->Ce2b->exists()) {
+            return "CE2B Report is invalid";
+        }
+
+        $ce2b = $this->Ce2b->find('first', array(
+            'conditions' => array('Ce2b.id' => $id),
+        ));
+        $cc = $ce2b['Ce2b']['e2b_content'];
+        if (empty($cc)) {
+            return "No XML content found for this CE2B report.";
+        }
+    }
+    public function map_full_reaction_details($reactions)
+    {
+
+        $reactions_data = array();
+        foreach ($reactions as $re) {
+            $reactions_data[] = array(
+                'index' => $re['id'],
+                'reaction_name' => !empty(Hash::extract($re['reactions'], '{n}[code=30].value'))
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=30].value')[0]
+                    : null,
+                'start_date' => '',
+                'meddra_code' => $re['value'],
+                'meddra_version' => '23',
+                'source_country' => $re['location'],
+                'criteria_death_code' => '34',
+                'criteria_death_null' => !empty(Hash::extract($re['reactions'], '{n}[code=34].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=34].value_null')[0]
+                : null,
+                'criteria_death_value' => !empty(Hash::extract($re['reactions'], '{n}[code=43].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=34].value')[0]
+                : null,
+                'life_hreatening_code' =>'21',
+                'life_hreatening_null' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=21].value_null')[0]
+                : null,
+                'life_hreatening_value' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=21].value')[0]
+                : null,
+                'prolonged_hospitalisation_code' => '33',
+                'prolonged_hospitalisation_null' => !empty(Hash::extract($re['reactions'], '{n}[code=33].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=33].value_null')[0]
+                : null,
+                'prolonged_hospitalisation_value' => !empty(Hash::extract($re['reactions'], '{n}[code=33].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=33].value')[0]
+                : null,
+                'incapacitating_code' =>'35',
+                'incapacitating_null' => !empty(Hash::extract($re['reactions'], '{n}[code=35].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=35].value_null')[0]
+                : null,
+                'incapacitating_value' => !empty(Hash::extract($re['reactions'], '{n}[code=35].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=35].value')[0]
+                : null,
+                'birth_defect_code' => '12',
+                'birth_defect_null' => !empty(Hash::extract($re['reactions'], '{n}[code=12].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=12].value_null')[0]
+                : null,
+                'birth_defect_value' => !empty(Hash::extract($re['reactions'], '{n}[code=12].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=12].value')[0]
+                : null,
+                'other_medical_code' =>'26',
+                'other_medical_null' => !empty(Hash::extract($re['reactions'], '{n}[code=26].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=26].value_null')[0]
+                : null,
+                'other_medical_value' => !empty(Hash::extract($re['reactions'], '{n}[code=26].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=26].value')[0]
+                : null,
+                'reaction_outcome_code' =>'27',
+                'reaction_outcome_null' => !empty(Hash::extract($re['reactions'], '{n}[code=27].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=27].value_null')[0]
+                : null,
+                'reaction_outcome_value' => !empty(Hash::extract($re['reactions'], '{n}[code=27].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=27].value')[0]
+                : null,
+                'medical_confirmation_code' => '24',
+                'medical_confirmation_null' => !empty(Hash::extract($re['reactions'], '{n}[code=24].value_null'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=24].value_null')[0]
+                : null,
+                'medical_confirmation_value' => !empty(Hash::extract($re['reactions'], '{n}[code=24].value'))
+                ? (string) Hash::extract($re['reactions'], '{n}[code=24].value')[0]
+                : null,
+                'serious' => ''
+            );
+        }
+
+        return $reactions_data;
+    }
+    public function manipulate_reaction_information($cc)
+    {
+        $reactions = [];
+        try {
+            $xml = new SimpleXMLElement($cc);
+
+            $xml->registerXPathNamespace('ns', 'urn:hl7-org:v3');
+
+            foreach ($xml->xpath('//ns:subjectOf2/ns:observation[@classCode="OBS" and @moodCode="EVN" and ns:code[@code="29"]]') as $reaction) {
+
+
+                $details = [
+                    'id' => (string) $reaction->id['root'],
+                    'code' => (string) $reaction->code['code'],
+                    'value' => (string) $reaction->value['code'],
+                ];
+                if (isset($reaction->location->locatedEntity->locatedPlace->code)) {
+                    $codeElement = $reaction->location->locatedEntity->locatedPlace->code;
+                    $locationCode = (string) $codeElement['code'];
+                    $details['location'] = $locationCode;
+                }
+                if (isset($reaction->outboundRelationship2)) {
+                    $dt = array();
+                    foreach ($reaction->outboundRelationship2  as $kk) {
+                        $obsc = (string) $kk->observation->code['code'];
+                        $re = (string) $kk->observation->value;
+                        $vnull=null;
+                        if (empty($re)) {
+                            $vnull = "NI";
+                        }
+                        $dt[] = array(
+                            'code' => $obsc,
+                            'value' => trim($re),
+                            'value_null' =>$vnull,
+                        );
+                    }
+                    $details['reactions'] = $dt;
+                }
+                // Add the reaction details to the results array
+                $reactions[] = $details;
+            }
+        } catch (Exception $e) {
+        }
+        return $reactions;
+    }
+
+    public function manipulate_drug_information($cc)
+    {
+        $drugs = [];
+        try {
+            $xml = new SimpleXMLElement($cc);
+
+            // Register namespaces for parsing
+            $xml->registerXPathNamespace('ns', 'urn:hl7-org:v3');
+
+            // Extract drug information
+            foreach ($xml->xpath('//ns:substanceAdministration/ns:consumable/ns:instanceOfKind/ns:kindOfProduct') as $product) {
+                // Extract drug name
+                $drugName = trim((string)$product->name);
+                if (!empty($drugName)) {
+                    if (!in_array($drugName, $drugs)) {
+                        $drugs[] = [
+                            'drug_name' => $drugName,  // Combine ingredients into a single string
+                        ];
+                    }
+                }
+            }
+        } catch (Exception $e) {
+        }
+
+        return $drugs;
+    }
+    public function finalize_drugs($id = null)
+    {
+        $this->Ce2b->id = $id;
+        if (!$this->Ce2b->exists()) {
+            return "CE2B Report is invalid";
+        }
+
+        $ce2b = $this->Ce2b->find('first', array(
+            'conditions' => array('Ce2b.id' => $id),
+        ));
+        $cc = $ce2b['Ce2b']['e2b_content'];
+        if (empty($cc)) {
+            return "No XML content found for this CE2B report.";
+        }
+
+        // Parse the XML string
+        try {
+            $xml = new SimpleXMLElement($cc);
+
+            // Register namespaces for parsing
+            $xml->registerXPathNamespace('ns', 'urn:hl7-org:v3');
+
+            // Initialize arrays for drugs and reactions
+            $drugs = [];
+            $reactions = [];
+
+            // Extract drug information
+            foreach ($xml->xpath('//ns:substanceAdministration/ns:consumable/ns:instanceOfKind/ns:kindOfProduct') as $product) {
+                // Extract drug name
+                $drugName = trim((string)$product->name);
+                $ingredients = [];
+
+                // // Extract ingredient substances
+                // foreach ($product->xpath('ns:ingredient/ns:ingredientSubstance') as $ingredientNode) {
+                //     $ingredients[] = trim((string)$ingredientNode->name);
+                // }
+
+                // Add the drug with its ingredients
+                $drugs[] = [
+                    'name' => $drugName,
+                    'ingredients' => implode(', ', $ingredients), // Combine ingredients into a single string
+                ];
+            }
+
+
+
+
+            // Prepare data for saving
+            $data = ['Drug' => $drugs, 'Reaction' => $reactions];
+            debug($data);
+            exit;
+            // Save to database using models
+            // $this->loadModel('Drug');
+            // $this->loadModel('Reaction');
+            // if ($this->Drug->saveAll($data['Drug']) && $this->Reaction->saveAll($data['Reaction'])) {
+            //     return "Data has been successfully saved.";
+            // } else {
+            //     return "Failed to save data.";
+            // }
+        } catch (Exception $e) {
+            return "Error parsing XML: " . $e->getMessage();
+        }
+        debug($cc);
+        exit;
+    }
     public function vigiflow($id = null)
     {
         # code...
@@ -56,17 +320,16 @@ class Ce2bsController extends AppController
         }
 
 
-
-
-
         $version = $ce2b['Ce2b']['e2b_type'];
 
         if ($version == "R2") {
             $ce2b['Ce2b']['e2b_content'] = $this->manipulated_content($ce2b['Ce2b']['e2b_content']);
         }
-        // if ($version == "R3") {
-        //     $ce2b['Ce2b']['e2b_content'] = $this->manipulated_r3content($ce2b['Ce2b']['e2b_content']);
-        // }
+        if ($version == "R3") {
+            $ce2b['Ce2b']['e2b_content'] = $this->manipulated_r3content($ce2b['Ce2b']['e2b_content']);
+        }
+        // debug($ce2b['Ce2b']['e2b_content']);
+        // exit;
         $view = new View($this, false);
         $view->viewPath = 'Ce2bs/xml';  // Directory inside view directory to search for .ctp files
         $view->layout = false; // if you want to disable layout
@@ -199,11 +462,75 @@ class Ce2bsController extends AppController
             $criteria['Ce2b.submitted'] = array(2, 3);
         }
         $criteria['Ce2b.deleted'] = false;
-        $criteria['Ce2b.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Ce2b.archived'] = true;
+        }else{
+            $criteria['Ce2b.archived'] = false;
+        }
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Ce2b.created' => 'desc');
         $this->set('ce2bs', Sanitize::clean($this->paginate(), array('encode' => false)));
         $this->set('page_options', $this->page_options);
+    }
+
+    public function manipulated_r3content($xmlString)
+    {
+
+        if (empty($xmlString)) {
+            throw new BadRequestException(__('No XML data provided.'));
+        }
+
+        // Load XML
+        $xml = simplexml_load_string($xmlString);
+        if ($xml === false) {
+            throw new BadRequestException(__('Invalid XML format.'));
+        }
+
+        // Register namespaces if necessary
+        $namespaces = $xml->getNamespaces(true);
+        $xml->registerXPathNamespace('ns', $namespaces['']);
+
+
+        // Replacement XML for `<receiver>` and `<sender>`
+        $newReceiver = '
+            <receiver typeCode="RCV">
+                <device classCode="DEV" determinerCode="INSTANCE">
+                    <id extension="UMC" root="2.16.840.1.113883.3.989.2.1.3.14" />
+                </device>
+            </receiver>';
+        $newSender = '
+            <sender typeCode="SND">
+                <device classCode="DEV" determinerCode="INSTANCE">
+                    <id extension="PVERS" root="2.16.840.1.113883.3.989.2.1.3.13" />
+                </device>
+            </sender>';
+
+        // Replace all `<receiver>` nodes
+        $receivers = $xml->xpath('//ns:receiver');
+        foreach ($receivers as $receiverNode) {
+            $newReceiverXml = new SimpleXMLElement($newReceiver);
+            $domReceiver = dom_import_simplexml($receiverNode);
+            $domNewReceiver = dom_import_simplexml($newReceiverXml);
+            $domReceiver->parentNode->replaceChild(
+                $domReceiver->ownerDocument->importNode($domNewReceiver, true),
+                $domReceiver
+            );
+        }
+
+        // Replace all `<sender>` nodes
+        $senders = $xml->xpath('//ns:sender');
+        foreach ($senders as $senderNode) {
+            $newSenderXml = new SimpleXMLElement($newSender);
+            $domSender = dom_import_simplexml($senderNode);
+            $domNewSender = dom_import_simplexml($newSenderXml);
+            $domSender->parentNode->replaceChild(
+                $domSender->ownerDocument->importNode($domNewSender, true),
+                $domSender
+            );
+        }
+
+
+        return $xml->asXML();
     }
     public function manipulated_content($file)
     {
@@ -409,219 +736,181 @@ class Ce2bsController extends AppController
         $this->general_editor($id);
     }
 
-    private function parseE2BReport($xmlFilePath)
+    public function extract_drug_details($xmlString)
     {
-        try {
-            if (!file_exists($xmlFilePath)) {
-                throw new NotFoundException(__('Invalid file path'));
-            }
-
-            $xml = simplexml_load_file($xmlFilePath);
-            if ($xml === false) {
-                throw new Exception(__('Failed to load XML file'));
-            }
-
-            $namespaces = $xml->getNamespaces(true);
-            $xml->registerXPathNamespace('hl7', $namespaces['']);
-
-            $data = [];
-
-            // Batch Number
-            $data['batch_number'] = (string) $xml->id['extension'];
-
-            // Date of Batch Transmission
-            $data['batch_transmission_date'] = (string) $xml->creationTime['value'];
-
-            // Type of Messages in Batch
-            $data['message_type'] = (string) $xml->name['code'];
-
-            // ICSR Message Header
-            $icsr = $xml->xpath('//hl7:PORR_IN049016UV')[0];
-
-            // Message Identifier
-            $data['message_identifier'] = (string) $icsr->id['extension'];
-
-            // Date of Message Creation
-            $data['message_creation_date'] = (string) $icsr->creationTime['value'];
-
-            // Message Receiver Identifier
-            $data['message_receiver'] = (string) $icsr->receiver->device->id['extension'];
-
-            // Message Sender Identifier
-            $data['message_sender'] = (string) $icsr->sender->device->id['extension'];
-
-            // Case Safety Report
-            $caseReport = $icsr->controlActProcess->subject->investigationEvent;
-
-            // Sender's Case Safety Report Unique Identifier
-            $data['case_report_identifier'] = (string) $caseReport->id[0]['extension'];
-
-            // Worldwide Unique Case Identification Number
-            $data['unique_case_identifier'] = (string) $caseReport->id[1]['extension'];
-
-            // Case Narrative
-            $data['case_narrative'] = (string) $caseReport->text;
-
-            // Date Report Was First Received from Source
-            $data['report_received_date'] = (string) $caseReport->effectiveTime->low['value'];
-
-            // Date of Receipt of the Most Recent Information for This Report
-            $data['most_recent_info_date'] = (string) $caseReport->availabilityTime['value'];
-
-            // Extract Batch Receiver Identifier
-            $data['batch_receiver_identifier'] = (string) $xml->receiver->device->id['extension'];
-
-            // Extract Batch Sender Identifier
-            $data['batch_sender_identifier'] = (string) $xml->sender->device->id['extension'];
-            //     <!--D: Patient Characteristics-->
-            $primaryRole = $caseReport->component->adverseEventAssessment->subject1->primaryRole;
-            // return $component;
-            $data['patient_name'] = (string)  $primaryRole->player1->name;
-            $data['patient_gender'] = (string) $primaryRole->player1->administrativeGenderCode['code'];
-
-            $subjectOf2 = $primaryRole->subjectOf2;
-            // <!--D.7.1.r: Relevant Medical History and Concurrent Conditions (not including reaction / event)
-
-            $components = $subjectOf2->organizer->component;
-
-            $MedicalData = [];
-
-            foreach ($components as $component) {
-                $observation = $component->observation;
-                $obsData = [];
-                // Extract code
-                $obsData['code'] = (string) $observation->code['code'];
-                // Extract codeSystemVersion
-                $obsData['codeSystemVersion'] = (string) $observation->code['codeSystemVersion'];
-                // Extract codeSystem
-                $obsData['codeSystem'] = (string) $observation->code['codeSystem'];
-                // Extract effectiveTime
-                $obsData['effectiveTime'] = (string) $observation->effectiveTime->low['value'];
-                // Add the extracted observation data to the main data array
-                $MedicalData[] = $obsData;
-            }
-            $data['medical_history'] = $MedicalData;
-            //  <!--E.i: REACTION(S)/EVENT(S) - (1)-->
-            $subjectOf2s = [];
-            foreach ($primaryRole->subjectOf2 as $sample) {
-                $subjectOf2s[] = $sample;
-            }
-            $firstItem = null;
-            $lastItem = null;
-            if (!empty($subjectOf2s)) {
-                // Get the first item
-                // $firstItem = $subjectOf2s[0];
-                // Get the last item
-                // $lastItem = $subjectOf2s[count($subjectOf2s) - 1];
-
-                // Remove the first item
-                $firstItem = array_shift($subjectOf2s);
-
-                // Remove the last item
-                $lastItem = array_pop($subjectOf2s);
-            }
-            $reactions = [];
-
-            foreach ($subjectOf2s as $reaction) {
-                $single = $reaction->observation;
-                $reactionDetails = array(
-                    'id' => (string) $single->id['root'],
-                    'code' => (string) $single->code['code'],
-                    'effectiveTime' => (string) $single->effectiveTime->low['value'],
-                    'medra_code' => (string) $single->value['code'],
-                    'country_origin' => (string) $single->location->locatedEntity->locatedPlace->code['code'],
-                    'medra_translation' => (string) $single->outboundRelationship2->observation->value
-
-                );
-                $reactions[] = $reactionDetails;
-            }
-
-            // return $subjectOf2s;
-            //    return $data['reactions']=$reactions;
-
-            return $data;
-        } catch (Exception $e) {
-            return null;
+        if (empty($xmlString)) {
+            throw new BadRequestException(__('No XML data provided.'));
         }
-    }
-    public function general_editor_alt($id)
-    {
-        $this->Ce2b->id = $id;
-        if (!$this->Ce2b->exists()) {
-            throw new NotFoundException(__('Invalid E2b'));
-        }
-        $ce2b = $this->Ce2b->read(null, $id);
-        if ($ce2b['Ce2b']['submitted'] > 1) {
-            $this->Session->setFlash(__('The E2b has been submitted'), 'alerts/flash_info');
-            $this->redirect(array('action' => 'view', $this->Ce2b->id));
-        }
-        if ($ce2b['Ce2b']['user_id'] !== $this->Auth->user('id')) {
-            $this->Session->setFlash(__('You don\'t have permission to edit this E2b!!'), 'alerts/flash_error');
-            $this->redirect(array('controller' => 'users', 'action' => 'dashboard'));
-        }
-        if ($this->request->is('post') || $this->request->is('put')) {
 
-            if (isset($this->request->data['submitReport'])) {
-                if ($this->request->data['Ce2b']['e2b_type'] == "R2") {
-                    try {
-                        $file = $this->request->data['Ce2b']['e2b_file_data'];
-                        $xmlString = file_get_contents($file['tmp_name']);
-                        $xml = Xml::build($xmlString);
-                        $xmlString = $xml->asXML();
-                        $this->Ce2b->saveField('e2b_content', $xmlString);
-                    } catch (Exception $e) {
-                        $this->Session->setFlash(__('Whoops! experienced problems uploading file. Please try again later'), 'alerts/flash_error');
-                        $this->redirect(array('action' => 'edit', $this->Ce2b->id));
-                    }
+        // Load XML
+        $xml = simplexml_load_string($xmlString);
+        if ($xml === false) {
+            throw new BadRequestException(__('Invalid XML format.'));
+        }
 
-                    if (!empty($ce2b['Ce2b']['reference_no']) && $ce2b['Ce2b']['reference_no'] == 'new') {
-                        $count = $this->Ce2b->find('count',  array(
-                            'fields' => 'Ce2b.reference_no',
-                            'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
-                                'Ce2b.reference_no !=' => 'new'
-                            )
-                        ));
-                        $count++;
-                        $count = ($count < 10) ? "0$count" : $count;
-                        $reference = 'E2B/' . date('Y') . '/' . $count;
-                        $this->Ce2b->saveField('reference_no', $reference);
-                        $this->Ce2b->saveField('submitted', 2);
-                        $this->Ce2b->saveField('submitted_date', date("Y-m-d H:i:s"));
-                    }
-                    $this->Session->setFlash(__('The E2b has been submitted to PPB'), 'alerts/flash_success');
-                    $this->redirect(array('action' => 'view', $this->Ce2b->id));
-                } else  if ($this->request->data['Ce2b']['e2b_type'] == "R3") {
-                    if (!empty($ce2b['Ce2b']['reference_no']) && $ce2b['Ce2b']['reference_no'] == 'new') {
-                        $count = $this->Ce2b->find('count',  array(
-                            'fields' => 'Ce2b.reference_no',
-                            'conditions' => array(
-                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
-                                'Ce2b.reference_no !=' => 'new'
-                            )
-                        ));
-                        $count++;
-                        $count = ($count < 10) ? "0$count" : $count;
-                        $reference = 'E2B/' . date('Y') . '/' . $count;
-                        $this->Ce2b->saveField('reference_no', $reference);
-                        $this->Ce2b->saveField('submitted', 2);
-                        $this->Ce2b->saveField('submitted_date', date("Y-m-d H:i:s"));
-                    }
-                    $this->Session->setFlash(__('The E2b has been submitted to PPB'), 'alerts/flash_success');
-                    $this->redirect(array('action' => 'view', $this->Ce2b->id));
-                }
-            }
-
-            $ce2b = $this->Ce2b->read(null, $id);
+        // Register namespace
+        $namespaces = $xml->getNamespaces(true);
+        if (isset($namespaces[''])) {
+            $xml->registerXPathNamespace('ns', $namespaces['']);
         } else {
-            $this->request->data = $this->Ce2b->read(null, $id);
+            throw new BadRequestException(__('No default namespace found in the XML.'));
         }
-        $counties = $this->Ce2b->County->find('list', array('order' => array('County.county_name' => 'ASC')));
-        $this->set(compact('counties'));
-        $sub_counties = $this->Ce2b->SubCounty->find('list', array('order' => array('SubCounty.sub_county_name' => 'ASC')));
-        $this->set(compact('sub_counties'));
-        $designations = $this->Ce2b->Designation->find('list', array('order' => array('Designation.name' => 'ASC')));
-        $this->set(compact('designations'));
+
+        $drugDetails = [];
+
+        // Extract all `<component>` nodes under `<subjectOf2>/<organizer>`
+        $components = $xml->xpath('//ns:subjectOf2/ns:organizer/ns:component');
+        foreach ($components as $component) {
+            $substance = $component->xpath('.//ns:substanceAdministration');
+            if (empty($substance)) {
+                continue; // Skip if no <substanceAdministration> found
+            }
+            $substance = $substance[0];
+
+            // Extract drug name
+            $drugNameNodes = $substance->xpath('.//ns:kindOfProduct/ns:name');
+            $drugName = isset($drugNameNodes[0]) ? trim((string)$drugNameNodes[0]) : 'Unknown';
+
+            // Extract ingredients
+            $ingredients = [];
+            $ingredientNodes = $substance->xpath('.//ns:ingredientSubstance/ns:name');
+            foreach ($ingredientNodes as $ingredient) {
+                $ingredients[] = trim((string)$ingredient);
+            }
+            if (empty($ingredients)) {
+                $ingredients[] = 'Unknown';
+            }
+
+            // Extract indications
+            $indications = [];
+            $indicationNodes = $substance->xpath('.//ns:inboundRelationship/ns:observation');
+            foreach ($indicationNodes as $indicationNode) {
+                $code = $indicationNode->xpath('./ns:code/@code');
+                $displayName = $indicationNode->xpath('./ns:code/@displayName');
+                $originalTextNode = $indicationNode->xpath('./ns:value/ns:originalText');
+
+                $indications[] = [
+                    'code' => isset($code[0]) ? (string)$code[0] : 'Unknown',
+                    'displayName' => isset($displayName[0]) ? (string)$displayName[0] : 'Unknown',
+                    'originalText' => isset($originalTextNode[0]) ? trim((string)$originalTextNode[0]) : 'Unknown',
+                ];
+            }
+
+            // Extract outbound relationships
+            $outboundRelationships = [];
+            $outboundNodes = $substance->xpath('.//ns:outboundRelationship2/ns:substanceAdministration');
+            foreach ($outboundNodes as $outbound) {
+                $routeCode = $outbound->xpath('./ns:routeCode/@code');
+                $routeTextNode = $outbound->xpath('./ns:routeCode/ns:originalText');
+                $doseValue = $outbound->xpath('./ns:doseQuantity/@value');
+                $doseUnit = $outbound->xpath('./ns:doseQuantity/@unit');
+                $lotNumberTextNode = $outbound->xpath('.//ns:lotNumberText');
+
+                $outboundRelationships[] = [
+                    'route_code' => isset($routeCode[0]) ? (string)$routeCode[0] : 'Unknown',
+                    'route_text' => isset($routeTextNode[0]) ? trim((string)$routeTextNode[0]) : 'Unknown',
+                    'dose' => [
+                        'value' => isset($doseValue[0]) ? (string)$doseValue[0] : 'Unknown',
+                        'unit' => isset($doseUnit[0]) ? (string)$doseUnit[0] : 'Unknown',
+                    ],
+                    'lot_number' => isset($lotNumberTextNode[0]) ? trim((string)$lotNumberTextNode[0]) : 'Unknown',
+                ];
+            }
+
+            // Compile details for this drug
+            $drugDetails[] = [
+                'drug_name' => $drugName,
+                'ingredients' => $ingredients,
+                'indications' => $indications,
+                'outbound_relationships' => $outboundRelationships,
+            ];
+        }
+
+        return $drugDetails;
+    }
+
+
+
+    public function extract_related_reactions($xmlString)
+    {
+        if (empty($xmlString)) {
+            throw new BadRequestException(__('No XML data provided.'));
+        }
+
+        // Load XML
+        $xml = simplexml_load_string($xmlString);
+        if ($xml === false) {
+            throw new BadRequestException(__('Invalid XML format.'));
+        }
+
+        // Register namespaces if necessary
+        $namespaces = $xml->getNamespaces(true);
+        $xml->registerXPathNamespace('ns', $namespaces['']);
+
+
+        $reactions = [];
+        // Extract reaction details
+        $reactionNodes = $xml->xpath('//ns:observation[contains(@classCode, "OBS") and contains(@code/@displayName, "reaction")]');
+        foreach ($reactionNodes as $reactionNode) {
+            $code = (string)$reactionNode->xpath('./ns:code/@code')[0];
+            $description = (string)$reactionNode->xpath('./ns:code/@displayName')[0];
+            $location = (string)$reactionNode->xpath('./ns:location/ns:locatedEntity/ns:locatedPlace/ns:code/@code')[0];
+            // Extract all outboundRelationship2 details
+            $details = [];
+            $outboundRelationships = $reactionNode->xpath('./ns:outboundRelationship2/ns:observation');
+            foreach ($outboundRelationships as $relationship) {
+                $relationshipCode = (string)$relationship->xpath('./ns:code/@code')[0];
+                $relationshipDescription = (string)$relationship->xpath('./ns:code/@displayName')[0];
+                $relationshipValue = trim((string)$relationship->xpath('./ns:value')[0]);
+                $details[] = [
+                    'code' => $relationshipCode,
+                    'description' => $relationshipDescription,
+                    'value' => $relationshipValue,
+                ];
+            }
+            $reactions[] = [
+                'meddra_code' => $code,
+                'reaction_name' => $description,
+                'source_country' => $location,
+                'details' => $details,
+            ];
+        }
+        return $reactions;
+    }
+
+    public function extract_reactions_and_drugs($file)
+    {
+        $xmlContent = file_get_contents($file['tmp_name']);
+
+        // Parse the XML
+        $xml = new SimpleXMLElement($xmlContent);
+
+        // Register namespaces for parsing
+        $xml->registerXPathNamespace('ns', 'urn:hl7-org:v3');
+
+        // Initialize arrays for drugs and reactions
+        $drugs = [];
+        $reactions = [];
+
+        // Extract drug information
+        // foreach ($xml->xpath('//ns:substanceAdministration/ns:consumable/ns:instanceOfKind/ns:kindOfProduct/ns:name') as $drug) {
+        //     $drugName = trim((string)$drug);
+        //     $drugs[] = ['name' => $drugName];
+        // }
+
+        // // Extract reaction information
+        // foreach ($xml->xpath('//ns:observation[@classCode="OBS" and @moodCode="EVN"]') as $reaction) {
+        //     $reactionCode = (string)$reaction->code['code'];
+        //     $reactionDesc = trim((string)$reaction->xpath('ns:outboundRelationship2/ns:observation/ns:value')[0]);
+        //     $reactions[] = [
+        //         'reaction_id' => $reactionCode,
+        //         'description' => $reactionDesc,
+        //     ];
+        // }
+
+        // Prepare data for saving
+        $data = ['Drug' => $drugs, 'Reaction' => $reactions];
+        return $data;
     }
     public function general_editor($id = null)
     {
@@ -647,6 +936,10 @@ class Ce2bsController extends AppController
             $xmlString = null;
             $validate = false;
             if (isset($this->request->data['submitReport'])) {
+
+                // debug($this->request->data['Ce2b']['e2b_file_data']);
+                // exit;
+
                 $validate = 'first';
                 try {
 
@@ -655,8 +948,10 @@ class Ce2bsController extends AppController
                     $xmlString = file_get_contents($file['tmp_name']);
                     $xml = Xml::build($xmlString);
                     $xmlString = $xml->asXML();
+                    // debug($xmlString);
+                    // exit;
 
-                    $filePath = WWW_ROOT . 'files' . DS . $file['name'];
+                    $filePath = WWW_ROOT . 'files' . DS . 'ce2bs' . DS . $file['name'];
                     move_uploaded_file($file['tmp_name'], $filePath);
 
                     $xmlArray = Xml::toArray(Xml::build($filePath));
@@ -667,14 +962,7 @@ class Ce2bsController extends AppController
                     $doctype = '<!DOCTYPE ichicsr SYSTEM "http://eudravigilance.ema.europa.eu/dtd/icsr21xml.dtd">';
                     $rootElement2 = '<ichicsr lang="en">';
 
-                    // Check for the first type
-                    // if (strpos($xmlString, $declaration1) === 0 && strpos($xmlString, $rootElement1, strlen($declaration1)) === strlen($declaration1)) {
-                    //     $this->request->data['Ce2b']['e2b_type'] = "R3";
-                    // }
-                    // // Check for the second type
-                    // elseif (strpos($xmlString, $declaration2) === 0 && strpos($xmlString, $doctype, strlen($declaration2)) === strlen($declaration2) && strpos($xmlString, $rootElement2, strlen($declaration2 . $doctype)) === strlen($declaration2 . $doctype)) {
-                    //     $this->request->data['Ce2b']['e2b_type'] = "R2";
-                    // } 
+
 
                     if (strpos($xmlString, 'MCCI_IN200100UV01') !== false) {
                         $this->request->data['Ce2b']['e2b_type'] = "R3";
@@ -683,27 +971,18 @@ class Ce2bsController extends AppController
                     }
 
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
-                    $flattenedData = $this->flattenXml($xmlArray);
-                    $reactions = $this->extractObservations($flattenedData);
-                    $criteria = $this->extractCriteria($flattenedData);
+                    $flattenedData = $this->flattenXml($xmlArray); 
+
+                    $reactions = $this->manipulate_reaction_information($xmlString);
+                    $reactions = $this->map_full_reaction_details($reactions);
+                   
                     $this->request->data['Ce2bReaction'] = $reactions;
-                    $drugs = $this->extractDrugs($flattenedData, count($reactions));
-                    $this->request->data['Ce2bListOfDrug'] = $drugs;
-
-                    $seriousValues = Hash::extract($reactions, '{n}.serious');
-
-                    // Checking if any "serious" value is true
-                    $hasSerious = in_array('true', $seriousValues);
-
-                    $this->request->data['Ce2b']['serious'] = $hasSerious;
-
-
-                    // Extract other sections as well::::
+                    $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
+ 
 
 
                 } catch (Exception $e) {
-
-                    // Handle R2s
+ 
                     $this->request->data['Ce2b']['e2b_type'] = "R2";
                 }
             }
@@ -766,8 +1045,8 @@ class Ce2bsController extends AppController
                     );
 
                     $this->loadModel('Queue.QueuedTask');
-                    $this->QueuedTask->createJob('GenericEmail', $datum);
-                    $this->QueuedTask->createJob('GenericNotification', $datum);
+                    // $this->QueuedTask->createJob('GenericEmail', $datum);
+                    // $this->QueuedTask->createJob('GenericNotification', $datum);
 
 
                     //Send SMS
@@ -807,8 +1086,8 @@ class Ce2bsController extends AppController
                             'message' => CakeText::insert($message['Message']['content'], $variables)
                         );
 
-                        $this->QueuedTask->createJob('GenericEmail', $datum);
-                        $this->QueuedTask->createJob('GenericNotification', $datum);
+                        // $this->QueuedTask->createJob('GenericEmail', $datum);
+                        // $this->QueuedTask->createJob('GenericNotification', $datum);
                     }
                     // **********************************    END   *********************************
 
@@ -1701,6 +1980,22 @@ class Ce2bsController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('E2B was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }  public function manager_restore_archive($id = null)
+    {
+
+        $this->Ce2b->id = $id;
+        if (!$this->Ce2b->exists()) {
+            throw new NotFoundException(__('Invalid E2B'));
+        }
+        $report = $this->Ce2b->read(null, $id);
+        $report['Ce2b']['archived'] = 0;
+        // $report['Ce2b']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Ce2b->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('E2B Archive Restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('E2B was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }

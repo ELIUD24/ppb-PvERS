@@ -73,6 +73,11 @@ $this->assign('SAEFI', 'active');
                 'label' => false, 'placeHolder' => 'End Date'
               )
             );
+            echo $this->Form->input('filter_by', [
+              'type' => 'checkbox',
+              'hiddenField' => false,
+              'label' => 'Filter by date reported',
+          ]);
             ?>
           </td>
           <td>
@@ -190,7 +195,16 @@ $this->assign('SAEFI', 'active');
                   'class' => 'input-xlarge'
                 ));  ?>
                 </td>
-          <td></td>
+          <td> <?php
+              if ($redir == 'manager') { ?>
+            <h6>Archived Status:</h6>
+          <?php
+                echo $this->Form->input('archived', [
+                  'type' => 'checkbox',
+                  'hiddenField' => false,
+                  'label' => 'Show',
+                ]);
+              } ?></td>
           <td></td>
           <td></td>
           <td></td>
@@ -287,7 +301,7 @@ $this->assign('SAEFI', 'active');
                   echo "<br> Initial: ";
                   echo $this->Html->link(
                     '<label class="label label-info">' . $aefi['Saefi']['reference_no'] . '</label>',
-                    array('action' => 'view', $aefi['Saefi']['aefi_id']),
+                    array('action' => 'view', $aefi['Saefi']['initial_id']),
                     array('escape' => false)
                   );
                 }
@@ -316,10 +330,17 @@ $this->assign('SAEFI', 'active');
                 );
                 echo "&nbsp;";
                 if (($redir == 'manager' || $redir == 'reviewer') && $aefi['Saefi']['copied'] == 0) echo $this->Form->postLink('<span class="badge badge-success tooltipper" data-toggle="tooltip" title="Copy & Edit"> <i class="fa fa-copy" aria-hidden="true"></i> Copy </span>', array('controller' => 'saefis', 'action' => 'copy', $aefi['Saefi']['id']), array('escape' => false), __('Create a clean copy to edit?'));
-                echo $this->Html->link(
-                  '<span class="label label-warning tooltipper" title="View"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
+                if ($redir == 'manager' && $aefi['Saefi']['archived'] == 0)  echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Archive"><i class="fa fa-refresh" aria-hidden="true"></i> Archive </span>',
                   array('controller' => 'saefis', 'action' => 'archive', $aefi['Saefi']['id']),
-                  array('escape' => false), __('Are you sure you want to archive the report?')
+                  array('escape' => false),
+                  __('Are you sure you want to archive the report?')
+                );
+                if ($redir == 'manager' && $aefi['Saefi']['archived'] == 1) echo $this->Html->link(
+                  '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
+                  array('controller' => 'saefis', 'action' => 'restore_archive', $aefi['Saefi']['id']),
+                  array('escape' => false),
+                  __('Are you sure you want to restore archive the report?')
                 );
               } else {
                 if ($redir == 'reporter' and $this->Session->read('Auth.User.user_type') != 'Public Health Program') echo $this->Html->link(
@@ -353,7 +374,7 @@ $this->assign('SAEFI', 'active');
 
 <script type="text/javascript">
   $(function() {
-    var adates = $('#AefiStartDate, #AefiEndDate').datepicker({
+    var adates = $('#SaefiStartDate, #SaefiEndDate').datepicker({
       minDate: "-100Y",
       maxDate: "-0D",
       dateFormat: 'dd-mm-yy',
@@ -364,9 +385,9 @@ $this->assign('SAEFI', 'active');
       changeYear: true,
       showAnim: 'show',
       onSelect: function(selectedDate) {
-        var option = this.id == "AefiStartDate" ? "minDate" : "maxDate",
+        var option = this.id == "SaefiStartDate" ? "minDate" : "maxDate",
           instance = $(this).data("datepicker"),
-          date = $.datepicker.parseDate(
+          date = $.datepicker.parseDate( 
             instance.settings.dateFormat ||
             $.datepicker._defaults.dateFormat,
             selectedDate, instance.settings);

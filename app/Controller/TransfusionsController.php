@@ -43,7 +43,13 @@ class TransfusionsController extends AppController
     {
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
 
@@ -133,7 +139,13 @@ class TransfusionsController extends AppController
     {
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
 
@@ -165,14 +177,24 @@ class TransfusionsController extends AppController
     {
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
 
         $criteria = $this->Transfusion->parseCriteria($this->passedArgs);
         // add deleted=false to criteria
         $criteria['Transfusion.deleted'] = false;
-        $criteria['Transfusion.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Transfusion.archived'] = true;
+        }else{
+            $criteria['Transfusion.archived'] = false;
+        }
 
         $criteria['Transfusion.copied !='] = '1';
         if (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 1) {
@@ -204,7 +226,13 @@ class TransfusionsController extends AppController
         # code...
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
 
@@ -1119,6 +1147,22 @@ class TransfusionsController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('Blood transfusion reaction  was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }
+    public function manager_restore_archive($id = null)
+    {
+        $this->Transfusion->id = $id;
+        if (!$this->Transfusion->exists()) {
+            throw new NotFoundException(__('Invalid blood transfusion reaction'));
+        }
+        $report = $this->Transfusion->read(null, $id);
+        $report['Transfusion']['archived'] = 0;
+        // $report['Transfusion']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Transfusion->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('Blood transfusion reaction  Archive restored  successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('Blood transfusion reaction  was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }

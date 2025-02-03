@@ -29,7 +29,13 @@ class SaefisController extends AppController
     public function reporter_index()
     {
         $this->Prg->commonProcess();
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($this->page_options);
         //Health program fiasco
@@ -89,7 +95,13 @@ class SaefisController extends AppController
     public function partner_index()
     {
         $this->Prg->commonProcess();
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($this->page_options);
 
@@ -123,13 +135,23 @@ class SaefisController extends AppController
     public function manager_index()
     {
         $this->Prg->commonProcess();
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (!empty($this->request->query['pages'])) $this->paginate['limit'] = $this->request->query['pages'];
         else $this->paginate['limit'] = reset($this->page_options);
 
         $criteria = $this->Saefi->parseCriteria($this->passedArgs);
         $criteria['Saefi.deleted'] = false;
-        $criteria['Saefi.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Saefi.archived'] = true;
+        }else{
+            $criteria['Saefi.archived'] = false;
+        }
         $criteria['Saefi.copied !='] = '1';
         if (isset($this->request->query['submitted'])) {
             if ($this->request->query['submitted'] == 1) {
@@ -571,6 +593,22 @@ class SaefisController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('SAEFI was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+	}
+    public function manager_restore_archive($id=null) {
+
+        $this->Saefi->id = $id;
+        if (!$this->Saefi->exists()) {
+            throw new NotFoundException(__('Invalid SAEFI'));
+        }
+        $report = $this->Saefi->read(null, $id);
+        $report['Saefi']['archived'] = 0;
+        // $report['Saefi']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Saefi->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('SAEFI Archive Restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('SAEFI was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
 	}
 }

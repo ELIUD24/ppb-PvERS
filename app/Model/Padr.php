@@ -19,6 +19,7 @@ class Padr extends AppModel {
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
         'county_id' => array('type' => 'value'),
+		'archived' => array('type' => 'value'),
         'drug_name' => array('type' => 'query', 'method' => 'findByDrugName', 'encode' => true),
         'product_specify' => array('type' => 'like', 'encode' => true),
         'patient_name' => array('type' => 'like', 'encode' => true),

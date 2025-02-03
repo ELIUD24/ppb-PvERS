@@ -39,7 +39,13 @@ class MedicationsController extends AppController
     {
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
         //Health program fiasco
@@ -144,7 +150,13 @@ class MedicationsController extends AppController
     {
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
 
@@ -178,7 +190,13 @@ class MedicationsController extends AppController
     {
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
 
@@ -186,7 +204,11 @@ class MedicationsController extends AppController
         // $criteria['Medication.submitted'] = 2;
         //add deleted=false to criteria
         $criteria['Medication.deleted'] = false;
-        $criteria['Medication.archived'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Medication.archived'] = true;
+        }else{
+            $criteria['Medication.archived'] = false;
+        }
         $criteria['Medication.copied !='] = '1';
         if (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 1) {
             $criteria['Medication.submitted'] = array(0, 1);
@@ -220,7 +242,13 @@ class MedicationsController extends AppController
         # code...
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
-        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
         if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
         else $this->paginate['limit'] = reset($page_options);
 
@@ -1209,6 +1237,22 @@ class MedicationsController extends AppController
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('MEDICATION was not archied'), 'alerts/flash_error');
+        $this->redirect($this->referer());
+    }  public function manager_restore_archive($id = null)
+    {
+
+        $this->Medication->id = $id;
+        if (!$this->Medication->exists()) {
+            throw new NotFoundException(__('Invalid MEDICATION'));
+        }
+        $report = $this->Medication->read(null, $id);
+        $report['Medication']['archived'] = 0;
+        // $report['Medication']['archived_date'] = date("Y-m-d H:i:s");
+        if ($this->Medication->save($report, array('validate' => false))) {
+            $this->Session->setFlash(__('MEDICATION Archive restored successfully'), 'alerts/flash_success');
+            $this->redirect(array('action' => 'index'));
+        }
+        $this->Session->setFlash(__('MEDICATION was not restored'), 'alerts/flash_error');
         $this->redirect($this->referer());
     }
 }
