@@ -104,60 +104,60 @@ class Ce2bsController extends AppController
                 'source_country' => $re['location'],
                 'criteria_death_code' => '34',
                 'criteria_death_null' => !empty(Hash::extract($re['reactions'], '{n}[code=34].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=34].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=34].value_null')[0]
+                    : null,
                 'criteria_death_value' => !empty(Hash::extract($re['reactions'], '{n}[code=43].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=34].value')[0]
-                : null,
-                'life_hreatening_code' =>'21',
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=34].value')[0]
+                    : null,
+                'life_hreatening_code' => '21',
                 'life_hreatening_null' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=21].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=21].value_null')[0]
+                    : null,
                 'life_hreatening_value' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=21].value')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=21].value')[0]
+                    : null,
                 'prolonged_hospitalisation_code' => '33',
                 'prolonged_hospitalisation_null' => !empty(Hash::extract($re['reactions'], '{n}[code=33].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=33].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=33].value_null')[0]
+                    : null,
                 'prolonged_hospitalisation_value' => !empty(Hash::extract($re['reactions'], '{n}[code=33].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=33].value')[0]
-                : null,
-                'incapacitating_code' =>'35',
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=33].value')[0]
+                    : null,
+                'incapacitating_code' => '35',
                 'incapacitating_null' => !empty(Hash::extract($re['reactions'], '{n}[code=35].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=35].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=35].value_null')[0]
+                    : null,
                 'incapacitating_value' => !empty(Hash::extract($re['reactions'], '{n}[code=35].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=35].value')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=35].value')[0]
+                    : null,
                 'birth_defect_code' => '12',
                 'birth_defect_null' => !empty(Hash::extract($re['reactions'], '{n}[code=12].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=12].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=12].value_null')[0]
+                    : null,
                 'birth_defect_value' => !empty(Hash::extract($re['reactions'], '{n}[code=12].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=12].value')[0]
-                : null,
-                'other_medical_code' =>'26',
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=12].value')[0]
+                    : null,
+                'other_medical_code' => '26',
                 'other_medical_null' => !empty(Hash::extract($re['reactions'], '{n}[code=26].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=26].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=26].value_null')[0]
+                    : null,
                 'other_medical_value' => !empty(Hash::extract($re['reactions'], '{n}[code=26].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=26].value')[0]
-                : null,
-                'reaction_outcome_code' =>'27',
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=26].value')[0]
+                    : null,
+                'reaction_outcome_code' => '27',
                 'reaction_outcome_null' => !empty(Hash::extract($re['reactions'], '{n}[code=27].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=27].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=27].value_null')[0]
+                    : null,
                 'reaction_outcome_value' => !empty(Hash::extract($re['reactions'], '{n}[code=27].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=27].value')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=27].value')[0]
+                    : null,
                 'medical_confirmation_code' => '24',
                 'medical_confirmation_null' => !empty(Hash::extract($re['reactions'], '{n}[code=24].value_null'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=24].value_null')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=24].value_null')[0]
+                    : null,
                 'medical_confirmation_value' => !empty(Hash::extract($re['reactions'], '{n}[code=24].value'))
-                ? (string) Hash::extract($re['reactions'], '{n}[code=24].value')[0]
-                : null,
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=24].value')[0]
+                    : null,
                 'serious' => ''
             );
         }
@@ -190,14 +190,14 @@ class Ce2bsController extends AppController
                     foreach ($reaction->outboundRelationship2  as $kk) {
                         $obsc = (string) $kk->observation->code['code'];
                         $re = (string) $kk->observation->value;
-                        $vnull=null;
+                        $vnull = null;
                         if (empty($re)) {
                             $vnull = "NI";
                         }
                         $dt[] = array(
                             'code' => $obsc,
                             'value' => trim($re),
-                            'value_null' =>$vnull,
+                            'value_null' => $vnull,
                         );
                     }
                     $details['reactions'] = $dt;
@@ -464,7 +464,7 @@ class Ce2bsController extends AppController
         $criteria['Ce2b.deleted'] = false;
         if (!empty($this->passedArgs['archived'])) {
             $criteria['Ce2b.archived'] = true;
-        }else{
+        } else {
             $criteria['Ce2b.archived'] = false;
         }
         $this->paginate['conditions'] = $criteria;
@@ -495,13 +495,14 @@ class Ce2bsController extends AppController
         $newReceiver = '
             <receiver typeCode="RCV">
                 <device classCode="DEV" determinerCode="INSTANCE">
-                    <id extension="UMC" root="2.16.840.1.113883.3.989.2.1.3.14" />
+                     <id extension="PPB"  root="2.16.840.1.113883.3.989.2.1.3.14" />
                 </device>
             </receiver>';
+        //  $newReceiver = '';
         $newSender = '
             <sender typeCode="SND">
                 <device classCode="DEV" determinerCode="INSTANCE">
-                    <id extension="PVERS" root="2.16.840.1.113883.3.989.2.1.3.13" />
+                    <id extension="Pharmacy and Poisons Board" root="2.16.840.1.113883.3.989.2.1.3.13" />
                 </device>
             </sender>';
 
@@ -516,6 +517,12 @@ class Ce2bsController extends AppController
                 $domReceiver
             );
         }
+        // foreach ($receivers as $receiverNode) {
+        //     $domReceiver = dom_import_simplexml($receiverNode);
+        //     if ($domReceiver !== false && $domReceiver->parentNode !== null) {
+        //         $domReceiver->parentNode->removeChild($domReceiver);
+        //     }
+        // }
 
         // Replace all `<sender>` nodes
         $senders = $xml->xpath('//ns:sender');
@@ -655,6 +662,9 @@ class Ce2bsController extends AppController
 
         if ($version == "R2") {
             $ce2b['Ce2b']['e2b_content'] = $this->manipulated_content($ce2b['Ce2b']['e2b_content']);
+        }
+        if ($version == "R3") {
+            $ce2b['Ce2b']['e2b_content'] = $this->manipulated_r3content($ce2b['Ce2b']['e2b_content']);
         }
         // debug($ce2b['Ce2b']['e2b_content']);
         // exit;
@@ -969,20 +979,21 @@ class Ce2bsController extends AppController
                     } else {
                         $this->request->data['Ce2b']['e2b_type'] = "R2";
                     }
-
-                    $this->Ce2b->saveField('e2b_content', $xmlString, false);
-                    $flattenedData = $this->flattenXml($xmlArray); 
-
-                    $reactions = $this->manipulate_reaction_information($xmlString);
-                    $reactions = $this->map_full_reaction_details($reactions);
                    
-                    $this->request->data['Ce2bReaction'] = $reactions;
-                    $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
- 
+                    $this->Ce2b->saveField('submitted', 2);
+                    $this->Ce2b->saveField('e2b_content', $xmlString, false);
 
+                    // if ($this->request->data['Ce2b']['e2b_type'] === "R3") {
+                        $flattenedData = $this->flattenXml($xmlArray);
 
+                        $reactions = $this->manipulate_reaction_information($xmlString);
+                        $reactions = $this->map_full_reaction_details($reactions);
+
+                        $this->request->data['Ce2bReaction'] = $reactions;
+                        $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
+                    // }
                 } catch (Exception $e) {
- 
+
                     $this->request->data['Ce2b']['e2b_type'] = "R2";
                 }
             }
@@ -1875,8 +1886,13 @@ class Ce2bsController extends AppController
         ));
 
         if (empty($ce2b['Ce2b']['e2b_content'])) {
-            $this->Session->setFlash(__('Could not verify the E2b report ID. Please ensure the ID is correct.'), 'flash_error');
-            $this->redirect($this->referer());
+            $this->Session->setFlash(__('Invalid XML File, please reupload and try again'), 'flash_error');
+            // $this->redirect($this->referer());
+
+            //unsubmit and allow editing:
+
+            $this->Ce2b->saveField('submitted', 1);
+            $this->redirect(array('action' => 'edit', $this->Ce2b->id));
         }
 
         if ($ce2b['Ce2b']['e2b_type'] === "R2") {
@@ -1981,7 +1997,8 @@ class Ce2bsController extends AppController
         }
         $this->Session->setFlash(__('E2B was not archied'), 'alerts/flash_error');
         $this->redirect($this->referer());
-    }  public function manager_restore_archive($id = null)
+    }
+    public function manager_restore_archive($id = null)
     {
 
         $this->Ce2b->id = $id;

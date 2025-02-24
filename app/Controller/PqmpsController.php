@@ -1374,6 +1374,7 @@ class PqmpsController extends AppController
         $save_data['Pqmp']['user_id'] = $this->Auth->user('id');
         $save_data['Pqmp']['submitted'] = 2;
         $save_data['Pqmp']['submitted_date'] = date("Y-m-d H:i:s");
+        $save_data['Pqmp']['category'] = "";
 
         //lucian
         if (empty($save_data['Pqmp']['reference_no'])) {

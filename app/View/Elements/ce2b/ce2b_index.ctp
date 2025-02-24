@@ -129,8 +129,18 @@ echo $this->Session->flash();
                             'type' => 'radio'
                         ));
                         ?>
+
+                        <h5>Report Status</h5>
+                        <?php
+
+                        echo $this->Form->input('submitted', array(
+                            'options' => array('1' => 'UnSubmitted', '2' => 'Submitted'),
+                            'legend' => false,
+                            'type' => 'radio'
+                        ));
+                        ?>
                     </td>
-                   
+
                     <td>
                         <?php
                         echo $this->Form->input(
@@ -333,13 +343,13 @@ echo $this->Session->flash();
                                     array('controller' => 'ce2bs', 'action' => 'archive', $ce2b['Ce2b']['id']),
                                     array('escape' => false),
                                     __('Are you sure you want to archive the report?')
-                                  );
-                                  if ($redir == 'manager' && $ce2b['Ce2b']['archived'] == 1) echo $this->Html->link(
+                                );
+                                if ($redir == 'manager' && $ce2b['Ce2b']['archived'] == 1) echo $this->Html->link(
                                     '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
                                     array('controller' => 'ce2bs', 'action' => 'restore_archive', $ce2b['Ce2b']['id']),
                                     array('escape' => false),
                                     __('Are you sure you want to restore archive the report?')
-                                  );
+                                );
 
                                 // PDF Download
 
