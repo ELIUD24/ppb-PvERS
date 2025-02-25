@@ -953,8 +953,8 @@ class ReportsController extends AppController
 
         // Change to the correct directory and execute the command
         $jsonParams = escapeshellarg(json_encode($params));
-        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
-
+        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams"; 
+ 
         // Log command execution for debugging
         file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
 

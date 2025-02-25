@@ -10,12 +10,10 @@ $this->Html->css('summary', null, array('inline' => false));
 
     <div class="span12">
         <table id="data-table" class="table table-condensed table-bordered">
-            <?php
-            $total = 0
-            ?>
+
             <thead>
                 <tr>
-                    <th>Total Cases <?php echo $total ?></th>
+                    <th id="totalCases">Total Cases: </th>
                 </tr>
                 <tr>
                     <th><?php echo $this->Paginator->sort('Vaccine Name'); ?></th>
@@ -41,6 +39,11 @@ $this->Html->css('summary', null, array('inline' => false));
             .then(data => {
                 let tbody = document.querySelector("#data-table tbody");
                 tbody.innerHTML = ""; // Clear existing rows
+
+                if (data.length > 0) {
+                    let total = data[0].Disproportionality.total; // Pick total from the first row
+                    document.getElementById("totalCases").textContent = `Total Cases: ${total}`;
+                }
 
                 data.forEach(item => {
                     let rowData = item.Disproportionality; // Extract Disproportionality object
