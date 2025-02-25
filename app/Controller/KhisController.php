@@ -52,6 +52,8 @@ class KhisController extends AppController
         curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch1, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($ch1, CURLOPT_USERPWD, "$username:$password");
+        curl_setopt($ch1, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, false);
         // Execute cURL session and get the response
         $response1 = curl_exec($ch1);
         $statusCode1 = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
@@ -109,6 +111,8 @@ class KhisController extends AppController
         // Set cURL options
         curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch1, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($ch1, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch1, CURLOPT_USERPWD, "$username:$password");
         // Execute cURL session and get the response
         $response1 = curl_exec($ch1);
@@ -173,7 +177,8 @@ class KhisController extends AppController
         $dataValues = array();
         $gender = $this->Aefi->find('all', array(
             'fields' => array('gender', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('gender'),
             'having' => array('COUNT(*) >' => 0),
@@ -206,7 +211,8 @@ class KhisController extends AppController
         $dataValues = array();
         $month = $this->Aefi->find('all', array(
             'fields' => array('DATE_FORMAT(reporter_date, "%b %Y")  as month', 'month(ifnull(reporter_date, reporter_date)) as salit', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('DATE_FORMAT(reporter_date, "%b %Y")', 'salit'), // Include 'salit' in the GROUP BY clause
             'order' => array('salit'),
@@ -321,7 +327,8 @@ class KhisController extends AppController
 
         $vaccine = $this->Aefi->AefiListOfVaccine->find('all', array(
             'fields' => array('Vaccine.vaccine_name as vaccine_name', 'COUNT(distinct AefiListOfVaccine.aefi_id) as cnt'),
-            'contain' => array('Vaccine'), 'recursive' => -1,
+            'contain' => array('Vaccine'),
+            'recursive' => -1,
             'conditions' => $criteriav,
             'group' => array('Vaccine.vaccine_name', 'Vaccine.id'),
             'having' => array('COUNT(distinct AefiListOfVaccine.aefi_id) >' => 0),
@@ -588,26 +595,25 @@ class KhisController extends AppController
                 $month_data_values = array_merge($month_data_values, $this->prepare_county_month_data_values($criteria, $org_unit, $period));
                 $vaccines_data_values = array_merge($vaccines_data_values, $this->prepare_county_vaccines_data_values($criteria, $org_unit, $period));
             }
-            
+
             $dataValues = array_merge($gender_data_values, $age_data_values, $month_data_values, $vaccines_data_values);
-          
+
             $sadr_data_values = $this->prepare_upload_sadr();
 
             $dataValues = array_merge($dataValues, $sadr_data_values);
 
             $payload = [
-                "dataSet" => "khmkmn2RRx4", 
+                "dataSet" => "khmkmn2RRx4",
                 "dataValues" => $dataValues
             ];
-            
-        }
-         else {
+        } else {
             $criteria['Aefi.county_id'] = $this->request->data['Report']['county_id'];
 
             // AEFI Gender
             $gender = $this->Aefi->find('all', array(
                 'fields' => array('gender', 'COUNT(*) as cnt'),
-                'contain' => array(), 'recursive' => -1,
+                'contain' => array(),
+                'recursive' => -1,
                 'conditions' => $criteria,
                 'group' => array('gender'),
                 'having' => array('COUNT(*) >' => 0),
@@ -701,7 +707,8 @@ class KhisController extends AppController
             // AEFI Month
             $month = $this->Aefi->find('all', array(
                 'fields' => array('DATE_FORMAT(reporter_date, "%b %Y")  as month', 'month(ifnull(reporter_date, reporter_date)) as salit', 'COUNT(*) as cnt'),
-                'contain' => array(), 'recursive' => -1,
+                'contain' => array(),
+                'recursive' => -1,
                 'conditions' => $criteria,
                 'group' => array('DATE_FORMAT(reporter_date, "%b %Y")', 'salit'), // Include 'salit' in the GROUP BY clause
                 'order' => array('salit'),
@@ -725,7 +732,8 @@ class KhisController extends AppController
 
             $vaccine = $this->Aefi->AefiListOfVaccine->find('all', array(
                 'fields' => array('Vaccine.vaccine_name as vaccine_name', 'COUNT(distinct AefiListOfVaccine.aefi_id) as cnt'),
-                'contain' => array('Vaccine'), 'recursive' => -1,
+                'contain' => array('Vaccine'),
+                'recursive' => -1,
                 'conditions' => $criteriav,
                 'group' => array('Vaccine.vaccine_name', 'Vaccine.id'),
                 'having' => array('COUNT(distinct AefiListOfVaccine.aefi_id) >' => 0),
@@ -899,7 +907,7 @@ class KhisController extends AppController
             $sadr_data_values = $this->prepare_upload_sadr();
             //add this sadr values to the main $dataValues to make one complete array 
             $dataValues = array_merge($dataValues, $sadr_data_values);
-            
+
 
 
             $currentDate = date('Y-m-d');
@@ -911,7 +919,7 @@ class KhisController extends AppController
                 "dataValues" => $dataValues
             ];
         }
-       
+
 
         // debug($payload);
         // exit;
@@ -1043,7 +1051,7 @@ class KhisController extends AppController
         }
 
         if (empty($this->request->data['Report']['county_id'])) {
-              $geo = $this->Sadr->find('all', array(
+            $geo = $this->Sadr->find('all', array(
                 'fields' => array('County.county_name', 'County.org_unit', 'COUNT(*) as cnt'),
                 'contain' => array('County'),
                 'conditions' => $criteria,
@@ -1054,7 +1062,7 @@ class KhisController extends AppController
             //loop through each county
             $gender_data_values = array();
             $age_data_values = array();
-            $month_data_values = array(); 
+            $month_data_values = array();
             $period = $year . "" . $month;
             foreach ($geo as $single) {
                 $org_unit = $single['County']['org_unit'];
@@ -1064,7 +1072,7 @@ class KhisController extends AppController
                 $month_data_values = array_merge($month_data_values, $this->prepare_county_sadr_month_data_values($criteria, $org_unit, $period));
             }
             $dataValues = array_merge($gender_data_values, $age_data_values, $month_data_values);
-          
+
 
             return $dataValues;
         } else {
@@ -1073,7 +1081,8 @@ class KhisController extends AppController
             // Sadr Gender
             $sadr_gender = $this->Sadr->find('all', array(
                 'fields' => array('gender', 'COUNT(*) as cnt'),
-                'contain' => array(), 'recursive' => -1,
+                'contain' => array(),
+                'recursive' => -1,
                 'conditions' => $criteria,
                 'group' => array('gender'),
                 'having' => array('COUNT(*) >' => 0),
@@ -1161,7 +1170,8 @@ class KhisController extends AppController
             // SADR Month
             $monthly = $this->Sadr->find('all', array(
                 'fields' => array('DATE_FORMAT(reporter_date, "%b %Y")  as month', 'month(ifnull(reporter_date, reporter_date)) as salit', 'COUNT(*) as cnt'),
-                'contain' => array(), 'recursive' => -1,
+                'contain' => array(),
+                'recursive' => -1,
                 'conditions' => $criteria,
                 'group' => array('DATE_FORMAT(reporter_date, "%b %Y")', 'salit'), // Include 'salit' in the GROUP BY clause
                 'order' => array('salit'),
@@ -1185,7 +1195,8 @@ class KhisController extends AppController
         $dataValues = array();
         $sadr_gender = $this->Sadr->find('all', array(
             'fields' => array('gender', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('gender'),
             'having' => array('COUNT(*) >' => 0),
@@ -1211,7 +1222,7 @@ class KhisController extends AppController
                     "value" => $result[0]['cnt']
                 ];
             }
-        } 
+        }
 
         return $dataValues;
     }
@@ -1300,7 +1311,8 @@ class KhisController extends AppController
         $dataValues = array();
         $monthly = $this->Sadr->find('all', array(
             'fields' => array('DATE_FORMAT(reporter_date, "%b %Y")  as month', 'month(ifnull(reporter_date, reporter_date)) as salit', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('DATE_FORMAT(reporter_date, "%b %Y")', 'salit'), // Include 'salit' in the GROUP BY clause
             'order' => array('salit'),
@@ -1316,7 +1328,7 @@ class KhisController extends AppController
                 "orgUnit" => $org_unit,
                 "value" => $value[0]['cnt']
             ];
-        } 
+        }
 
         return $dataValues;
     }
@@ -1404,7 +1416,8 @@ class KhisController extends AppController
 
         $monthly = $this->Sadr->find('all', array(
             'fields' => array('DATE_FORMAT(reporter_date, "%b %Y")  as month', 'month(ifnull(reporter_date, reporter_date)) as salit', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('DATE_FORMAT(reporter_date, "%b %Y")', 'salit'), // Include 'salit' in the GROUP BY clause
             'order' => array('salit'),
@@ -1418,7 +1431,8 @@ class KhisController extends AppController
         // Get All SADRs by Gender 
         $sadr_gender = $this->Sadr->find('all', array(
             'fields' => array('gender', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('gender'),
             'having' => array('COUNT(*) >' => 0),
@@ -1447,7 +1461,8 @@ class KhisController extends AppController
         // SADRs per Year
         $year = $this->Sadr->find('all', array(
             'fields' => array('year(ifnull(created, created)) as year', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('year(ifnull(created, created))'),
             'order' => array('year'),
@@ -1509,7 +1524,8 @@ class KhisController extends AppController
         // Get All AEFIs by Gender
         $sex = $this->Aefi->find('all', array(
             'fields' => array('gender', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('gender'),
             'having' => array('COUNT(*) >' => 0),
@@ -1545,7 +1561,8 @@ class KhisController extends AppController
         // SADRs per Year
         $year = $this->Aefi->find('all', array(
             'fields' => array('year(ifnull(created, created)) as year', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('year(ifnull(created, created))'),
             'order' => array('year'),
@@ -1554,7 +1571,8 @@ class KhisController extends AppController
 
         $months = $this->Aefi->find('all', array(
             'fields' => array('DATE_FORMAT(reporter_date, "%b %Y")  as month', 'month(ifnull(reporter_date, reporter_date)) as salit', 'COUNT(*) as cnt'),
-            'contain' => array(), 'recursive' => -1,
+            'contain' => array(),
+            'recursive' => -1,
             'conditions' => $criteria,
             'group' => array('DATE_FORMAT(reporter_date, "%b %Y")', 'salit'), // Include 'salit' in the GROUP BY clause
             'order' => array('salit'),

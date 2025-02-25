@@ -63,7 +63,7 @@
 		// 'affected_unknown'=>'Unknown', 'community_comments'=>'Other comments:', 'relevant_findings'=>'Other findings/observations/comments', 
 		'reporter_name'=>'NAME OF PERSON REPORTING:', 
 		'designations' => 'Reporter designation', 'reporter_email'=>'E-MAIL ADDRESS:',
-		'reporter_phone'=>'PHONE NO', 'reporter_date'=>'Date:', 'reporter_name_diff'=>'NAME OF PERSON REPORTING:', 'reporter_email_diff'=>'E-MAIL ADDRESS:', 'reporter_designation_diff'=>'DESIGNATION:', 'reporter_phone_diff'=>'PHONE NO.',  'reporter_date_diff'=>'Date:'
+		'reporter_phone'=>'PHONE NO', 'reporter_date'=>'Date:', 'reporter_name_diff'=>'NAME OF PERSON REPORTING:', 'reporter_email_diff'=>'E-MAIL ADDRESS:', 'reporter_designation_diff'=>'DESIGNATION:', 'reporter_phone_diff'=>'PHONE NO.',  'reporter_date_diff'=>'Date:','submitted_date'=>'Date Submitted'
 
 		);
 

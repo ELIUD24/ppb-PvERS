@@ -40,7 +40,7 @@
 		'designations' => 'Reporter designation',
 		// 'reporter_name' => 'Reporter', 'reporter_email' => 'Reporter email',
 		// 'reporter_phone' => 'Reporter phone', 
-		'created' => 'Date Created', 'reporter_date' => 'Report Date'
+		'created' => 'Date Created', 'reporter_date' => 'Report Date','submitted_date'=>'Date Submitted'
 	);
 	
 

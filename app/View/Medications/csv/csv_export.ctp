@@ -33,7 +33,7 @@
 		'manufacturer_i' => 'Manufacturer I',
 		'manufacturer_ii' => 'Manufacturer II', 
 		'designations' => 'Reporter designation',
-		'created' => 'Date Created', 'reporter_date' => 'Report Date'
+		'created' => 'Date Created', 'reporter_date' => 'Report Date','submitted_date'=>'Date Submitted'
 		);
 	
 

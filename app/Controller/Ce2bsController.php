@@ -509,13 +509,14 @@ class Ce2bsController extends AppController
         $newReceiver = '
             <receiver typeCode="RCV">
                 <device classCode="DEV" determinerCode="INSTANCE">
-                    <id extension="UMC" root="2.16.840.1.113883.3.989.2.1.3.14" />
+                     <id extension="PPB"  root="2.16.840.1.113883.3.989.2.1.3.14" />
                 </device>
             </receiver>';
+        //  $newReceiver = '';
         $newSender = '
             <sender typeCode="SND">
                 <device classCode="DEV" determinerCode="INSTANCE">
-                    <id extension="PVERS" root="2.16.840.1.113883.3.989.2.1.3.13" />
+                    <id extension="Pharmacy and Poisons Board" root="2.16.840.1.113883.3.989.2.1.3.13" />
                 </device>
             </sender>';
 
@@ -530,6 +531,12 @@ class Ce2bsController extends AppController
                 $domReceiver
             );
         }
+        // foreach ($receivers as $receiverNode) {
+        //     $domReceiver = dom_import_simplexml($receiverNode);
+        //     if ($domReceiver !== false && $domReceiver->parentNode !== null) {
+        //         $domReceiver->parentNode->removeChild($domReceiver);
+        //     }
+        // }
 
         // Replace all `<sender>` nodes
         $senders = $xml->xpath('//ns:sender');
@@ -669,6 +676,9 @@ class Ce2bsController extends AppController
 
         if ($version == "R2") {
             $ce2b['Ce2b']['e2b_content'] = $this->manipulated_content($ce2b['Ce2b']['e2b_content']);
+        }
+        if ($version == "R3") {
+            $ce2b['Ce2b']['e2b_content'] = $this->manipulated_r3content($ce2b['Ce2b']['e2b_content']);
         }
         // debug($ce2b['Ce2b']['e2b_content']);
         // exit;
@@ -988,19 +998,19 @@ class Ce2bsController extends AppController
                     } else {
                         $this->request->data['Ce2b']['e2b_type'] = "R2";
                     }
-
+                   
+                    $this->Ce2b->saveField('submitted', 2);
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
-                    $flattenedData = $this->flattenXml($xmlArray);
 
-                    $reactions = $this->manipulate_reaction_information($xmlString);
-                    $reactions = $this->map_full_reaction_details($reactions);
+                    // if ($this->request->data['Ce2b']['e2b_type'] === "R3") {
+                        $flattenedData = $this->flattenXml($xmlArray);
 
-                    $drugs = $this->manipulate_drug_information($xmlString);
+                        $reactions = $this->manipulate_reaction_information($xmlString);
+                        $reactions = $this->map_full_reaction_details($reactions);
 
-                    // debug($drugs);
-                    // exit;
-                    $this->request->data['Ce2bReaction'] = $reactions;
-                    $this->request->data['Ce2bListOfDrug'] = $drugs;
+                        $this->request->data['Ce2bReaction'] = $reactions;
+                        $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
+                    // }
                 } catch (Exception $e) {
 
                     $this->request->data['Ce2b']['e2b_type'] = "R2";
@@ -1669,8 +1679,13 @@ class Ce2bsController extends AppController
         ));
 
         if (empty($ce2b['Ce2b']['e2b_content'])) {
-            $this->Session->setFlash(__('Could not verify the E2b report ID. Please ensure the ID is correct.'), 'flash_error');
-            $this->redirect($this->referer());
+            $this->Session->setFlash(__('Invalid XML File, please reupload and try again'), 'flash_error');
+            // $this->redirect($this->referer());
+
+            //unsubmit and allow editing:
+
+            $this->Ce2b->saveField('submitted', 1);
+            $this->redirect(array('action' => 'edit', $this->Ce2b->id));
         }
 
         if ($ce2b['Ce2b']['e2b_type'] === "R2") {
