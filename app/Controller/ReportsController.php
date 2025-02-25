@@ -28,6 +28,7 @@ class ReportsController extends AppController
             'generate_reports_per_reaction',
             'generate_reports_per_vaccines',
             'index',
+            'load_data',
             'summary',
             'aefi_summary',
             'pqmps_summary',
@@ -90,6 +91,19 @@ class ReportsController extends AppController
             $this->is_mobile = true;
         }
         $this->set('is_mobile', $this->is_mobile);
+    }
+
+    public function load_data($model)
+    {
+
+        $this->autoRender = false;
+        $this->loadModel('Disproportionality');
+        $data = $this->Disproportionality->find('all', array(
+            'conditions' => array('Disproportionality.model' => $model)
+        ));
+
+        echo json_encode($data);
+        return;
     }
 
     public function padr_reports_with_reaction($reportReactions, $reaction)
@@ -600,8 +614,41 @@ class ReportsController extends AppController
         $this->set(compact('total'));
         $this->set('_serialize', 'inputData', 'total');
     }
-    public function d_aefi_analytics()
+    public function d_aefi_analytics_current()
     {
+
+
+
+        $this->Prg->commonProcess();
+        $criteria = $this->Disproportionality->parseCriteria($this->passedArgs);
+        $criteria['Disproportionality.model'] = 'Aefi';
+
+        // Configure pagination to pull only from Disproportionality
+        $this->paginate = array(
+            'conditions' => $criteria,
+            'order' => array('Disproportionality.created' => 'DESC'),
+            // 'fields' => array('id', 'created', 'model'), // Only fetch required fields
+            'contain' => array(), // Prevent CakePHP from loading associated models
+            'limit' => 10000
+        );
+
+        // Fetch data from Disproportionality table only
+        $inputData =  $this->paginate('Disproportionality');
+
+        $total = 10;
+
+        $vaccines = $this->Aefi->AefiListOfVaccine->Vaccine->find('list');
+
+
+        $this->set(compact('inputData'));
+        $this->set(compact('total'));
+        $this->set(compact('vaccines'));
+        $this->set('_serialize', 'inputData', 'total', 'vaccines');
+    }
+
+    public function d_aefi_analytics_original()
+    {
+        $vaccines = $this->Aefi->AefiListOfVaccine->Vaccine->find('list');
 
         // Load Data for Counties 
         $id_arrays = array(0);
@@ -628,9 +675,11 @@ class ReportsController extends AppController
         ));
         $aefiIds = array_keys($aefiIds);
 
-        // debug($id_arrays);
-        // exit;
-        $vaccines = $this->Aefi->AefiListOfVaccine->Vaccine->find('list');
+
+
+
+
+
 
         $vaccine = $this->Aefi->AefiListOfVaccine->find('all', array(
             'fields' => array(
@@ -718,9 +767,6 @@ class ReportsController extends AppController
             }
         }
 
-        // Target Vaccine
-        // $reactionLists = Configure::read('analytics');
-        // debug($reactionName); 
         $config['analytics'] = [
             'anaphylaxis' => 'Anaphylaxis',
             'bcg' => 'BCG Lymphadenitis',
@@ -823,21 +869,42 @@ class ReportsController extends AppController
                 // exit;
                 $drug_name = $dt['current_drug_name'];
                 $reaction_name = $kk['reaction_at_hand'];
+                $b_reports = $kk['B_reports_with_reaction'];
+                $ab_reports = $kk['AB_reports_with_drug_and_reaction'];
+                $eab_expected = $kk['E_(AB)_expected_count'];
+                $ic_raw_data = $kk['IC_raw_calculated_data'];
+                $ic_calculated_data = $kk['IC_raw_calculated_log_data'];
+                $ic_variance = $kk['Var(IC)_Variance_of_IC'];
+                $standard_error = $kk['Standard_Error_(SE)_of_IC'];
+                $confidence_interval = $kk['95%_Confidence_Interval'];
                 $data = array(
                     'Disproportionality' => array(
+                        'total' => $total,
                         'drug_name' => $drug_name,
                         'reaction_name' => $reaction_name,
-                        'model' => 'Aefi'
+                        'model' => 'Aefi',
+                        'b_reports' => $b_reports,
+                        'ab_reports' => $ab_reports,
+                        'eab_expected' => $eab_expected,
+                        'ic_raw_data' => $ic_raw_data,
+                        'ic_calculated_data' => $ic_calculated_data,
+                        'ic_variance' => $ic_variance,
+                        'standard_error' => $standard_error,
+                        'confidence_interval' => $confidence_interval
+
+
+
                     )
                 );
                 // check if the drug and reaction exists, ignore else create
                 $existing = $this->Disproportionality->find('first', array(
                     'conditions' => array('Disproportionality.drug_name' => $drug_name, 'Disproportionality.reaction_name' => $reaction_name)
                 ));
-                if (!$existing) {
-                    $this->Disproportionality->create();
-                    $this->Disproportionality->save($data);
+                if ($existing) {
+                    $data['Disproportionality']['id'] = $existing['Disproportionality']['id'];
                 }
+                $this->Disproportionality->create();
+                $this->Disproportionality->save($data);
             }
         }
 
@@ -849,6 +916,73 @@ class ReportsController extends AppController
         $this->set(compact('total'));
 
         $this->set('_serialize', 'vaccines', 'total', 'vaccineinputData', '');
+    }
+    public function d_aefi_analytics()
+    {
+        $vaccines = $this->Aefi->AefiListOfVaccine->Vaccine->find('list');
+
+        // Load Data for Counties 
+        $id_arrays = array(0);
+        $criteria['Aefi.submitted'] = array(1, 2);
+        $criteria['Aefi.copied !='] = '1';
+        $criteria['Aefi.deleted'] = false;
+        $criteria['Aefi.archived'] = false;
+        if (!empty($this->request->data['Report']['start_date']) && !empty($this->request->data['Report']['end_date']))
+            $criteria['Aefi.submitted_date between ? and ?'] = array(date('Y-m-d', strtotime($this->request->data['Report']['start_date'])), date('Y-m-d', strtotime($this->request->data['Report']['end_date'])));
+
+        if (!empty($this->request->data['Report']['vaccines'])) {
+            $cond = array(); // Initialize $cond with an empty array
+            $ids = $this->generate_reports_per_vaccines_id($this->request->data['Report']['vaccines']);
+            if (!empty($ids)) {
+                foreach ($ids as $key => $value) {
+                    $id_arrays[] = $key;
+                }
+            }
+            $criteria['Aefi.id'] = $id_arrays;
+        }
+        $aefiIds = $this->Aefi->find('list', array(
+            'fields' => array('Aefi.id'),
+            'conditions' => $criteria
+        ));
+        $aefiIds = array_keys($aefiIds);
+
+        $params = [
+            'aefiIds' => $aefiIds,
+            'criteria' => $criteria
+        ];
+
+        // Change to the correct directory and execute the command
+        $jsonParams = escapeshellarg(json_encode($params));
+        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+
+        // Log command execution for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
+
+        // Execute the command in the correct directory
+        $output = shell_exec("$command 2>&1");
+
+        // Log output for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
+
+        if ($output) {
+            $this->log("✅ Process started successfully", 'debug');
+        } else {
+            $this->log("❌ Failed to start process", 'error');
+        }
+
+        // Convert parameters to JSON and escape them 
+        // $jsonParams = escapeshellarg(json_encode($params));
+        // $phpPath = '/usr/bin/php'; // Adjust this path based on your PHP installation
+        // $cakePath = escapeshellarg(APP . "Console/cake");
+        // $logPath = LOGS . "process_data.log"; // Path to log output
+
+        // $command = "nohup $phpPath $cakePath process_data $jsonParams > $logPath 2>&1 & echo $!";
+        // $pid = shell_exec($command);
+
+        // $this->log("Shell PID: $pid", 'debug');
+
+        $this->set(compact('vaccines'));
+        $this->set('_serialize', 'vaccines');
     }
     public function d_sadr_analytics()
     {
@@ -2989,7 +3123,7 @@ class ReportsController extends AppController
         foreach ($pi as $item) {
             $productNameI = $item['MedicationProduct']['product_name_i'];
             if (!empty($productNameI)) {
-            $pi_counts[$productNameI] = $item[0]['cnt'];
+                $pi_counts[$productNameI] = $item[0]['cnt'];
             }
         }
 
@@ -2997,7 +3131,7 @@ class ReportsController extends AppController
         foreach ($pe as $item) {
             $productNameII = $item['MedicationProduct']['product_name_ii'];
             if (!empty($productNameII)) {
-            $pe_counts[$productNameII] = $item[0]['cnt'];
+                $pe_counts[$productNameII] = $item[0]['cnt'];
             }
         }
 
@@ -3048,7 +3182,7 @@ class ReportsController extends AppController
         foreach ($gi as $item) {
             $productNameI = $item['MedicationProduct']['generic_name_i'];
             if (!empty($productNameI)) {
-            $gi_counts[$productNameI] = $item[0]['cnt'];
+                $gi_counts[$productNameI] = $item[0]['cnt'];
             }
         }
 
@@ -3056,7 +3190,7 @@ class ReportsController extends AppController
         foreach ($ge as $item) {
             $productNameII = $item['MedicationProduct']['generic_name_ii'];
             if (!empty($productNameII)) {
-            $ge_counts[$productNameII] = $item[0]['cnt'];
+                $ge_counts[$productNameII] = $item[0]['cnt'];
             }
         }
 

@@ -110,7 +110,7 @@ class NotificationsController extends AppController {
         //     else $this->paginate['limit'] = reset($page_options);
         if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
         if (!empty($this->request->query['pages'])) $this->paginate['limit'] = $this->request->query['pages'];
-        else $this->paginate['limit'] = reset($this->page_options);
+            //  else $this->paginate['limit'] = reset($this->page_options);
  
 
         $criteria = $this->Notification->parseCriteria($this->passedArgs);

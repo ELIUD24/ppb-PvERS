@@ -8,17 +8,7 @@ $this->Html->css('summary', null, array('inline' => false));
 
 <div class="row-fluid">
 
-    <div class="span12">
-        <!-- N- Total Reports <br>
-        A- Reports with the drug of interface_exists <br>
-        B- Reports with reaction of interest <br>
-        AB- Reports with both the drug and reaction of interest <br>
-        E_AB- Observed vs. Expected calculated as -> E(AB)= (A * B)/N<br>
-        IC- Raw Data Observed vs. Expected calculated as IC=(E(AB)+0.5)/(AB+0.5)<br> 
-        Loc IC -Log of the above  log2(IC)<br>
-        Variance of IC- Calculated <br>
-        Standard Error <br>
-        95% Confidence -> Calculated -->
+    <div class="span12"> 
         <table class="table table-condensed table-bordered">
             <thead>
                 <tr>

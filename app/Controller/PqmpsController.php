@@ -26,6 +26,69 @@ class PqmpsController extends AppController
         $this->Auth->allow('guest_add', 'guest_edit', 'manager_prims', 'pms_feedback');
     }
 
+
+    public function getFormulationCode($name)
+    {
+        $formulationCodes = [
+            "Injection" => "I",
+            "Oral tablets / capsules" => "OT",
+            "Oral suspension / syrup" => "OS",
+            "Powder for Reconstitution of Suspension" => "PRS",
+            "Cream / Ointment / Liniment / Paste" => "C",
+            "Powder for Reconstitution of Injection" => "PRI",
+            "Eye drops" => "EYD",
+            "Ear drops" => "EAD",
+            "Nebuliser solution" => "NS",
+            "Diluent" => "D",
+            "Anticoagulant (for blood and blood products)" => "A"
+        ];
+
+        return isset($formulationCodes[$name]) ? $formulationCodes[$name] : null;
+    }
+
+    public function getComplaintCode($name)
+    {
+        $complaintCodes = [
+            "Packaging" => "PG",
+            "Labelling" => "L",
+            "Color Change" => "CC",
+            "Separating" => "SG",
+            "Powdering/ crumbling" => "PC",
+            "Caking" => "C",
+            "Therapeutic ineffectiveness" => "TI",
+            "Moulding" => "MG",
+            "Change of oduor" => "CO",
+            "Mislabelling" => "M",
+            "Incomplete pack" => "IP",
+            "Sampling" => "S",
+            "Mechanism" => "MN",
+            "Electrical" => "EC",
+            "Data" => "D",
+            "Software" => "SW",
+            "Environmental" => "EL",
+            "Failure to calibrate" => "FC",
+            "Results" => "RS",
+            "Readings" => "RD",
+            "Others" => "OT"
+        ];
+
+        return isset($complaintCodes[$name]) ? $complaintCodes[$name] : null;
+    }
+
+    public function getProductCategoryCode($name)
+    {
+        $productCategoryCodes = [
+            "Medicinal Product" => "MP",
+            "Herbal Product" => "HP",
+            "Vaccine" => "V",
+            "Blood and Blood Products" => "BBP",
+            "Medical device" => "MD",
+            "Cosmeceuticals" => "C"
+        ];
+
+        return isset($productCategoryCodes[$name]) ? $productCategoryCodes[$name] : null;
+    }
+
     public function api_pms_feedback()
     {
 
@@ -87,22 +150,22 @@ class PqmpsController extends AppController
     public function extract_category($pqmp)
     {
         if ($pqmp['Pqmp']['medicinal_product']) {
-            return "Medicinal product";
+            return $this->getProductCategoryCode("Medicinal Product");
         }
         if ($pqmp['Pqmp']['blood_products']) {
-            return "Blood and blood products";
+            return $this->getProductCategoryCode("Blood and Blood Products");
         }
         if ($pqmp['Pqmp']['herbal_product']) {
-            return "Herbal product";
+            return $this->getProductCategoryCode("Herbal product");
         }
         if ($pqmp['Pqmp']['medical_device']) {
-            return "Medical device";
+            return $this->getProductCategoryCode("Medical device");
         }
         if ($pqmp['Pqmp']['cosmeceuticals']) {
-            return "Cosmeceuticals";
+            return $this->getProductCategoryCode("Cosmeceuticals");
         }
         if ($pqmp['Pqmp']['product_vaccine']) {
-            return "Vaccine";
+            return $this->getProductCategoryCode("Vaccine");
         }
         if ($pqmp['Pqmp']['product_other']) {
             return $pqmp['Pqmp']['product_specify'];
@@ -113,66 +176,80 @@ class PqmpsController extends AppController
     public function extract_complaints($pqmp)
     {
         $complaints = [];
-    
+
         if ($pqmp['Pqmp']['colour_change']) {
-            $complaints[] = "Colour change";
+            $complaints[] = $this->getComplaintCode("Colour Change");
         }
         if ($pqmp['Pqmp']['separating']) {
-            $complaints[] = "Separating";
+            $complaints[] = $this->getComplaintCode("Separating");
         }
         if ($pqmp['Pqmp']['powdering']) {
-            $complaints[] = "Powdering / crumbling";
+            $complaints[] = $this->getComplaintCode("Powdering / crumbling");
         }
         if ($pqmp['Pqmp']['caking']) {
-            $complaints[] = "Caking";
+            $complaints[] = $this->getComplaintCode("Caking");
         }
         if ($pqmp['Pqmp']['moulding']) {
-            $complaints[] = "Moulding";
+            $complaints[] = $this->getComplaintCode("Moulding");
         }
         if ($pqmp['Pqmp']['odour_change']) {
-            $complaints[] = "Change of odour";
+            $complaints[] = $this->getComplaintCode("Change of odour");
         }
         if ($pqmp['Pqmp']['mislabeling']) {
-            $complaints[] = "Mislabeling";
+            $complaints[] = $this->getComplaintCode("Mislabeling");
         }
         if ($pqmp['Pqmp']['incomplete_pack']) {
-            $complaints[] = "Incomplete pack";
+            $complaints[] = $this->getComplaintCode("Incomplete pack");
         }
         if ($pqmp['Pqmp']['therapeutic_ineffectiveness']) {
-            $complaints[] = "Therapeutic ineffectiveness";
+            $complaints[] = $this->getComplaintCode("Therapeutic ineffectiveness");
         }
         if ($pqmp['Pqmp']['particulate_matter']) {
-            $complaints[] = "Particulate matter in infusions/injectables";
+            $complaints[] = $this->getComplaintCode("Particulate matter in infusions/injectables");
         }
         if ($pqmp['Pqmp']['complaint_other']) {
             $complaints[] = $pqmp['Pqmp']['complaint_other'];
         }
-    
+
         return $complaints;
     }
     public function extract_device_complaints($pqmp)
     {
         $deviceComplaints = [];
-    
+
         if ($pqmp['Pqmp']['packaging']) {
-            $deviceComplaints[] = "Packaging";
+            $deviceComplaints[] = $this->getComplaintCode("Packaging");
         }
         if ($pqmp['Pqmp']['labelling']) {
-            $deviceComplaints[] = "Labelling";
+            $deviceComplaints[] = $this->getComplaintCode("Labelling");
         }
         if ($pqmp['Pqmp']['sampling']) {
-            $deviceComplaints[] = "Sampling";
+            $deviceComplaints[] = $this->getComplaintCode("Sampling");
         }
         if ($pqmp['Pqmp']['mechanism']) {
-            $deviceComplaints[] = "Mechanism";
+            $deviceComplaints[] = $this->getComplaintCode("Mechanism");
         }
         if ($pqmp['Pqmp']['electrical']) {
-            $deviceComplaints[] = "Electrical";
+            $deviceComplaints[] = $this->getComplaintCode("Electrical");
         }
         if ($pqmp['Pqmp']['device_data']) {
-            $deviceComplaints[] = "Device data";
+            $deviceComplaints[] = $this->getComplaintCode("Data");
         }
-    
+        if ($pqmp['Pqmp']['failure_to_calibrate']) {
+            $deviceComplaints[] = $this->getComplaintCode("Failure to calibrate");
+        }
+        if ($pqmp['Pqmp']['results']) {
+            $deviceComplaints[] = $this->getComplaintCode("Results");
+        }
+        if ($pqmp['Pqmp']['readings']) {
+            $deviceComplaints[] = $this->getComplaintCode("Readings");
+        }
+        if ($pqmp['Pqmp']['environmental']) {
+            $deviceComplaints[] = $this->getComplaintCode("Environmental");
+        }
+        if ($pqmp['Pqmp']['software']) {
+            $deviceComplaints[] = $this->getComplaintCode("Software");
+        }
         return $deviceComplaints;
     }
     function flattenDateArray($dateArray)
@@ -254,7 +331,7 @@ class PqmpsController extends AppController
 
         // try {
         $photolist = $this->convertAttachmentToBase64($pqmp['Attachment']);
- 
+
 
         $flattenedManufactureDate = $this->flattenDateArray($pqmp['Pqmp']['manufacture_date']);
 
@@ -308,16 +385,16 @@ class PqmpsController extends AppController
                 "email" => $pqmp['Pqmp']['reporter_email']
             ),
             "personSubmittingToPPB" => array(
-                "name" => "", //"String (optional)",
-                "designation" => "", // "String (optional)",
-                "mobileNo" => "", //"String (optional)",
-                "email" => "", // "String (optional)"
+                "name" => !empty($pqmp['Pqmp']['reporter_name_diff']) ? $pqmp['Pqmp']['reporter_name_diff'] : "",
+                "designation" => !empty($pqmp['Pqmp']['reporter_designation_diff']) ? $pqmp['Pqmp']['reporter_designation_diff'] : "",
+                "mobileNo" => !empty($pqmp['Pqmp']['reporter_phone_diff']) ? $pqmp['Pqmp']['reporter_phone_diff'] : "",
+                "email" => !empty($pqmp['Pqmp']['reporter_email_diff']) ? $pqmp['Pqmp']['reporter_email_diff'] : ""
             ),
-            "reportNo" =>$pqmp['Pqmp']['id'],
+            "reportNo" => $pqmp['Pqmp']['id'],
             "reportDate" => $reporter_date_formatted, //"String (format=>yyyy-MM-dd)",
             "facility" => array(
                 "county" => $pqmp['County']['county_name'], //"String (optional)",
-                "subCounty" => !empty($pqmp['SubCounty']['sub_county_name']) ? $pqmp['SubCounty']['sub_county_name'] : "",//$pqmp[''][''], //"String (optional)",
+                "subCounty" => !empty($pqmp['SubCounty']['sub_county_name']) ? $pqmp['SubCounty']['sub_county_name'] : "", //$pqmp[''][''], //"String (optional)",
                 "address" => $pqmp['Pqmp']['facility_address'], //"String (optional)",
                 "mobileNo" => $pqmp['Pqmp']['facility_phone'], //"String (optional)"
             ),
@@ -328,6 +405,7 @@ class PqmpsController extends AppController
                 "telephone" => "", //$pqmp['Pqmp']['name'],//"String (optional)"
             ),
             "photolist" => $photolist,
+            "productFormulation" => $this->getFormulationCode($pqmp['Pqmp']['product_formulation']),
             "productcomplaint" => $productComplaints,
             "devicecomplaint" => $deviceComplaints,
             "otherdetails" => $pqmp['Pqmp']['complaint_other_specify'],
@@ -443,7 +521,7 @@ class PqmpsController extends AppController
         }
         $criteria['Pqmp.deleted'] = false;
         $criteria['Pqmp.archived'] = false;
-        
+
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Pqmp.created' => 'desc');
         $this->paginate['contain'] = array('County', 'Country', 'Designation');
@@ -566,7 +644,7 @@ class PqmpsController extends AppController
         $criteria['Pqmp.deleted'] = false;
         if (!empty($this->passedArgs['archived'])) {
             $criteria['Pqmp.archived'] = true;
-        }else{
+        } else {
             $criteria['Pqmp.archived'] = false;
         }
 
@@ -974,7 +1052,7 @@ class PqmpsController extends AppController
     {
 
         $count = $this->Pqmp->find('count',  array(
-            'fields' => 'Pqmp.reference_no', 
+            'fields' => 'Pqmp.reference_no',
             'conditions' => array(
                 'Pqmp.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
                 'Pqmp.reference_no !=' => 'new'
@@ -1085,6 +1163,7 @@ class PqmpsController extends AppController
                 "telephone" => "", //$pqmp['Pqmp']['name'],//"String (optional)"
             ),
             "photolist" => $photolist,
+            "productFormulation" => $this->getFormulationCode($pqmp['Pqmp']['product_formulation']),
             "productcomplaint" => $productComplaints,
             "devicecomplaint" => $deviceComplaints,
             "otherdetails" => $pqmp['Pqmp']['complaint_other_specify'],
@@ -1374,6 +1453,7 @@ class PqmpsController extends AppController
         $save_data['Pqmp']['user_id'] = $this->Auth->user('id');
         $save_data['Pqmp']['submitted'] = 2;
         $save_data['Pqmp']['submitted_date'] = date("Y-m-d H:i:s");
+        $save_data['Pqmp']['category'] = "";
 
         //lucian
         if (empty($save_data['Pqmp']['reference_no'])) {
@@ -1949,7 +2029,8 @@ class PqmpsController extends AppController
         }
         $this->Session->setFlash(__('PQHTP was not archied'), 'alerts/flash_error');
         $this->redirect($this->referer());
-    } public function manager_restore_archive($id = null)
+    }
+    public function manager_restore_archive($id = null)
     {
 
         $this->Pqmp->id = $id;

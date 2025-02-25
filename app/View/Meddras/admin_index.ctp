@@ -46,11 +46,11 @@
 								 
 						echo $this->Form->end();
 
-						echo $this->Html->link(
-							'<span class="label label-info tooltipper" title="Auto Sync"><i class="fa fa-refresh" aria-hidden="true"></i> Auto Sync </span>',
-							array('controller' => 'meddras', 'action' => 'autosync', 'manager' => false),
-							array('escape' => false)
-						  );
+						// echo $this->Html->link(
+						// 	'<span class="label label-info tooltipper" title="Auto Sync"><i class="fa fa-refresh" aria-hidden="true"></i> Auto Sync </span>',
+						// 	array('controller' => 'meddras', 'action' => 'sync', 'admin' => true),
+						// 	array('escape' => false)
+						//   );
 					?>
 
 					
