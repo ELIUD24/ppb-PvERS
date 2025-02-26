@@ -195,37 +195,7 @@ $this->Html->css('sadr', false, array('inline' => false));
 						);
 
 
-
-						// echo $this->Form->input('medicinal_product', array(
-						// 	'format' => array('error', 'before', 'label', 'between', 'input', 'after'),
-						// 	'type' => 'checkbox',  
-						// 	'class' => 'circle-checkbox',
-						// 	'style' => 'width: 14px; height: 14px; border-radius: 50%; border: 2px solid #999; outline: none; vertical-align: middle; cursor: pointer;',
-						// 	'before' => '<i class="fa fa-check" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #007bff; border-radius: 50%;"></i>',			
-						// 	'label' => false, 'div' => false, 'class' => false, 'hiddenField' => false,
-						// 	'between' => '<input type="hidden" value="0" id="Sadr_medicinal_product_" name="data[Sadr][medicinal_product]">
-						//                                                 <label class="checkbox">',
-						// 	'after' => 'Medicinal product </label>',
-						// ));
-						// echo $this->Form->input('herbal_product', array(
-						// 	'type' => 'checkbox',   'label' => false, 'div' => false, 'class' => false, 'hiddenField' => false,
-						// 	'between' => '<input type="hidden" value="0" id="Sadr_herbal_product_" name="data[Sadr][herbal_product]">
-						//                                                 <label class="checkbox">',
-						// 	'after' => 'Herbal product </label>',
-						// ));
-						// echo $this->Form->input('cosmeceuticals', array(
-						// 	'type' => 'checkbox',   'label' => false, 'div' => false, 'class' => false, 'hiddenField' => false,
-						// 	'between' => '<input type="hidden" value="0" id="Sadr_cosmeceuticals_" name="data[Sadr][cosmeceuticals]">
-						//                                                 <label class="checkbox">',
-						// 	'after' => 'Cosmeceuticals </label>',
-						// ));
-						// echo $this->Form->input('product_other', array(
-						// 	'type' => 'checkbox',   'label' => false, 'div' => false, 'class' => false, 'hiddenField' => false,
-						// 	'between' => '<input type="hidden" value="0" id="Sadr_product_other_" name="data[Sadr][product_other]">
-						//                                                 <label class="checkbox">',
-						// 	'after' => 'Others </label>',
-						// ));
-						
+ 
 
 						?>
 						<br>

@@ -54,11 +54,13 @@ $nchecked = "&#x2610;";
 						</td>
 						<td style="width: 50%;">
 							<h5>Product category (Tick appropriate box)</h5>
-							<p> <?php echo ($sadr['Sadr']['medicinal_product']   ? $ichecked : $nchecked); ?> Medicinal product </p>
-							<p> <?php echo ($sadr['Sadr']['herbal_product']   ? $ichecked : $nchecked); ?> Herbal product </p>
-							<p> <?php echo ($sadr['Sadr']['cosmeceuticals']   ? $ichecked : $nchecked); ?> Cosmeceuticals </p>
-							<p> <?php echo ($sadr['Sadr']['product_other']   ? $ichecked : $nchecked); ?> Others </p>
-							<p> <?php echo $sadr['Sadr']['product_specify']; ?> </p>
+							<p> <?php echo ($sadr['Sadr']['product_category'] === 'Medicinal product' ? $ichecked : $nchecked); ?> Medicinal product </p>
+							<p> <?php echo ($sadr['Sadr']['product_category'] === 'Herbal product' ? $ichecked : $nchecked); ?> Herbal product </p>
+							<p> <?php echo ($sadr['Sadr']['product_category'] === 'Cosmeceuticals' ? $ichecked : $nchecked); ?> Cosmeceuticals </p>
+							<p> <?php echo ($sadr['Sadr']['product_category'] === 'Others' ? $ichecked : $nchecked); ?> Others </p>
+
+							<!-- Display 'Others' specification if applicable -->
+							<p> <?php echo ($sadr['Sadr']['product_category'] === 'Others' && !empty($sadr['Sadr']['product_specify'])) ? 'Specify: ' . h($sadr['Sadr']['product_specify']) : ''; ?> </p>
 						</td>
 					</tr>
 				</table>
@@ -146,9 +148,9 @@ $nchecked = "&#x2610;";
 						<td style="width: 70%;">
 							<?php
 							foreach ($sadr['SadrReaction'] as $reaction) :
-								echo "<strong>".$reaction['reaction'] . "</strong><br>";
+								echo "<strong>" . $reaction['reaction'] . "</strong><br>";
 							endforeach; ?>
-							 
+
 						</td>
 					</tr>
 					<tr>

@@ -76,6 +76,7 @@ class SadrsController extends AppController
                             'weight',
                             'report_sadr',
                             'report_therapeutic',
+                            'product_category',
                             'medicinal_product',
                             'blood_products',
                             'herbal_product',
@@ -134,30 +135,102 @@ class SadrsController extends AppController
                             'reporter_date_diff'
                         );
 
-                        // if ($header !== $expectedColumns) {
-                        //     $this->Session->setFlash(__('CSV format is incorrect! Please check column headers.'), 'flash_error');
-                        //     fclose($handle);
-                        //     return $this->redirect($this->referer());
-                        // }
-
                         $savedRecords = 0;
                         while (($row = fgetcsv($handle)) !== false) {
                             $data = array();
-                            foreach ($expectedColumns as $index => $column) {
-                                $data['Sadr'][$column] = isset($row[$index]) ? trim($row[$index]) : null;
+                            $listOfDrugs = [];
+
+                            // Map CSV values based on column names from the header
+                            foreach ($header as $i => $columnName) {
+                                $columnName = trim($columnName); // Ensure spaces are trimmed
+                                if (in_array($columnName, $expectedColumns)) {
+                                    $data['Sadr'][$columnName] = isset($row[$i]) ? trim($row[$i]) : null;
+                                }
                             }
 
+                            // Process Drugs with corresponding data
+                            $drugs = !empty($data['Sadr']['drugs']) ? explode(';', $data['Sadr']['drugs']) : [];
+                            $brands = !empty($data['Sadr']['brands']) ? explode(';', $data['Sadr']['brands']) : [];
+                            $batchNos = !empty($data['Sadr']['batch_no']) ? explode(';', $data['Sadr']['batch_no']) : [];
+                            $manufacturers = !empty($data['Sadr']['manufacturers']) ? explode(';', $data['Sadr']['manufacturers']) : [];
+                            $startDates = !empty($data['Sadr']['start_date']) ? explode(';', $data['Sadr']['start_date']) : [];
+                            $stopDates = !empty($data['Sadr']['end_date']) ? explode(';', $data['Sadr']['end_date']) : [];
+                            $indications = !empty($data['Sadr']['drug_indication']) ? explode(';', $data['Sadr']['drug_indication']) : [];
+                            $suspectedDrugs = !empty($data['Sadr']['suspected_drug']) ? explode(';', $data['Sadr']['suspected_drug']) : [];
+
+                            foreach ($drugs as $index => $drug) {
+                                $listOfDrugs[] = [
+                                    'dose_id' => null,
+                                    'route_id' => null,
+                                    'frequency_id' => null,
+                                    'frequency_id_other' => null,
+                                    'drug_name' => trim($drug),
+                                    'brand_name' => isset($brands[$index]) ? trim($brands[$index]) : null,
+                                    'batch_no' => isset($batchNos[$index]) ? trim($batchNos[$index]) : null,
+                                    'manufacturer' => isset($manufacturers[$index]) ? trim($manufacturers[$index]) : null,
+                                    'dose' => null,
+                                    'start_date' => isset($startDates[$index]) ? trim($startDates[$index]) : null,
+                                    'stop_date' => isset($stopDates[$index]) ? trim($stopDates[$index]) : null,
+                                    'indication' => isset($indications[$index]) ? trim($indications[$index]) : null,
+                                    'suspected_drug' => isset($suspectedDrugs[$index]) ? trim($suspectedDrugs[$index]) : null
+                                ];
+                            }
+
+                            $data['SadrListOfDrug'] = !empty($listOfDrugs) ? $listOfDrugs : null;
+
+
+
+                            // Medications
+
+
+                            $medicines = !empty($data['Sadr']['med_drug_name']) ? explode(';', $data['Sadr']['med_drug_name']) : [];
+                            $medBrands = !empty($data['Sadr']['med_brand_name']) ? explode(';', $data['Sadr']['med_brand_name']) : [];
+                            $medBatchNos = !empty($data['Sadr']['med_batch_no']) ? explode(';', $data['Sadr']['med_batch_no']) : [];
+                            $medManufacturers = !empty($data['Sadr']['med_manufacturer']) ? explode(';', $data['Sadr']['med_manufacturer']) : [];
+                            $medDoses = !empty($data['Sadr']['med_dose']) ? explode(';', $data['Sadr']['med_dose']) : [];
+                            $medStartDates = !empty($data['Sadr']['med_start_date']) ? explode(';', $data['Sadr']['med_start_date']) : [];
+                            $medStopDates = !empty($data['Sadr']['med_stop_date']) ? explode(';', $data['Sadr']['med_stop_date']) : [];
+                            $medIndications = !empty($data['Sadr']['med_indication']) ? explode(';', $data['Sadr']['med_indication']) : [];
+
+                            $listOfMedicines = [];
+
+                            foreach ($medicines as $index => $medicine) {
+                                $listOfMedicines[] = [
+                                    'dose_id' => null,
+                                    'route_id' => null,
+                                    'frequency_id' => null,
+                                    'frequency_id_other' => null,
+                                    'drug_name' => trim($medicine),
+                                    'brand_name' => isset($medBrands[$index]) ? trim($medBrands[$index]) : null,
+                                    'batch_no' => isset($medBatchNos[$index]) ? trim($medBatchNos[$index]) : null,
+                                    'manufacturer' => isset($medManufacturers[$index]) ? trim($medManufacturers[$index]) : null,
+                                    'dose' => isset($medDoses[$index]) ? trim($medDoses[$index]) : null,
+                                    'start_date' => isset($medStartDates[$index]) ? trim($medStartDates[$index]) : null,
+                                    'stop_date' => isset($medStopDates[$index]) ? trim($medStopDates[$index]) : null,
+                                    'indication' => isset($medIndications[$index]) ? trim($medIndications[$index]) : null
+                                ];
+                            }
+
+                            $data['SadrListOfMedicine'] = !empty($listOfMedicines) ? $listOfMedicines : null;
+
+
+
+                            // Process reactions
+                            $reactions = !empty($data['Sadr']['reactions']) ? explode(';', $data['Sadr']['reactions']) : [];
+
+                            $listOfReactions = [];
+
+                            foreach ($reactions as $reaction) {
+                                $listOfReactions[] = ['reaction' => trim($reaction)];
+                            }
+
+                            // Store in SadrReaction
+                            $data['SadrReaction'] = !empty($listOfReactions) ? $listOfReactions : null;
                             // add the basic fields
 
                             $data['Sadr']['user_id'] = $this->Auth->User('id');
-                            $data['Sadr']['reference_no'] = 'new';
+                            $data['Sadr']['reference_no'] = $this->generate_inner_reference();
                             $data['Sadr']['report_type'] = 'Initial';
-                            // $data['Sadr']['designation_id'] = $this->Auth->User('designation_id');
-                            // $data['Sadr']['county_id'] = $this->Auth->User('county_id');
-                            // $data['Sadr']['institution_code'] = $this->Auth->User('institution_code');
-                            // $data['Sadr']['address'] = $this->Auth->User('institution_address');
-                            // $data['Sadr']['contact'] = $this->Auth->User('institution_contact');
-                            // $data['Sadr']['name_of_institution'] = $this->Auth->User('name_of_institution');
                             $data['Sadr']['submitted'] = 2;
                             $data['Sadr']['submitted_date'] = date("Y-m-d H:i:s");
 
@@ -165,12 +238,9 @@ class SadrsController extends AppController
                             // debug($data);
                             // exit;
                             $this->Sadr->create();
-                            if ($this->Sadr->save($data, array('validate' => false, 'deep' => true))) {
+                            // if ($this->Sadr->save($data, array('validate' => false, 'deep' => true))) {
+                            if ($this->Sadr->saveAssociated($data, array('deep' => true, 'validate' => false))) {
                                 $savedRecords++;
-                            }else{
-                                $errors = $this->Sadr->validationErrors;
-                                debug($errors);
-                                exit;
                             }
                         }
                         fclose($handle);
@@ -276,13 +346,14 @@ class SadrsController extends AppController
         $count = $this->Sadr->find('count',  array(
             'fields' => 'Sadr.reference_no',
             'conditions' => array(
-                'Sadr.created BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                'Sadr.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
                 'Sadr.reference_no !=' => 'new'
             )
         ));
         $count++;
         $count = ($count < 10) ? "0$count" : $count;
-        return $reference_number = 'SADR/' . date('Y') . '/' . $count;
+        $reference_number = 'SADR/' . date('Y') . '/' . $count;
+        return $reference_number;
     }
     /**
      * index method
@@ -1484,6 +1555,8 @@ class SadrsController extends AppController
         $sadr = $this->Sadr->read(null, $id);
         if ($this->request->is('post') || $this->request->is('put')) {
             $validate = false;
+            // debug($this->request->data);
+            // exit;
             // $validate = 'first';                
             if ($this->Sadr->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
