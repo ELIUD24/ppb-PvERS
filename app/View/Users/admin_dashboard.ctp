@@ -1,164 +1,269 @@
 <?php
-  $this->assign('Dashboard', 'active');
+$this->assign('Dashboard', 'active');
 ?>
-  <div class="marketing">
-    <h4>Administrators&rsquo; Dashboard <small class="text-error">(Restricted)</small></h4>
+<div class="marketing">
+  <h4>Administrators&rsquo; Dashboard <small class="text-error">(Restricted)</small></h4>
+</div>
+<hr class="soften" style="margin: 10px;">
+<div class="row-fluid">
+  <div class="span4">
+    <h4><img alt="" src="/img/report.ico" style="width: 25px;">&nbsp;
+      <?php //echo $this->Html->link('Reports', array('controller' => 'applications', 'action' => 'index')); 
+      ?></h4>
+    <small class="muted">Filter, search and download reports</small>
+    <ul class="nav nav-tabs nav-stacked">
+
+    </ul>
+    <br>
+    <hr>
+    <h4><a href="http://www.google.com/analytics/" target="_blank"><i class="icon-globe"></i> Google Analytics</a></h4>
+
+    <!-- Sadrs Upload -->
+     <hr>
+    <h4><a href="#" ><i class="icon-globe"></i> Tibu Linkage</a></h4>
+<br>
+    <?php
+    echo $this->Form->create('Sadr', array(
+      'url' => array_merge(array('controller' => 'sadrs', 'action' => 'file_upload'), $this->params['pass']),
+      'class' => 'well',
+      'type' => 'file'
+    ));
+    ?>
+    <div class="row-fluid">
+      <div class="span12">
+        <?php
+        echo $this->Form->input(
+          'file',
+          array(
+            'type' => 'file',
+            'div' => false,
+            'id' => 'adminTitleId',
+            'class' => 'span9',
+            'label' => array('class' => 'required', 'text' => 'Select File'),
+            'required' => true, // Make file input required
+            'accept' => '.csv'
+          )
+        );
+        ?>
+      </div>
+    </div>
+    <div class="row-fluid">
+      <hr>
+      <div class="span4">
+        <?php
+        echo $this->Form->button(
+          '<i class="icon-upload icon-white"></i> Upload',
+          array(
+            'class' => 'btn btn-inverse',
+            'type' => 'submit', // Make the button a submit button
+            'escape' => false
+          )
+        );
+        ?>
+      </div>
+    </div>
+    <?php echo $this->Form->end(); ?>
+
+    <!-- End -->
+
+
   </div>
-  <hr class="soften" style="margin: 10px;">
-  <div class="row-fluid">
-    <div class="span4">
-      <h4><img alt="" src="/img/report.ico" style="width: 25px;">&nbsp;
-        <?php //echo $this->Html->link('Reports', array('controller' => 'applications', 'action' => 'index')); ?></h4>
-      <small class="muted">Filter, search and download reports</small>
-      <ul class="nav nav-tabs nav-stacked">
-
-      </ul>
-      <br>
-      <hr>
-      <h4><a href="http://www.google.com/analytics/" target="_blank"><i class="icon-globe"></i> Google Analytics</a></h4>
+  <div class="span4">
+    <h4><img alt="" src="/img/user_group.ico" style="width: 25px;">&nbsp;<?php
+                                                                          echo $this->Html->link(
+                                                                            'User Management',
+                                                                            array('controller' => 'users', 'action' => 'index', 'admin' => true),
+                                                                            array('escape' => false)
+                                                                          );
+                                                                          ?></h4>
+    <small class="muted">Add, edit, deactivate users.</small>
+    <ul class="nav nav-tabs nav-stacked">
+      <li>
+        <?php echo $this->Html->link(
+          '<i class="icon-user"></i> Users',
+          array('controller' => 'users', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        ); ?>
+      </li>
+      <li>
+        <?php echo $this->Html->link(
+          '<i class="icon-plus-sign"></i> Add User',
+          array('controller' => 'users', 'action' => 'add', 'admin' => true),
+          array('escape' => false)
+        ); ?>
+      </li>
+      <li>
+        <?php echo $this->Html->link(
+          '<i class="icon-group"></i> User Roles',
+          array('controller' => 'groups', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        ); ?>
+      </li>
+    </ul>
+    <hr>
+    <h4><img alt="" src="/img/comments.ico" style="width: 25px;">&nbsp;<?php
+                                                                        echo $this->Html->link('User Feedback', array('controller' => 'feedbacks'), array('escape' => false));
+                                                                        ?><small class="muted">&nbsp;(From Contact Us page)</small></h4>
+    <div style="margin-left: 20px;">
+      <?php if (count($previous_messages) > 0) { ?>
+        <dl>
+          <?php
+          $count = 1;
+          foreach ($previous_messages as $previous_message) {
+            echo "<dt>" . $count . ". " . $previous_message['Feedback']['subject'] . " <small class='muted'> created on " . date('d-m-Y H:i:s', strtotime($previous_message['Feedback']['created'])) . "</small></dt>";
+            echo "<dd class='morecontent'>" . $previous_message['Feedback']['feedback'] . "</dd>";
+            $count++;
+          }
+          ?>
+        </dl>
+      <?php } ?>
     </div>
-       <div class="span4">
-        <h4><img alt="" src="/img/user_group.ico" style="width: 25px;">&nbsp;<?php
-               echo $this->Html->link('User Management',
-                  array('controller' => 'users', 'action' => 'index', 'admin' => true), array('escape' => false));
-        ?></h4>
-      <small class="muted">Add, edit, deactivate users.</small>
-      <ul class="nav nav-tabs nav-stacked">
-        <li>
-        <?php echo $this->Html->link('<i class="icon-user"></i> Users',
-              array('controller' => 'users', 'action' => 'index', 'admin' => true),
-              array('escape' => false)); ?>
-        </li>
-        <li>
-        <?php echo $this->Html->link('<i class="icon-plus-sign"></i> Add User',
-              array('controller' => 'users', 'action' => 'add', 'admin' => true),
-              array('escape' => false)); ?>
-        </li>
-        <li>
-        <?php echo $this->Html->link('<i class="icon-group"></i> User Roles',
-              array('controller' => 'groups', 'action' => 'index', 'admin' => true),
-              array('escape' => false)); ?>
-        </li>
-      </ul>
-      <hr>
-      <h4><img alt="" src="/img/comments.ico" style="width: 25px;">&nbsp;<?php
-        echo $this->Html->link('User Feedback', array('controller' => 'feedbacks'), array('escape' => false));
-        ?><small class="muted">&nbsp;(From Contact Us page)</small></h4>
-      <div style="margin-left: 20px;">
-         <?php if(count($previous_messages) > 0) { ?>
-             <dl>
-            <?php
-              $count = 1;
-              foreach ($previous_messages as $previous_message) {
-                echo "<dt>".$count.". ".$previous_message['Feedback']['subject']." <small class='muted'> created on ".date('d-m-Y H:i:s', strtotime($previous_message['Feedback']['created']))."</small></dt>";
-                echo "<dd class='morecontent'>".$previous_message['Feedback']['feedback']."</dd>";
-                $count++;
-              }
-            ?>
-             </dl>
-         <?php } ?>
-       </div>
-      <small class="muted">Latest Feedback.</small>
-    </div>
+    <small class="muted">Latest Feedback.</small>
+  </div>
 
 
-    <div class="span4">
-      <h4><img alt="" src="/img/box_content.ico" style="width: 25px;">&nbsp;<a href="#">Content Management</a></h4>
-      <small class="muted">Manage site content like emails, notifications, web pages etc</small>
+  <div class="span4">
+    <h4><img alt="" src="/img/box_content.ico" style="width: 25px;">&nbsp;<a href="#">Content Management</a></h4>
+    <small class="muted">Manage site content like emails, notifications, web pages etc</small>
 
-      <ul class="nav nav-tabs nav-stacked">
-        <li><?php
-        echo $this->Html->link('<i class="icon-envelope"></i> Site Messages <small class="muted">(Emails &amp; Notifications)</small>',
-            array('controller' => 'messages', 'action' => 'index', 'admin' => true), array('escape' => false)); ?>
-        </li>
-        <li><?php
-        echo $this->Html->link('<i class="fa fa-code" aria-hidden="true"></i> Front end pages <small class="muted">(public text)</small>',
-            array('controller' => 'sites', 'action' => 'index', 'admin' => true), array('escape' => false)); ?>
-        </li>
-        <li>
+    <ul class="nav nav-tabs nav-stacked">
+      <li><?php
+          echo $this->Html->link(
+            '<i class="icon-envelope"></i> Site Messages <small class="muted">(Emails &amp; Notifications)</small>',
+            array('controller' => 'messages', 'action' => 'index', 'admin' => true),
+            array('escape' => false)
+          ); ?>
+      </li>
+      <li><?php
+          echo $this->Html->link(
+            '<i class="fa fa-code" aria-hidden="true"></i> Front end pages <small class="muted">(public text)</small>',
+            array('controller' => 'sites', 'action' => 'index', 'admin' => true),
+            array('escape' => false)
+          ); ?>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="icon-hand-right"></i> Counties',
+        echo $this->Html->link(
+          '<i class="icon-hand-right"></i> Counties',
           array('controller' => 'counties', 'action' => 'index',  'admin' => true),
-          array('escape' => false));
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="icon-hand-right"></i> Sub Counties',
+        echo $this->Html->link(
+          '<i class="icon-hand-right"></i> Sub Counties',
           array('controller' => 'sub_counties', 'action' => 'index',  'admin' => true),
-          array('escape' => false));
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="icon-globe"></i> Countries',
+        echo $this->Html->link(
+          '<i class="icon-globe"></i> Countries',
           array('controller' => 'countries', 'action' => 'index', 'admin' => true),
-          array('escape' => false));
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-user-secret" aria-hidden="true"></i> Designations',
-          array('controller' => 'designations', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-user-secret" aria-hidden="true"></i> Designations',
+          array('controller' => 'designations', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-linux" aria-hidden="true"></i> Drug Dictionary',
-          array('controller' => 'drug_dictionaries', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-linux" aria-hidden="true"></i> Drug Dictionary',
+          array('controller' => 'drug_dictionaries', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-plus-square" aria-hidden="true"></i> Vaccines',
-          array('controller' => 'vaccines', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-plus-square" aria-hidden="true"></i> Vaccines',
+          array('controller' => 'vaccines', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-fighter-jet" aria-hidden="true"></i> Drug Administration Routes',
-          array('controller' => 'routes', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-fighter-jet" aria-hidden="true"></i> Drug Administration Routes',
+          array('controller' => 'routes', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-clock-o" aria-hidden="true"></i> Drug Administration Frequencies',
-          array('controller' => 'frequencies', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-clock-o" aria-hidden="true"></i> Drug Administration Frequencies',
+          array('controller' => 'frequencies', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-dot-circle-o" aria-hidden="true"></i> Drug Administration Doses',
-          array('controller' => 'doses', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-dot-circle-o" aria-hidden="true"></i> Drug Administration Doses',
+          array('controller' => 'doses', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-university" aria-hidden="true"></i> Institutions',
-          array('controller' => 'facility_codes', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-university" aria-hidden="true"></i> Institutions',
+          array('controller' => 'facility_codes', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-        <li>
+      </li>
+      <li>
         <?php
-        echo $this->Html->link('<i class="fa fa-medkit" aria-hidden="true"></i> MedDRA Dictionary',
-          array('controller' => 'meddras', 'action' => 'index', 'admin' => true), array('escape' => false));
+        echo $this->Html->link(
+          '<i class="fa fa-medkit" aria-hidden="true"></i> MedDRA Dictionary',
+          array('controller' => 'meddras', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
         ?>
-        </li>
-      </ul>
+      </li>
+      <li>
+        <?php
+        echo $this->Html->link(
+          '<i class="fa fa-file-o" aria-hidden="true"></i> Tibu Data',
+          array('controller' => 'sadrs', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        );
+        ?>
+      </li>
+    </ul>
 
-    </div>
-      </div> <!-- /row -->
-      <hr>
-      <div class="row-fluid" style="margin-bottom: 9px;">
-        <div class="span4">
-      <!-- SOME CONDEND HERE -->
-    </div>
-        <div class="span4">
-      <!-- SOME OTHER CONDEND HERE -->
-        </div>
-        <div class="span4">
-        </div>
-      </div> <!-- /row -->
+  </div>
+</div> <!-- /row -->
+<hr>
+<div class="row-fluid" style="margin-bottom: 9px;">
+  <div class="span4">
+    <!-- SOME CONDEND HERE -->
+  </div>
+  <div class="span4">
+    <!-- SOME OTHER CONDEND HERE -->
+  </div>
+  <div class="span4">
+  </div>
+</div> <!-- /row -->
 
 
 

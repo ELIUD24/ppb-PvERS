@@ -29,6 +29,229 @@ class SadrsController extends AppController
         parent::beforeFilter();
         $this->Auth->allow('yellowcard', 'guest_add', 'guest_edit', 'manager_check_missing');
     }
+
+    public function admin_file_upload()
+    {
+        if ($this->request->is('post')) {
+
+            // debug($this->request->data);
+            // exit;
+            if (!empty($this->request->data['Sadr']['file'])) {
+                $file = $this->request->data['Sadr']['file'];
+
+                // Check if file is a CSV
+                $allowedTypes = array('text/csv', 'application/vnd.ms-excel');
+                $fileExt = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+                if (!in_array($file['type'], $allowedTypes) || strtolower($fileExt) !== 'csv') {
+                    $this->Session->setFlash(__('Only CSV files are allowed.'), 'default', array('class' => 'alert alert-danger'));
+                    return $this->redirect($this->referer());
+                }
+
+                // Define upload directory (ensure it exists and is writable)
+                $uploadPath = WWW_ROOT . 'files' . DS . 'sadrs' . DS;
+                $fileName = time() . '_' . $file['name']; // Unique filename
+                $uploadFile = $uploadPath . $fileName;
+
+                if (move_uploaded_file($file['tmp_name'], $uploadFile)) {
+
+                    // Let's manupulate the data
+
+                    // $handle = fopen($file['tmp_name'], "r");
+                    $handle = fopen($uploadFile, "r");
+                    if ($handle !== false) {
+                        $header = fgetcsv($handle); // Read header row
+
+                        // Ensure header matches expected fields
+                        $expectedColumns = array(
+                            'report_type',
+                            'county',
+                            'sub_county',
+                            'report_title',
+                            'patient_name',
+                            'date_of_birth',
+                            'age_group',
+                            'gender',
+                            'height',
+                            'weight',
+                            'report_sadr',
+                            'report_therapeutic',
+                            'medicinal_product',
+                            'blood_products',
+                            'herbal_product',
+                            'cosmeceuticals',
+                            'product_other',
+                            'product_specify',
+                            'name_of_institution',
+                            'institution_code',
+                            'pregnancy_status',
+                            'known_allergy',
+                            'known_allergy_specify',
+                            'onset_date',
+                            'reaction',
+                            'reactions',
+                            'drugs',
+                            'brands',
+                            'batch_no',
+                            'manufacturers',
+                            'start_date',
+                            'end_date',
+                            'drug_indication',
+                            'suspected_drug',
+                            'suspected_drug_name',
+                            'suspected_drug_brand',
+                            'suspected_drug_manufacturer',
+                            'med_drug_name',
+                            'med_brand_name',
+                            'med_batch_no',
+                            'med_manufacturer',
+                            'med_dose',
+                            'med_start_date',
+                            'med_stop_date',
+                            'med_indication',
+                            'reaction_resolve',
+                            'reaction_reappear',
+                            'severity',
+                            'serious',
+                            'serious_reason',
+                            'action_taken',
+                            'outcome',
+                            'designations',
+                            'reporter_date',
+                            'reporter_name',
+                            'reporter_email',
+                            'reporter_phone',
+                            'diagnosis',
+                            'description_of_reaction',
+                            'medical_history',
+                            'lab_investigation',
+                            'any_other_comment',
+                            'person_submitting',
+                            'reporter_name_diff',
+                            'reporter_designation_diff',
+                            'reporter_email_diff',
+                            'reporter_phone_diff',
+                            'reporter_date_diff'
+                        );
+
+                        // if ($header !== $expectedColumns) {
+                        //     $this->Session->setFlash(__('CSV format is incorrect! Please check column headers.'), 'flash_error');
+                        //     fclose($handle);
+                        //     return $this->redirect($this->referer());
+                        // }
+
+                        $savedRecords = 0;
+                        while (($row = fgetcsv($handle)) !== false) {
+                            $data = array();
+                            foreach ($expectedColumns as $index => $column) {
+                                $data['Sadr'][$column] = isset($row[$index]) ? trim($row[$index]) : null;
+                            }
+
+                            // add the basic fields
+
+                            $data['Sadr']['user_id'] = $this->Auth->User('id');
+                            $data['Sadr']['reference_no'] = 'new';
+                            $data['Sadr']['report_type'] = 'Initial';
+                            // $data['Sadr']['designation_id'] = $this->Auth->User('designation_id');
+                            // $data['Sadr']['county_id'] = $this->Auth->User('county_id');
+                            // $data['Sadr']['institution_code'] = $this->Auth->User('institution_code');
+                            // $data['Sadr']['address'] = $this->Auth->User('institution_address');
+                            // $data['Sadr']['contact'] = $this->Auth->User('institution_contact');
+                            // $data['Sadr']['name_of_institution'] = $this->Auth->User('name_of_institution');
+                            $data['Sadr']['submitted'] = 2;
+                            $data['Sadr']['submitted_date'] = date("Y-m-d H:i:s");
+
+                            // Save record in the database
+                            // debug($data);
+                            // exit;
+                            $this->Sadr->create();
+                            if ($this->Sadr->save($data, array('validate' => false, 'deep' => true))) {
+                                $savedRecords++;
+                            }else{
+                                $errors = $this->Sadr->validationErrors;
+                                debug($errors);
+                                exit;
+                            }
+                        }
+                        fclose($handle);
+
+                        $this->Session->setFlash(__("File uploaded successfully! \n $savedRecords records have been successfully imported."), 'flash_success');
+                        return $this->redirect($this->referer());
+                    } else {
+                        $this->Session->setFlash(__('Could not open the file!'), 'flash_error');
+                    }
+
+                    // End of Manipulation
+
+                } else {
+                    $this->Session->setFlash(__('File upload failed. Please try again.'), 'default', array('class' => 'alert alert-danger'));
+                }
+            } else {
+                $this->Session->setFlash(__('No file selected.'), 'default', array('class' => 'alert alert-danger'));
+            }
+        }
+
+        $this->redirect($this->referer());
+    }
+
+    public function admin_index()
+    {
+        $this->Prg->commonProcess();
+        // debug($this->request->query['pages']);
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) {
+            if (!empty($this->passedArgs['filter_by'])) {
+                $this->passedArgs['reportrange'] = true;
+            } else {
+                $this->passedArgs['range'] = true;
+            }
+        }
+        if (!empty($this->request->query['pages'])) $this->paginate['limit'] = $this->request->query['pages'];
+        else $this->paginate['limit'] = reset($this->page_options);
+
+        $criteria = $this->Sadr->parseCriteria($this->passedArgs);
+
+        $criteria['Sadr.copied !='] = '1';
+        // check if the user has select unsubmited sadrs
+        if (isset($this->request->query['submitted']) && $this->request->query['submitted'] == 1) {
+            $criteria['Sadr.submitted'] = array(0, 1);
+        } else {
+            $criteria['Sadr.submitted'] = array(2, 3);
+        }
+        // add deleted condition to criteria
+        $criteria['Sadr.deleted'] = false;
+        if (!empty($this->passedArgs['archived'])) {
+            $criteria['Sadr.archived'] = true;
+        } else {
+            $criteria['Sadr.archived'] = false;
+        }
+
+        // if (!isset($this->passedArgs['submit'])) $criteria['Sadr.submitted'] = array(2, 3);
+        $this->paginate['conditions'] = $criteria;
+        $this->paginate['order'] = array('Sadr.submitted_date' => 'desc');
+        $this->paginate['contain'] = array('County', 'SadrListOfDrug', 'SadrListOfMedicine', 'SadrDescription', 'Designation', 'User');
+
+        //in case of csv export
+        if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
+
+            $sadrs = $this->Sadr->find(
+                'all',
+                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 1000)
+            );
+            // debug($sadrs);
+            // exit;
+            $this->csv_export($this->Sadr->find(
+                'all',
+                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 10000)
+            ));
+        }
+        //end csv export
+        $this->set('page_options', $this->page_options);
+        $counties = $this->Sadr->County->find('list', array('order' => array('County.county_name' => 'ASC')));
+        $this->set(compact('counties'));
+        $designations = $this->Sadr->Designation->find('list', array('order' => array('Designation.name' => 'ASC')));
+        $this->set(compact('designations'));
+        $this->set('sadrs', Sanitize::clean($this->paginate(), array('encode' => false)));
+    }
     public function manager_check_missing()
     {
         $data = $this->Sadr->find(
@@ -244,7 +467,7 @@ class SadrsController extends AppController
         $criteria['Sadr.deleted'] = false;
         if (!empty($this->passedArgs['archived'])) {
             $criteria['Sadr.archived'] = true;
-        }else{
+        } else {
             $criteria['Sadr.archived'] = false;
         }
 

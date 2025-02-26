@@ -1075,17 +1075,17 @@ class Ce2bsController extends AppController
                     );
 
                     $this->loadModel('Queue.QueuedTask');
-                    // $this->QueuedTask->createJob('GenericEmail', $datum);
-                    // $this->QueuedTask->createJob('GenericNotification', $datum);
+                    $this->QueuedTask->createJob('GenericEmail', $datum);
+                    $this->QueuedTask->createJob('GenericNotification', $datum);
 
 
                     //Send SMS
-                    // if (!empty($ce2b['Ce2b']['reporter_phone']) && strlen(substr($ce2b['Ce2b']['reporter_phone'], -9)) == 9 && is_numeric(substr($ce2b['Ce2b']['reporter_phone'], -9))) {
-                    //     $datum['phone'] = '254' . substr($ce2b['Ce2b']['reporter_phone'], -9);
-                    //     $variables['reference_url'] = Router::url(['controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true]);
-                    //     $datum['sms'] = CakeText::insert($message['Message']['sms'], $variables);
-                    //     $this->QueuedTask->createJob('GenericSms', $datum);
-                    // }
+                    if (!empty($ce2b['Ce2b']['reporter_phone']) && strlen(substr($ce2b['Ce2b']['reporter_phone'], -9)) == 9 && is_numeric(substr($ce2b['Ce2b']['reporter_phone'], -9))) {
+                        $datum['phone'] = '254' . substr($ce2b['Ce2b']['reporter_phone'], -9);
+                        $variables['reference_url'] = Router::url(['controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true]);
+                        $datum['sms'] = CakeText::insert($message['Message']['sms'], $variables);
+                        $this->QueuedTask->createJob('GenericSms', $datum);
+                    }
 
                     //Notify managers
                     $users = $this->Ce2b->User->find('all', array(
