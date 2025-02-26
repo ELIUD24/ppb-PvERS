@@ -714,7 +714,12 @@ class Sadr extends AppModel
     public function beforeSave($options = array())
     {
         if (!empty($this->data['Sadr']['date_of_birth'])) {
-            $this->data['Sadr']['date_of_birth'] = implode('-', $this->data['Sadr']['date_of_birth']);
+            if (is_array($this->data['Sadr']['date_of_birth'])) {
+                $this->data['Sadr']['date_of_birth'] = implode('-', $this->data['Sadr']['date_of_birth']);
+            }else{
+                $this->data['Sadr']['date_of_birth'] = $this->data['Sadr']['date_of_birth'];
+            }
+           
         } else {
             $this->data['Sadr']['date_of_birth'] = '';
         }
