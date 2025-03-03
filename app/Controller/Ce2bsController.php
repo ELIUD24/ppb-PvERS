@@ -1106,8 +1106,10 @@ class Ce2bsController extends AppController
                 }
             }
             // Extract Drug Information
-            if (isset($patient['drug'])) {
-                $drugs = is_array($patient['drug']) ? $patient['drug'] : [$patient['drug']];
+            if (isset($patient['drug'])) { 
+                $drugs = is_array($patient['drug']) && isset($patient['drug'][0])
+                ? $patient['drug']
+                : [$patient['drug']]; 
                 foreach ($drugs as $drug) {
                     $flattenedData['Patient']['Drugs'][] = [
                         'MedicinalProduct' => isset($drug['medicinalproduct']) ? $drug['medicinalproduct'] : '',
@@ -1128,11 +1130,6 @@ class Ce2bsController extends AppController
         $drugs = [];
         if (isset($data)) {
             foreach ($data as $dt) {
-                //         'MedicinalProduct' => 'Malaria falciparum RTS,S vaccine + AS01E Solution for injection',
-                // 'ActiveSubstance' => 'MALARIA FALCIPARUM VACCINE',
-                // 'AdministrationRoute' => '030',
-                // 'StartDate' => '20240815',
-                // 'Characterization' => '1'
                 $MedicinalProduct = $dt['MedicinalProduct'];
                 $ActiveSubstance = $dt['ActiveSubstance'];
                 $StartDate = $dt['StartDate'];
@@ -1901,6 +1898,37 @@ class Ce2bsController extends AppController
             return '';
         }
     }
+
+    public function extract_and_update_drugs($id, $flattenedData)
+    {
+        if (!$this->Ce2b->exists()) {
+            throw new NotFoundException(__('Invalid Ce2b'));
+        }
+        $this->Ce2b->id = $id;
+        $drugs = $this->manipulate_r2_drugs($flattenedData['Patient']['Drugs']);
+        $this->request->data['Ce2bListOfDrug'] = $drugs;
+        $this->request->data['Ce2b']['id'] = $id;
+        // debug($this->request->data);
+        // exit;
+        if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => false, 'deep' => true))) {
+            // debug("Drugs Updated");
+        }
+    }
+    public function extract_and_update_reactions($id, $flattenedData)
+    {
+
+        if (!$this->Ce2b->exists()) {
+            throw new NotFoundException(__('Invalid Ce2b'));
+        }
+        $this->Ce2b->id = $id;
+        $reactions = $this->manipulate_r2_reactions($flattenedData['Patient']['Reactions']);
+        $this->request->data['Ce2bReaction'] = $reactions;
+        $this->request->data['Ce2b']['id'] = $id;
+
+        if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => false, 'deep' => true))) {
+            // debug("Reactions Updated");
+        }
+    }
     public function general_view($id = null)
     {
         # code...
@@ -1911,8 +1939,6 @@ class Ce2bsController extends AppController
         ));
 
 
-        // debug($ce2b);
-        // exit;
 
         if (empty($ce2b['Ce2b']['e2b_content'])) {
             $this->Session->setFlash(__('Invalid XML File, please reupload and try again'), 'flash_error');
@@ -1984,22 +2010,32 @@ class Ce2bsController extends AppController
             }
 
             // $this->set(['ce2b' => $ce2b, 'data' => $data]);
-            // debug($data);
+
+
+           
+
+            // debug($ce2b);
             // exit;
+            if ($ce2b['Ce2b']['e2b_type'] === "R2") {
+                $filePath = $ce2b['Ce2b']['e2b_content'];
+                $xmlArray = Xml::toArray(Xml::build($filePath));
+                $flattenedData = $this->handle_r2_flattened($xmlArray);
+                // debug($xmlArray);
+                // debug($flattenedData);
+                // exit;
+                if (empty($ce2b['Ce2bListOfDrug'])) {
+                    $this->extract_and_update_drugs($id, $flattenedData);
+                }
+                if (empty($ce2b['Ce2bReaction'])) {
+
+                    $this->extract_and_update_reactions($id, $flattenedData);
+                }
+            }
 
             $ce2b = $this->Ce2b->find('first', array(
                 'conditions' => array('Ce2b.id' => $id),
                 'contain' => array('Designation', 'Ce2bListOfDrug' => array('Route'), 'Ce2bReaction', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment')
             ));
-
-            if(empty($ce2b['Ce2bListOfDrug'])){
- 
-            }
-            if(empty($ce2b['Ce2bReaction'])){ 
-            }
-
- 
-
             // Extract values
             $resultsInDeath = Hash::extract($data, '{n}[key=results_in_death].value');
             $lifeThreateningValue = Hash::extract($data, '{n}[key=life_threatening].value');
@@ -2016,16 +2052,7 @@ class Ce2bsController extends AppController
             $birthDefectValue = !empty($birthDefectValue) ? $birthDefectValue[0] : null;
             $sourceCountry = !empty($sourceCountry) ? $sourceCountry[0] : null;
 
-            // Debugging output
-            // debug([
-            //     'results_in_death' => $resultsInDeath,
-            //     'life_threatening' => $lifeThreateningValue,
-            //     'prolonged_hospitalization' => $prolongedHospitalizationValue,
-            //     'incapacitating' => $incapacitatingValue,
-            //     'birth_defect' => $birthDefectValue,
-            //     'source_country' => $sourceCountry
-            // ]);
-            // exit;
+
             // ----------------- UPDATE REACTIONS -----------------
 
             if (!empty($resultsInDeath) && isset($ce2b['Ce2bReaction'])) {
