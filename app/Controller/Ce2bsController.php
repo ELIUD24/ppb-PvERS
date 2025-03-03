@@ -200,10 +200,10 @@ class Ce2bsController extends AppController
                     ? (string) Hash::extract($re['reactions'], '{n}[code=34].value')[0]
                     : null,
                 'life_hreatening_code' => '21',
-                'life_hreatening_null' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value_null'))
+                'life_threatening_null' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value_null'))
                     ? (string) Hash::extract($re['reactions'], '{n}[code=21].value_null')[0]
                     : null,
-                'life_hreatening_value' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value'))
+                'life_threatening_value' => !empty(Hash::extract($re['reactions'], '{n}[code=21].value'))
                     ? (string) Hash::extract($re['reactions'], '{n}[code=21].value')[0]
                     : null,
                 'prolonged_hospitalisation_code' => '33',
@@ -1031,6 +1031,141 @@ class Ce2bsController extends AppController
         $data = ['Drug' => $drugs, 'Reaction' => $reactions];
         return $data;
     }
+
+
+    public function handle_r2_flattened($xmlArray)
+    {
+
+        // Flattened data structure
+        $flattenedData = [];
+
+        // Extract Message Header
+        if (isset($xmlArray['ichicsr']['ichicsrmessageheader'])) {
+            $messageHeader = $xmlArray['ichicsr']['ichicsrmessageheader'];
+            $flattenedData['MessageHeader'] = [
+                'MessageType' => isset($messageHeader['messagetype']) ? $messageHeader['messagetype'] : '',
+                'MessageNumber' => isset($messageHeader['messagenumb']) ? $messageHeader['messagenumb'] : '',
+                'MessageSender' => isset($messageHeader['messagesenderidentifier']) ? $messageHeader['messagesenderidentifier'] : '',
+                'MessageReceiver' => isset($messageHeader['messagereceiveridentifier']) ? $messageHeader['messagereceiveridentifier'] : '',
+                'MessageDate' => isset($messageHeader['messagedate']) ? $messageHeader['messagedate'] : '',
+            ];
+        }
+
+        // Extract Safety Report
+        if (isset($xmlArray['ichicsr']['safetyreport'])) {
+            $safetyReport = $xmlArray['ichicsr']['safetyreport'];
+            $flattenedData['SafetyReport'] = [
+                'SafetyReportID' => isset($safetyReport['safetyreportid']) ? $safetyReport['safetyreportid'] : '',
+                'PrimarySourceCountry' => isset($safetyReport['primarysourcecountry']) ? $safetyReport['primarysourcecountry'] : '',
+                'Seriousness' => isset($safetyReport['serious']) ? $safetyReport['serious'] : '',
+                'ReportType' => isset($safetyReport['reporttype']) ? $safetyReport['reporttype'] : '',
+                'ReceivedDate' => isset($safetyReport['receivedate']) ? $safetyReport['receivedate'] : '',
+            ];
+        }
+
+        // Extract Patient Information
+        if (isset($safetyReport['patient'])) {
+            $patient = $safetyReport['patient'];
+            $flattenedData['Patient'] = [
+                'Initial' => isset($patient['patientinitial']) ? $patient['patientinitial'] : '',
+                'MedicalHistory' => [],
+                'Reactions' => [],
+                'Drugs' => []
+            ];
+
+            // Extract Medical History
+            if (isset($patient['medicalhistoryepisode'])) {
+                $medicalHistoryEpisodes = is_array($patient['medicalhistoryepisode']) ? $patient['medicalhistoryepisode'] : [$patient['medicalhistoryepisode']];
+                foreach ($medicalHistoryEpisodes as $history) {
+                    $flattenedData['Patient']['MedicalHistory'][] = [
+                        'EpisodeName' => isset($history['patientepisodename']) ? $history['patientepisodename'] : '',
+                        'StartDate' => isset($history['patientmedicalstartdate']) ? $history['patientmedicalstartdate'] : '',
+                        'Comment' => isset($history['patientmedicalcomment']) ? $history['patientmedicalcomment'] : ''
+                    ];
+                }
+            }
+
+            // Check if 'reaction' exists and handle single/multiple cases
+            if (isset($patient['reaction'])) {
+                $reactions = is_array($patient['reaction']) && isset($patient['reaction'][0])
+                    ? $patient['reaction']
+                    : [$patient['reaction']]; // Wrap single item in an array
+
+                foreach ($reactions as $reaction) {
+                    $flattenedData['Patient']['Reactions'][] = array(
+                        'primarysourcereaction' => isset($reaction['primarysourcereaction']) ? $reaction['primarysourcereaction'] : '',
+                        'reactionmeddraversionllt' => isset($reaction['reactionmeddraversionllt']) ? $reaction['reactionmeddraversionllt'] : '',
+                        'reactionmeddrallt' => isset($reaction['reactionmeddrallt']) ? $reaction['reactionmeddrallt'] : '',
+                        'reactionmeddraversionpt' => isset($reaction['reactionmeddraversionpt']) ? $reaction['reactionmeddraversionpt'] : '',
+                        'reactionmeddrapt' => isset($reaction['reactionmeddrapt']) ? $reaction['reactionmeddrapt'] : '',
+                        'termhighlighted' => isset($reaction['termhighlighted']) ? $reaction['termhighlighted'] : '',
+                        'reactionstartdateformat' => isset($reaction['reactionstartdateformat']) ? $reaction['reactionstartdateformat'] : '',
+                        'reactionstartdate' => isset($reaction['reactionstartdate']) ? $reaction['reactionstartdate'] : '',
+                        'reactionoutcome' => isset($reaction['reactionoutcome']) ? $reaction['reactionoutcome'] : ''
+                    );
+                }
+            }
+            // Extract Drug Information
+            if (isset($patient['drug'])) {
+                $drugs = is_array($patient['drug']) ? $patient['drug'] : [$patient['drug']];
+                foreach ($drugs as $drug) {
+                    $flattenedData['Patient']['Drugs'][] = [
+                        'MedicinalProduct' => isset($drug['medicinalproduct']) ? $drug['medicinalproduct'] : '',
+                        'ActiveSubstance' => isset($drug['activesubstance']['activesubstancename']) ? $drug['activesubstance']['activesubstancename'] : '',
+                        'AdministrationRoute' => isset($drug['drugadministrationroute']) ? $drug['drugadministrationroute'] : '',
+                        'StartDate' => isset($drug['drugstartdate']) ? $drug['drugstartdate'] : '',
+                        'Characterization' => isset($drug['drugcharacterization']) ? $drug['drugcharacterization'] : ''
+                    ];
+                }
+            }
+        }
+
+        return $flattenedData;
+    }
+
+    public function manipulate_r2_drugs($data)
+    {
+        $drugs = [];
+        if (isset($data)) {
+            foreach ($data as $dt) {
+                //         'MedicinalProduct' => 'Malaria falciparum RTS,S vaccine + AS01E Solution for injection',
+                // 'ActiveSubstance' => 'MALARIA FALCIPARUM VACCINE',
+                // 'AdministrationRoute' => '030',
+                // 'StartDate' => '20240815',
+                // 'Characterization' => '1'
+                $MedicinalProduct = $dt['MedicinalProduct'];
+                $ActiveSubstance = $dt['ActiveSubstance'];
+                $StartDate = $dt['StartDate'];
+                $route_id = $dt['AdministrationRoute'];
+                $drugs[] = [
+                    'drug_name' => $MedicinalProduct,  // Combine ingredients into a single string
+                    'brand_name' => $ActiveSubstance,
+                    // 'dose' => $dose,
+                    'route_id' => $route_id,
+                    'start_date' => $StartDate
+                ];
+            }
+        }
+
+
+        return $drugs;
+    }
+
+    public function manipulate_r2_reactions($data)
+    {
+        $reactions = [];
+        if (isset($data)) {
+            foreach ($data as $dt) {
+                $reactions[] = [
+                    'reaction_name' => $dt['primarysourcereaction'],
+                    'meddra_code' => $dt['reactionmeddrallt'],
+                    'start_date' => $dt['reactionstartdate'],
+                    'reaction_outcome_value' => $dt['reactionoutcome']
+                ];
+            }
+        }
+        return $reactions;
+    }
     public function general_editor($id = null)
     {
 
@@ -1085,22 +1220,29 @@ class Ce2bsController extends AppController
 
                     if (strpos($xmlString, 'MCCI_IN200100UV01') !== false) {
                         $this->request->data['Ce2b']['e2b_type'] = "R3";
+                        $flattenedData = $this->flattenXml($xmlArray);
+                        $reactions = $this->manipulate_reaction_information($xmlString);
+                        $reactions = $this->map_full_reaction_details($reactions);
+
+                        $this->request->data['Ce2bReaction'] = $reactions;
+                        $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
                     } else {
                         $this->request->data['Ce2b']['e2b_type'] = "R2";
+                        $flattenedData = $this->handle_r2_flattened($xmlArray);
+                        // debug($xmlArray);
+                        // debug($flattened);
+                        // debug($flattenedData);
+                        $drugs = $this->manipulate_r2_drugs($flattenedData['Patient']['Drugs']);
+                        $reactions = $this->manipulate_r2_reactions($flattenedData['Patient']['Reactions']);
+                        // debug($drugs);
+                        // debug($reactions);
+                        $this->request->data['Ce2bReaction'] = $reactions;
+                        $this->request->data['Ce2bListOfDrug'] = $drugs;
+                        // exit;
                     }
 
                     $this->Ce2b->saveField('submitted', 2);
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
-
-                    // if ($this->request->data['Ce2b']['e2b_type'] === "R3") {
-                    $flattenedData = $this->flattenXml($xmlArray);
-
-                    $reactions = $this->manipulate_reaction_information($xmlString);
-                    $reactions = $this->map_full_reaction_details($reactions);
-
-                    $this->request->data['Ce2bReaction'] = $reactions;
-                    $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
-                    // }
                 } catch (Exception $e) {
 
                     $this->request->data['Ce2b']['e2b_type'] = "R2";
@@ -1411,8 +1553,8 @@ class Ce2bsController extends AppController
                 $reaction_name = null;
 
                 $criteria_death_code = $medical_confirmation_code = $reaction_outcome_code = $other_medical_code = $life_hreatening_code = $prolonged_hospitalisation_code = $incapacitating_code = $birth_defect_code = null;
-                $criteria_death_null = $medical_confirmation_null = $reaction_outcome_null = $other_medical_null = $life_hreatening_null = $prolonged_hospitalisation_null = $incapacitating_null = $birth_defect_null = null;
-                $criteria_death_value = $medical_confirmation_value = $reaction_outcome_value = $other_medical_value = $life_hreatening_value = $prolonged_hospitalisation_value = $incapacitating_value = $birth_defect_value = null;
+                $criteria_death_null = $medical_confirmation_null = $reaction_outcome_null = $other_medical_null = $life_threatening_null = $prolonged_hospitalisation_null = $incapacitating_null = $birth_defect_null = null;
+                $criteria_death_value = $medical_confirmation_value = $reaction_outcome_value = $other_medical_value = $life_threatening_value = $prolonged_hospitalisation_value = $incapacitating_value = $birth_defect_value = null;
 
                 // medical_confirmation
                 if (isset($flattenedData[$medical_confirmation_code_key])) {
@@ -1483,10 +1625,10 @@ class Ce2bsController extends AppController
                     $life_hreatening_code = $flattenedData[$life_hreatening_code_key];
                 }
                 if (isset($flattenedData[$life_hreatening_null_key])) {
-                    $life_hreatening_null = $flattenedData[$life_hreatening_null_key];
+                    $life_threatening_null = $flattenedData[$life_hreatening_null_key];
                 }
                 if (isset($flattenedData[$life_hreatening_value_key])) {
-                    $life_hreatening_value = $flattenedData[$life_hreatening_value_key];
+                    $life_threatening_value = $flattenedData[$life_hreatening_value_key];
                 }
 
 
@@ -1524,7 +1666,7 @@ class Ce2bsController extends AppController
 
                     if (
                         $criteria_death_value === 'true' ||
-                        $life_hreatening_value === 'true' ||
+                        $life_threatening_value === 'true' ||
                         $prolonged_hospitalisation_value === 'true' ||
                         $incapacitating_value === 'true' ||
                         $birth_defect_value === 'true'
@@ -1550,8 +1692,8 @@ class Ce2bsController extends AppController
                         'criteria_death_null' => $criteria_death_null,
                         'criteria_death_value' => $criteria_death_value,
                         'life_hreatening_code' => $life_hreatening_code,
-                        'life_hreatening_null' => $life_hreatening_null,
-                        'life_hreatening_value' => $life_hreatening_value,
+                        'life_threatening_null' => $life_threatening_null,
+                        'life_threatening_value' => $life_threatening_value,
                         'prolonged_hospitalisation_code' => $prolonged_hospitalisation_code,
                         'prolonged_hospitalisation_null' => $prolonged_hospitalisation_null,
                         'prolonged_hospitalisation_value' => $prolonged_hospitalisation_value,
@@ -1765,8 +1907,12 @@ class Ce2bsController extends AppController
 
         $ce2b = $this->Ce2b->find('first', array(
             'conditions' => array('Ce2b.id' => $id),
-            'contain' => array('Designation', 'Ce2bListOfDrug', 'Ce2bReaction', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment')
+            'contain' => array('Designation', 'Ce2bListOfDrug' => array('Route'), 'Ce2bReaction', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment')
         ));
+
+
+        // debug($ce2b);
+        // exit;
 
         if (empty($ce2b['Ce2b']['e2b_content'])) {
             $this->Session->setFlash(__('Invalid XML File, please reupload and try again'), 'flash_error');
@@ -1786,12 +1932,48 @@ class Ce2bsController extends AppController
                 $xml = Xml::build($xml);
                 $elements = $xml->xpath('//*');
 
+                // $this->Ce2b->saveField('submitted', 1);
+
                 foreach ($elements as $element) {
                     $key = $element->getName();
                     $value = (string) $element;
                     if ($key == 'ichicsr' || $key == 'ichicsrmessageheader') {
                         continue;
                     } else {
+
+                        $keyMapping = [
+                            'narrativeincludeclinical' => 'case_narrative',
+                            'senderdepartment' => 'sender_department',
+                            'senderorganization' => 'sender_organization',
+                            'receivedate' => 'date_first_received',
+                            'seriousnessdeath' => 'results_in_death',
+                            'seriousnesslifethreatening' => 'life_threatening',
+                            'seriousnesshospitalization' => 'prolonged_hospitalization',
+                            'seriousnessdisabling' => 'incapacitating',
+                            'messagedate' => 'creation_time',
+                            'safetyreportid' => 'sender_unique_identifier',
+                            'messagenumb' => 'worldwide_identifier',
+                            'reporterfamilyname' => 'patient_name',
+
+                        ];
+
+                        $formattedKeys = ['narrativeincludeclinical'];
+                        // Rename key if it exists in the mapping
+                        if (isset($keyMapping[$key])) {
+                            $key = $keyMapping[$key];
+                        }
+                        if (in_array($key, $formattedKeys)) {
+                            // Convert newlines to HTML <br> and escape special characters
+                            $value = nl2br(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+                        } else {
+                            // Trim whitespace for other fields
+                            $value = trim($value);
+                        }
+
+
+                        $this->Ce2b->saveField($key, $value, false);
+
+
                         $data[] = [
                             'key' => $key,
                             'value' => $value
@@ -1802,8 +1984,67 @@ class Ce2bsController extends AppController
             }
 
             // $this->set(['ce2b' => $ce2b, 'data' => $data]);
+            // debug($data);
+            // exit;
+
+            $ce2b = $this->Ce2b->find('first', array(
+                'conditions' => array('Ce2b.id' => $id),
+                'contain' => array('Designation', 'Ce2bListOfDrug' => array('Route'), 'Ce2bReaction', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment')
+            ));
+
+
+// Extract values
+$resultsInDeath = Hash::extract($data, '{n}[key=results_in_death].value');
+$lifeThreateningValue = Hash::extract($data, '{n}[key=life_threatening].value');
+$prolongedHospitalizationValue = Hash::extract($data, '{n}[key=prolonged_hospitalization].value');
+$incapacitatingValue = Hash::extract($data, '{n}[key=incapacitating].value');
+$birthDefectValue = Hash::extract($data, '{n}[key=seriousnesscongenitalanomali].value');
+$sourceCountry = Hash::extract($data, '{n}[key=occurcountry].value');
+
+// Get first value or null if not found
+$resultsInDeath = !empty($resultsInDeath) ? $resultsInDeath[0] : null;
+$lifeThreateningValue = !empty($lifeThreateningValue) ? $lifeThreateningValue[0] : null;
+$prolongedHospitalizationValue = !empty($prolongedHospitalizationValue) ? $prolongedHospitalizationValue[0] : null;
+$incapacitatingValue = !empty($incapacitatingValue) ? $incapacitatingValue[0] : null;
+$birthDefectValue = !empty($birthDefectValue) ? $birthDefectValue[0] : null;
+$sourceCountry = !empty($sourceCountry) ? $sourceCountry[0] : null;
+
+// Debugging output
+// debug([
+//     'results_in_death' => $resultsInDeath,
+//     'life_threatening' => $lifeThreateningValue,
+//     'prolonged_hospitalization' => $prolongedHospitalizationValue,
+//     'incapacitating' => $incapacitatingValue,
+//     'birth_defect' => $birthDefectValue,
+//     'source_country' => $sourceCountry
+// ]);
+// exit;
+            // ----------------- UPDATE REACTIONS -----------------
+           
+            if (!empty($resultsInDeath) && isset($ce2b['Ce2bReaction'])) {
+                foreach ($ce2b['Ce2bReaction'] as $reaction) {
+                    $reactionId = $reaction['id']; // Get reaction ID
+
+                    // Update only the `criteria_death_value` field for the specific reaction
+                    $this->Ce2b->Ce2bReaction->updateAll(
+                        [
+                            'Ce2bReaction.criteria_death_value' => "'" . $resultsInDeath . "'",
+                            'Ce2bReaction.life_threatening_value' => "'" . $lifeThreateningValue . "'",
+                            'Ce2bReaction.prolonged_hospitalisation_value' => "'" . $prolongedHospitalizationValue . "'",
+                            'Ce2bReaction.incapacitating_value' => "'" . $incapacitatingValue . "'",
+                            'Ce2bReaction.birth_defect_value' => "'" . $birthDefectValue . "'",
+                            'Ce2bReaction.source_country' => "'" . $sourceCountry . "'"
+                        ],
+                        ['Ce2bReaction.id' => $reactionId] // Where condition: update all reactions by ID
+                    );
+                    
+                }
+            }
 
             $e2b = Xml::toArray(Xml::build($ce2b['Ce2b']['e2b_content']));
+
+            $ce2b['Ce2b']['creation_time'] = $this->generateDesiredDate($ce2b['Ce2b']['creation_time']);
+            $ce2b['Ce2b']['date_first_received'] = $this->generateDesiredDate($ce2b['Ce2b']['date_first_received']);
             $this->set(['ce2b' => $ce2b]);
             $this->set(['e2b' => $e2b]);
         } else {

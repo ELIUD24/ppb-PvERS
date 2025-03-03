@@ -194,8 +194,10 @@ $this->Html->script('ce2b', array('inline' => false));
                     <?php
                     echo $this->Form->button('<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes', array(
                         'name' => 'saveChanges',
-                        'class' => 'btn btn-success mapop',
+                        'class' => 'btn btn-success mapop d-none',
                         'formnovalidate' => 'formnovalidate',
+                        'disabled' => true, 
+                        'style' => 'display: none;',
                         'id' => 'SadrSaveChanges', 'title' => 'Save & continue editing',
                         'data-content' => 'Save changes to form without submitting it.
 	                                              The form will still be available for further editing.',

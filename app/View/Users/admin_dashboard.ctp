@@ -19,9 +19,9 @@ $this->assign('Dashboard', 'active');
     <h4><a href="http://www.google.com/analytics/" target="_blank"><i class="icon-globe"></i> Google Analytics</a></h4>
 
     <!-- Sadrs Upload -->
-     <hr>
-    <h4><a href="#" ><i class="icon-globe"></i> Tibu Linkage</a></h4>
-<br>
+    <hr>
+    <h4><a href="#"><i class="icon-globe"></i> Tibu Linkage</a></h4>
+    <br>
     <?php
     echo $this->Form->create('Sadr', array(
       'url' => array_merge(array('controller' => 'sadrs', 'action' => 'file_upload'), $this->params['pass']),

@@ -172,7 +172,7 @@ foreach ($csadrs as $csadr) :
 			$suspectedDrugs = array(); // Create an array to store suspected drugs
 
 			foreach ($csadr['SadrListOfDrug'] as $sadrListOfDrug) {
-				if ($sadrListOfDrug['suspected_drug'] == 1) {
+				if ($sadrListOfDrug['suspected_drug'] == 1) { 
 					$suspectedDrugs[] = $sadrListOfDrug['manufacturer']; // Add drug_name to the array
 				}
 			}
