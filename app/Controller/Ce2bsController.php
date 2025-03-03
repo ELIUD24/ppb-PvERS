@@ -1993,14 +1993,12 @@ class Ce2bsController extends AppController
             ));
 
             if(empty($ce2b['Ce2bListOfDrug'])){
-
-                // debug("No Drugs");
+ 
             }
-            if(empty($ce2b['Ce2bReaction'])){
-                // debug("No Reactions");
+            if(empty($ce2b['Ce2bReaction'])){ 
             }
 
-// exit;
+ 
 
             // Extract values
             $resultsInDeath = Hash::extract($data, '{n}[key=results_in_death].value');
