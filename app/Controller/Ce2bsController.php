@@ -35,9 +35,99 @@ class Ce2bsController extends AppController
     public function beforeFilter()
     {
         parent::beforeFilter();
-        $this->Auth->allow('finalize');
+        $this->Auth->allow('finalize', 'trigger');
     }
 
+    public function trigger($id = null)
+    {
+        $this->Ce2b->id = $id;
+        if (!$this->Ce2b->exists()) {
+            debug('Could not verify the E2b report ID. Please ensure the ID is correct.');
+            exit;
+        }
+
+        $ce2b = $this->Ce2b->find('first', array(
+            'conditions' => array('Ce2b.id' => $id),
+        ));
+
+        if ($ce2b) {
+
+
+            //******************       Send Email and Notifications to Reporter and Managers          *****************************
+            $this->loadModel('Message');
+            $html = new HtmlHelper(new ThemeView());
+            $message = $this->Message->find('first', array('conditions' => array('name' => 'reporter_ce2b_submit')));
+            $variables = array(
+                'name' => $this->Auth->User('name'),
+                'reference_no' => $ce2b['Ce2b']['reference_no'],
+                'reference_link' => $html->link(
+                    $ce2b['Ce2b']['reference_no'],
+                    array('controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true),
+                    array('escape' => false)
+                ),
+                'modified' => $ce2b['Ce2b']['modified']
+            );
+            $datum = array(
+                'email' => $ce2b['Ce2b']['reporter_email'],
+                'id' => $id,
+                'user_id' => $this->Auth->User('id'),
+                'type' => 'reporter_ce2b_submit',
+                'model' => 'Ce2b',
+                'subject' => CakeText::insert($message['Message']['subject'], $variables),
+                'message' => CakeText::insert($message['Message']['content'], $variables)
+            );
+
+            $this->loadModel('Queue.QueuedTask');
+            $this->QueuedTask->createJob('GenericEmail', $datum);
+            $this->QueuedTask->createJob('GenericNotification', $datum);
+
+
+            //Send SMS
+            if (!empty($ce2b['Ce2b']['reporter_phone']) && strlen(substr($ce2b['Ce2b']['reporter_phone'], -9)) == 9 && is_numeric(substr($ce2b['Ce2b']['reporter_phone'], -9))) {
+                $datum['phone'] = '254' . substr($ce2b['Ce2b']['reporter_phone'], -9);
+                $variables['reference_url'] = Router::url(['controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true]);
+                $datum['sms'] = CakeText::insert($message['Message']['sms'], $variables);
+                $this->QueuedTask->createJob('GenericSms', $datum);
+            }
+
+            //Notify managers
+            $users = $this->Ce2b->User->find('all', array(
+                'contain' => array(),
+                'conditions' => array(
+                    'User.group_id' => 2,
+                    'User.is_active' => '1'
+                )
+            ));
+            foreach ($users as $user) {
+                $variables = array(
+                    'name' => $user['User']['name'],
+                    'reference_no' => $ce2b['Ce2b']['reference_no'],
+                    'reference_link' => $html->link(
+                        $ce2b['Ce2b']['reference_no'],
+                        array('controller' => 'Ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'manager' => true, 'full_base' => true),
+                        array('escape' => false)
+                    ),
+                    'modified' => $ce2b['Ce2b']['modified']
+                );
+                $datum = array(
+                    'email' => $user['User']['email'],
+                    'id' => $id,
+                    'user_id' => $user['User']['id'],
+                    'type' => 'reporter_ce2b_submit',
+                    'model' => 'Ce2b',
+                    'subject' => CakeText::insert($message['Message']['subject'], $variables),
+                    'message' => CakeText::insert($message['Message']['content'], $variables)
+                );
+
+                // $this->QueuedTask->createJob('GenericEmail', $datum);
+                // $this->QueuedTask->createJob('GenericNotification', $datum);
+            }
+            // **********************************    END   *********************************
+
+            debug($ce2b);
+            exit;
+        }
+    }
     private function extractReactions($xml)
     {
         // Register the namespace
@@ -509,14 +599,14 @@ class Ce2bsController extends AppController
         $newReceiver = '
             <receiver typeCode="RCV">
                 <device classCode="DEV" determinerCode="INSTANCE">
-                     <id extension="PPB"  root="2.16.840.1.113883.3.989.2.1.3.14" />
+                     <id extension="KE"  root="2.16.840.1.113883.3.989.2.1.3.14" />
                 </device>
             </receiver>';
         //  $newReceiver = '';
         $newSender = '
             <sender typeCode="SND">
                 <device classCode="DEV" determinerCode="INSTANCE">
-                    <id extension="Pharmacy and Poisons Board" root="2.16.840.1.113883.3.989.2.1.3.13" />
+                    <id extension="PPB" root="2.16.840.1.113883.3.989.2.1.3.13" />
                 </device>
             </sender>';
 
@@ -723,7 +813,7 @@ class Ce2bsController extends AppController
                 'conditions' => array('Ce2b.id' => $id)
             )
         ), 'Ce2b.id');
-         
+
         if ($ce2b['Ce2b']['copied']) {
             $this->Session->setFlash(__('A clean copy already exists. Click on edit to update changes.'), 'alerts/flash_error');
             return $this->redirect(array('action' => 'index'));
@@ -998,18 +1088,18 @@ class Ce2bsController extends AppController
                     } else {
                         $this->request->data['Ce2b']['e2b_type'] = "R2";
                     }
-                   
+
                     $this->Ce2b->saveField('submitted', 2);
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
 
                     // if ($this->request->data['Ce2b']['e2b_type'] === "R3") {
-                        $flattenedData = $this->flattenXml($xmlArray);
+                    $flattenedData = $this->flattenXml($xmlArray);
 
-                        $reactions = $this->manipulate_reaction_information($xmlString);
-                        $reactions = $this->map_full_reaction_details($reactions);
+                    $reactions = $this->manipulate_reaction_information($xmlString);
+                    $reactions = $this->map_full_reaction_details($reactions);
 
-                        $this->request->data['Ce2bReaction'] = $reactions;
-                        $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
+                    $this->request->data['Ce2bReaction'] = $reactions;
+                    $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
                     // }
                 } catch (Exception $e) {
 
