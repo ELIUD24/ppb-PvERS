@@ -1992,35 +1992,44 @@ class Ce2bsController extends AppController
                 'contain' => array('Designation', 'Ce2bListOfDrug' => array('Route'), 'Ce2bReaction', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment')
             ));
 
+            if(empty($ce2b['Ce2bListOfDrug'])){
 
-// Extract values
-$resultsInDeath = Hash::extract($data, '{n}[key=results_in_death].value');
-$lifeThreateningValue = Hash::extract($data, '{n}[key=life_threatening].value');
-$prolongedHospitalizationValue = Hash::extract($data, '{n}[key=prolonged_hospitalization].value');
-$incapacitatingValue = Hash::extract($data, '{n}[key=incapacitating].value');
-$birthDefectValue = Hash::extract($data, '{n}[key=seriousnesscongenitalanomali].value');
-$sourceCountry = Hash::extract($data, '{n}[key=occurcountry].value');
+                // debug("No Drugs");
+            }
+            if(empty($ce2b['Ce2bReaction'])){
+                // debug("No Reactions");
+            }
 
-// Get first value or null if not found
-$resultsInDeath = !empty($resultsInDeath) ? $resultsInDeath[0] : null;
-$lifeThreateningValue = !empty($lifeThreateningValue) ? $lifeThreateningValue[0] : null;
-$prolongedHospitalizationValue = !empty($prolongedHospitalizationValue) ? $prolongedHospitalizationValue[0] : null;
-$incapacitatingValue = !empty($incapacitatingValue) ? $incapacitatingValue[0] : null;
-$birthDefectValue = !empty($birthDefectValue) ? $birthDefectValue[0] : null;
-$sourceCountry = !empty($sourceCountry) ? $sourceCountry[0] : null;
-
-// Debugging output
-// debug([
-//     'results_in_death' => $resultsInDeath,
-//     'life_threatening' => $lifeThreateningValue,
-//     'prolonged_hospitalization' => $prolongedHospitalizationValue,
-//     'incapacitating' => $incapacitatingValue,
-//     'birth_defect' => $birthDefectValue,
-//     'source_country' => $sourceCountry
-// ]);
 // exit;
+
+            // Extract values
+            $resultsInDeath = Hash::extract($data, '{n}[key=results_in_death].value');
+            $lifeThreateningValue = Hash::extract($data, '{n}[key=life_threatening].value');
+            $prolongedHospitalizationValue = Hash::extract($data, '{n}[key=prolonged_hospitalization].value');
+            $incapacitatingValue = Hash::extract($data, '{n}[key=incapacitating].value');
+            $birthDefectValue = Hash::extract($data, '{n}[key=seriousnesscongenitalanomali].value');
+            $sourceCountry = Hash::extract($data, '{n}[key=occurcountry].value');
+
+            // Get first value or null if not found
+            $resultsInDeath = !empty($resultsInDeath) ? $resultsInDeath[0] : null;
+            $lifeThreateningValue = !empty($lifeThreateningValue) ? $lifeThreateningValue[0] : null;
+            $prolongedHospitalizationValue = !empty($prolongedHospitalizationValue) ? $prolongedHospitalizationValue[0] : null;
+            $incapacitatingValue = !empty($incapacitatingValue) ? $incapacitatingValue[0] : null;
+            $birthDefectValue = !empty($birthDefectValue) ? $birthDefectValue[0] : null;
+            $sourceCountry = !empty($sourceCountry) ? $sourceCountry[0] : null;
+
+            // Debugging output
+            // debug([
+            //     'results_in_death' => $resultsInDeath,
+            //     'life_threatening' => $lifeThreateningValue,
+            //     'prolonged_hospitalization' => $prolongedHospitalizationValue,
+            //     'incapacitating' => $incapacitatingValue,
+            //     'birth_defect' => $birthDefectValue,
+            //     'source_country' => $sourceCountry
+            // ]);
+            // exit;
             // ----------------- UPDATE REACTIONS -----------------
-           
+
             if (!empty($resultsInDeath) && isset($ce2b['Ce2bReaction'])) {
                 foreach ($ce2b['Ce2bReaction'] as $reaction) {
                     $reactionId = $reaction['id']; // Get reaction ID
@@ -2037,7 +2046,6 @@ $sourceCountry = !empty($sourceCountry) ? $sourceCountry[0] : null;
                         ],
                         ['Ce2bReaction.id' => $reactionId] // Where condition: update all reactions by ID
                     );
-                    
                 }
             }
 
