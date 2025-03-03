@@ -1,56 +1,12 @@
 <?php
-$this->assign('CIOM', 'active');
-
-$outcomes = array(
-    '1' => 'recovered/resolved',
-    '2' => 'recovering/resolving',
-    '3' => 'not recovered/not resolved',
-    '4' => 'recovered/resolved with sequelae',
-    '5' => 'fatal',
-    '6' => 'unknown'
-);
-$actiondrug = array(
-    '1' => 'Drug withdrawn',
-    '2' => 'Dose reduced',
-    '3' => 'Dose increased',
-    '4' => 'Dose not changed',
-    '5' => 'Unknown',
-    '6' => 'Not applicable'
-);
-
-$serious = array('1' => 'Yes', '2' => 'No');
-$drugcharacterization = array('1' => 'Suspect', '2' => 'Concomitant', '3' => 'Interacting');
-// debug($e2b);
-
-$drugadministrationroute = [
-    '001' => 'Auricular (otic)', '002' => 'Buccal', '003' => 'Cutaneous', '004' => 'Dental', '005' => 'Endocervical',
-    '006' => 'Endosinusial', '007' => 'Endotracheal', '008' => 'Epidural', '009' => 'Extra-amniotic', '010' => 'Hemodialysis', '011' => 'Intra corpus cavernosum',
-    '012' => 'Intra-amniotic', '013' => 'Intra-arterial', '014' => 'Intra-articular', '015' => 'Intra-uterine', '016' => 'Intracardiac', '017' => 'Intracavernous',
-    '018' => 'Intracerebral', '019' => 'Intracervical', '020' => 'Intracisternal', '021' => 'Intracorneal', '022' => 'Intracoronary', '023' => 'Intradermal',
-    '024' => 'Intradiscal (intraspinal)', '025' => 'Intrahepatic', '026' => 'Intralesional', '027' => 'Intralymphatic', '028' => 'Intramedullar (bone marrow)', '029' => 'Intrameningeal',
-    '030' => 'Intramuscular', '031' => 'Intraocular', '032' => 'Intrapericardial', '033' => 'Intraperitoneal', '034' => 'Intrapleural', '035' => 'Intrasynovial',
-    '036' => 'Intratumor', '037' => 'Intrathecal', '038' => 'Intrathoracic', '039' => 'Intratracheal', '040' => 'Intravenous bolus', '041' => 'Intravenous drip',
-    '042' => 'Intravenous (not otherwise specified)', '043' => 'Intravesical', '044' => 'Iontophoresis', '045' => 'Nasal',
-    '046' => 'Occlusive dressing technique', '047' => 'Ophthalmic', '048' => 'Oral', '049' => 'Oropharingeal', '050' => 'Other', '051' => 'Parenteral', '052' => 'Periarticular', '053' => 'Perineural', '054' => 'Rectal',
-    '055' => 'Respiratory (inhalation)', '056' => 'Retrobulbar', '057' => 'Sunconjunctival', '058' => 'Subcutaneous', '059' => 'Subdermal', '060' => 'Sublingual', '061' => 'Topical', '062' => 'Transdermal',
-    '063' => 'Transmammary', '064' => 'Transplacental', '065' => 'Unknown', '066' => 'Urethral', '067' => 'Vaginal'
-];
-
-$time_unit = ['801' => 'Year', '802' => 'Month', '803' => 'Week', '804' => 'Day', '805' => 'Hour', '806' => 'Minute'];
-
-$actions = [
-    '1' => 'Drug withdrawn',
-    '2' => 'Dose reduced',
-    '3' => 'Dose increased',
-    '4' => 'Dose not changed',
-    '5' => 'Unknown',
-    '6' => 'Not applicable'
-];
-
-$drugrecurreadministration = ['1' => 'Yes', '2' => 'No', '3' => 'Unknown'];
-$reporttype = ['1' => 'Spontaneous', '2' => 'Report from study', '3' => 'Other', '4' => 'Not available to sender (unknown)'];
-$qualification = ['1' => 'Physician', '2' => 'Pharmacist', '3' => 'Other Health Professional', '4' => 'Lawyer', '5' => 'Consumer or other non-health professional'];
+$this->assign('E2B', 'active');
+$ichecked = "&#x2611;";
+$nchecked = "&#x2610;";
 ?>
+
+<!-- Ce2b
+    ================================================== -->
+
 <div class="row-fluid" id="abonokode">
     <div class="span12">
 
@@ -74,473 +30,697 @@ $qualification = ['1' => 'Physician', '2' => 'Pharmacist', '3' => 'Other Health 
                         </div>
                     </div>
                 </div>
-                <div class="ciom-form">
 
-                    <hr>
-                    <table class="table" style="width: 100%;">
-                    <tr>
-                        <td style="width: 10%;"><b>E2B FILE:</b> </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 10%;">COMPANY NAME: </td>
-                        <td style="width: 25%;">
-                            <p><strong><?php echo $ce2b['Ce2b']['company_name'] ?></strong></p>
-                        </td>
-                        <td style="width: 10%;">REPORT ID: </td>
-                        <td style="width: 20%;">
-                            <p><strong><?php echo $ce2b['Ce2b']['reference_no'] ?></strong></p>
-                        </td>
-                        <td style="width: 10%;">COMMENTS: </td>
-                        <td style="width: 25%;">
-                            <p><strong><?php echo $ce2b['Ce2b']['comment'] ?></strong></p>
-                        </td>
-                    </tr>
-                </table>
-                    <table class="table  table-condensed">
-                        <thead>
-                            <tr style="background: #C5D9F0;">
-                                <th>E2B Form</th>
-                                <th>ICH-E2B field (R2)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="background: #DAEDF3;">
-                                <td colspan="2"> I. REACTION INFORMATION </td>
-                            </tr>
-                            <tr>
-                                <td width="30%" class="table-label required">
-                                    <p>1. Patient Initials <small class="muted">(first, last)</small> </p>
-                                </td>
-                                <td><?php
-                                    // debug(Hash::extract($e2b, 'ichicsr.safetyreport.patient.patientinitial'));
-                                    // debug(Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.patientinitial'));
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.patientinitial'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.patientinitial')));
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['patientinitial'])) ? $e2b['ichicsr']['safetyreport']['patient']['patientinitial'] : null; 
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>1.a Country</p>
-                                </td>
-                                <td><?php
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.occurcountry'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.occurcountry')));
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['occurcountry'])) ? $e2b['ichicsr']['safetyreport']['occurcountry'] : null; 
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>2. Date of birth</p>
-                                </td>
-                                <td><?php
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.patientbirthdate'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.patientbirthdate')));
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['patientbirthdate'])) ? $e2b['ichicsr']['safetyreport']['patient']['patientbirthdate'] : null; 
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>2.a Age <small class="muted">(years)</small> </p>
-                                </td>
-                                <td><?php
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.patientonsetage'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.patientonsetage')));
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['patientonsetage'])) ? $e2b['ichicsr']['safetyreport']['patient']['patientonsetage'] : null; 
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>2. Sex </p>
-                                </td>
-                                <td><?php
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.patientsex'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.patientsex')));
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['patientsex'])) ? $e2b['ichicsr']['safetyreport']['patient']['patientsex'] : null; 
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>4-6. Reaction onset </p>
-                                </td>
-                                <td><?php echo (!empty($e2b['ichicsr']['safetyreport']['patient']['reaction']['reactionstartdate'])) ? $e2b['ichicsr']['safetyreport']['patient']['reaction']['reactionstartdate'] : null; ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>7. Describe reaction(s) </p>
-                                </td>
-                                <td>
-                                    <?php
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.reaction.primarysourcereaction'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.reaction.{n}.primarysourcereaction')));
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['reaction']['primarysourcereaction'])) ? $e2b['ichicsr']['safetyreport']['patient']['reaction']['primarysourcereaction'] : null; 
-                                    echo "<br/>";
-                                    $out = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.reaction.reactionoutcome'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.reaction.{n}.reactionoutcome'));
-                                    array_walk($out, function (&$value, &$key) use ($outcomes) {
-                                        $value = (isset($outcomes[$value])) ? $outcomes[$value] : $value;
-                                    });
-                                    echo implode(" | ", $out);
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['reaction']['reactionoutcome'])) ? $outcomes[$e2b['ichicsr']['safetyreport']['patient']['reaction']['reactionoutcome']] : null; 
-                                    echo "<br/>";
-                                    $ad = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.actiondrug'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.actiondrug'));
-                                    array_walk($ad, function (&$value, &$key) use ($actiondrug) {
-                                        $value = (isset($actiondrug[$value])) ? $actiondrug[$value] : $value;
-                                    });
-                                    echo implode(" | ", $ad);
-                                    echo "<br/>";
-                                    echo implode(" <br>|<br> ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.summary.narrativeincludeclinical'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.summary.narrativeincludeclinical')));
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['summary']['narrativeincludeclinical'])) ? $e2b['ichicsr']['safetyreport']['patient']['summary']['narrativeincludeclinical'] : null; 
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['reaction']['primarysourcereaction'])) ? $e2b['ichicsr']['safetyreport']['patient']['reaction']['primarysourcereaction'] : null; 
-                                    // echo "<br/>";
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['reaction']['reactionoutcome'])) ? $outcomes[$e2b['ichicsr']['safetyreport']['patient']['reaction']['reactionoutcome']] : null; 
-                                    // echo "<br/>";
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['actiondrug'])) ? $actiondrug[$e2b['ichicsr']['safetyreport']['patient']['drug']['actiondrug']] : null; 
-                                    // echo "<br/>";
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['summary']['narrativeincludeclinical'])) ? $e2b['ichicsr']['safetyreport']['patient']['summary']['narrativeincludeclinical'] : null; 
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>13. (including relevant test lab data) </p>
-                                </td>
-                                <td>
-                                    <?php
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.resultstestsprocedures'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.resultstestsprocedures')));
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['resultstestsprocedures'])) ? $e2b['ichicsr']['safetyreport']['patient']['resultstestsprocedures'] : null; 
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>8-12. Check all appropriate to adverse reaction </p>
-                                </td>
-                                <td>
-                                    <p>Serious - at case level? </p>
-                                    <?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['serious'])) ? $serious[$e2b['ichicsr']['safetyreport']['serious']] : null;
-                                    $se = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.serious'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.serious'));
-                                    array_walk($se, function (&$value, &$key) use ($serious) {
-                                        $value = (isset($serious[$value])) ? $serious[$value] : $value;
-                                    });
-                                    echo implode(" | ", $se);
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <p>Patient died </p>
-                                </td>
-                                <td>
-                                    <?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['seriousnessdeath'])) ? $serious[$e2b['ichicsr']['safetyreport']['seriousnessdeath']] : null; 
-                                    $de = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.seriousnessdeath'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.seriousnessdeath'));
-                                    array_walk($de, function (&$value, &$key) use ($serious) {
-                                        $value = (isset($serious[$value])) ? $serious[$value] : $value;
-                                    });
-                                    echo implode(" | ", $de);
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <p>Involved or prolonged inpatient hospitalization </p>
-                                </td>
-                                <td>
-                                    <?php
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['seriousnesshospitalization'])) ? $serious[$e2b['ichicsr']['safetyreport']['seriousnesshospitalization']] : null; 
-                                    $ho = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.seriousnesshospitalization'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.seriousnesshospitalization'));
-                                    array_walk($ho, function (&$value, &$key) use ($serious) {
-                                        $value = (isset($serious[$value])) ? $serious[$value] : $value;
-                                    });
-                                    echo implode(" | ", $ho);
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <p>Involved persistence or significant disability or incapacity </p>
-                                </td>
-                                <td><?php
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['seriousnessdisabling'])) ? $serious[$e2b['ichicsr']['safetyreport']['seriousnessdisabling']] : null; 
-                                    $bl = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.seriousnessdisabling'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.seriousnessdisabling'));
-                                    array_walk($bl, function (&$value, &$key) use ($serious) {
-                                        $value = (isset($serious[$value])) ? $serious[$value] : $value;
-                                    });
-                                    echo implode(" | ", $bl);
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <p>Life threatening </p>
-                                </td>
-                                <td><?php
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['seriousnesslifethreatening'])) ? $serious[$e2b['ichicsr']['safetyreport']['seriousnesslifethreatening']] : null; 
-                                    $lt = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.seriousnesslifethreatening'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.seriousnesslifethreatening'));
-                                    array_walk($lt, function (&$value, &$key) use ($serious) {
-                                        $value = (isset($serious[$value])) ? $serious[$value] : $value;
-                                    });
-                                    echo implode(" | ", $lt);
-                                    ?></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Updated UI -->
+                <div class="row-fluid">
+                    <div class="span12" style="padding-left: 20px; padding-right: 20px;">
 
-                    <table class="table  table-condensed">
-                        <thead>
-                            <tr style="background: #DAEDF3;">
-                                <th class="table-label required">
-                                    <p>SUSPECT/CONCOMITANT DRUG(S) INFORMATION</p>
-                                </th>
-                                <th>Drug characterization: <?php
-                                                            // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugcharacterization'])) ? $drugcharacterization[$e2b['ichicsr']['safetyreport']['patient']['drug']['drugcharacterization']] : null; 
-                                                            $dc = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugcharacterization'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugcharacterization'));
-                                                            array_walk($dc, function (&$value, &$key) use ($drugcharacterization) {
-                                                                $value = (isset($drugcharacterization[$value])) ? $drugcharacterization[$value] : $value;
-                                                            });
-                                                            echo implode(" | ", $dc);
-                                                            ?></th>
+                        <h5 style="background: #18C4D1; padding:20px;">Identification of the Case Safety Report </h5>
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <th colspan="2">Sender's Safety Report Unique Identifier</th>
                             </tr>
-                        </thead>
-                        <tbody>
                             <tr>
-                                <td class="table-label required">
-                                    <p>14. Suspect drug(s)</p>
-                                </td>
+                                <td colspan="2"><?php echo $ce2b['Ce2b']['sender_unique_identifier']; ?></td>
+                            </tr>
+                            <tr>
+                                <th colspan="2">Type of Report</th>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><?php echo $ce2b['Ce2b']['e2b_type']; ?></td>
+                            </tr>
+                            <tr>
+                                <th>Date of Creation</th>
+                                <th>Date First Received from source</th>
+                            </tr>
+                            <tr>
                                 <td><?php
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['medicinalproduct'])) ? $e2b['ichicsr']['safetyreport']['patient']['drug']['medicinalproduct'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.medicinalproduct'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.medicinalproduct')));
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <p>Batch/lot number</p>
-                                </td>
-                                <td><?php
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugbatchnumb'])) ? $e2b['ichicsr']['safetyreport']['patient']['drug']['drugbatchnumb'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugbatchnumb'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugbatchnumb')));
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>15. Daily dose(s)</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugdosagetext'])) ? $e2b['ichicsr']['safetyreport']['patient']['drug']['drugdosagetext'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugdosagetext'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugdosagetext')));
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>16. Route(s) of administration</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugadministrationroute'])) ? $drugadministrationroute[$e2b['ichicsr']['safetyreport']['patient']['drug']['drugadministrationroute']] : null; 
-                                    $ar = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugadministrationroute'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugadministrationroute'));
-                                    array_walk($ar, function (&$value, &$key) use ($drugadministrationroute) {
-                                        $value = (isset($drugadministrationroute[$value])) ? $drugadministrationroute[$value] : $value;
-                                    });
-                                    echo implode(" | ", $ar);
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>17. Indication(s) for use</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugindication'])) ? $e2b['ichicsr']['safetyreport']['patient']['drug']['drugindication'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugindication'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugindication')));
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>18. Therapy dates</p>
-                                </td>
-                                <td>
-                                    <p>Date of start of drug</p>
-                                    <?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugstartdate'])) ? $e2b['ichicsr']['safetyreport']['patient']['drug']['drugstartdate'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugstartdate'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugstartdate')));
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p></p>
-                                </td>
-                                <td>
-                                    <p>Date of last administration</p>
-                                    <?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugenddate'])) ? $e2b['ichicsr']['safetyreport']['patient']['drug']['drugenddate'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugenddate'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugenddate')));
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>19. Therapy duration</p>
-                                </td>
-                                <td>
-                                    <?php
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugtreatmentduration'])) ? $e2b['ichicsr']['safetyreport']['patient']['drug']['drugtreatmentduration'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugtreatmentduration'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugtreatmentduration')));
-                                    echo "<br>";
-                                    // echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugtreatmentdurationunit'])) ? $time_unit[$e2b['ichicsr']['safetyreport']['patient']['drug']['drugtreatmentdurationunit']] : null; 
-                                    $dr = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugtreatmentdurationunit'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugtreatmentdurationunit'));
-                                    array_walk($dr, function (&$value, &$key) use ($time_unit) {
-                                        $value = (isset($time_unit[$value])) ? $time_unit[$value] : $value;
-                                    });
-                                    echo implode(" | ", $dr);
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>20. Did reaction abate after stopping drug?</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['actiondrug'])) ? $actiondrug[$e2b['ichicsr']['safetyreport']['patient']['drug']['actiondrug']] : null; 
-                                    $ad = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.actiondrug'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.actiondrug'));
-                                    array_walk($ad, function (&$value, &$key) use ($actiondrug) {
-                                        $value = (isset($actiondrug[$value])) ? $actiondrug[$value] : $value;
-                                    });
-                                    echo implode(" | ", $ad);
-                                    ?></td>
-                            </tr>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>21. Did reaction reappear after reintroduction?</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['patient']['drug']['drugrecurreadministration'])) ? $drugrecurreadministration[$e2b['ichicsr']['safetyreport']['patient']['drug']['drugrecurreadministration']] : null; 
-                                    $re = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.patient.drug.drugrecurreadministration'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.patient.drug.{n}.drugrecurreadministration'));
-                                    array_walk($re, function (&$value, &$key) use ($drugrecurreadministration) {
-                                        $value = (isset($drugrecurreadministration[$value])) ? $drugrecurreadministration[$value] : $value;
-                                    });
-                                    echo implode(" | ", $re);
-                                    ?></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    $dateString = $ce2b['Ce2b']['creation_time'];
+                                    echo $dateString;
 
-                    <table class="table  table-condensed">
-                        <thead>
-                            <tr style="background: #DAEDF3;">
-                                <th colspan="2" class="table-label required">
-                                    <p>MANUFACTURER INFORMATION</p>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="table-label required">
-                                    <p>Name and address of manufacturer</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['duplicatesource'])) ? $e2b['ichicsr']['safetyreport']['duplicatesource'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.duplicatesource'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.reportduplicate.{n}.duplicatesource')));
                                     ?></td>
+                                <td><?php echo $ce2b['Ce2b']['date_first_received']; ?></td>
+                            </tr>
+
+                            <tr>
+                                <th colspan="2">Worldwide unique case Identification</th>
+
                             </tr>
                             <tr>
-                                <td class="table-label required">
-                                    <p>MFR control no.</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['duplicate'])) ? $e2b['ichicsr']['safetyreport']['duplicate'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.duplicate'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.duplicate')));
-                                    ?></td>
+                                <td colspan="2"><?php echo $ce2b['Ce2b']['worldwide_identifier']; ?></td>
                             </tr>
                             <tr>
-                                <td class="table-label required">
-                                    <p>Date received by manufacturer</p>
-                                </td>
-                                <td><?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['receiptdate'])) ? $e2b['ichicsr']['safetyreport']['receiptdate'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.receiptdate'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.receiptdate')));
-                                    ?></td>
+                                <th colspan="2">Case Narrative</th>
+
                             </tr>
                             <tr>
-                                <td class="table-label required">
-                                    <p>Report source</p>
-                                </td>
+                                <td colspan="2"><?php echo $ce2b['Ce2b']['case_narrative']; ?></td>
+                            </tr>
+
+                        </table>
+                        <h5 style="background: #18C4D1; padding:20px;">Primary Sources</h5>
+
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <th>Reporter's Name</th>
+                                <th>Reporter's Email Address</th>
+                                <th>Reporter's Telephone</th>
+                            </tr>
+                            <tr>
+                                <td><?php echo $ce2b['Ce2b']['reporter_name']; ?></td>
+                                <td><?php echo $ce2b['Ce2b']['reporter_email']; ?></td>
+                                <td><?php echo $ce2b['Ce2b']['reporter_phone']; ?></td>
+                            </tr>
+                            <tr>
+                                <th>Reporter's Department</th>
+                                <th colspan="2">Reporter's Physicall Address </th>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td colspan="2"><?php echo $ce2b['Ce2b']['reporter_name']; ?></td>
+                            </tr>
+                            <tr>
+                                <th colspan="3">Reporter's Qualification</th>
+                            </tr>
+                            <tr>
+                                <td colspan="3"><?php echo $ce2b['Designation']['name']; ?></td>
+                            </tr>
+                        </table>
+                        <h5 style="background: #18C4D1; padding:20px;">Information on Sender of Case Safety Report</h5>
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <th>Sender's Name</th>
+                                <th>Sender's Email Address</th>
+                                <th>Sender's Telephone</th>
+                                <th>Sender's Organization</th>
+                            </tr>
+                            <tr>
+                                <td><?php ?></td>
+                                <td><?php  ?></td>
+                                <td><?php  ?></td>
+                                <td><?php echo $ce2b['Ce2b']['sender_organization']; ?></td>
+                            </tr>
+                            <tr>
+                                <th>Sender's Department</th>
+                                <th>Sender's Physicall Address </th>
+                                <th>Sender's Fax</th>
+                                <th>Sender's Qualification</th>
+                            </tr>
+                            <tr>
+                                <td><?php echo $ce2b['Ce2b']['sender_department']; ?></td>
+                                <td><?php echo $ce2b['Ce2b']['sender_address']; ?></td>
+                                <td><?php ?></td>
+                                <td></td>
+                            </tr>
+
+                        </table>
+                        <h5 style="background: #18C4D1; padding:20px;">Literature Reference(s)</h5>
+
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>Literature Reference</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <!-- <tr>
+                                <td>Included documents</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr> -->
+                        </table>
+                        <h5 style="background: #18C4D1; padding:20px;">Study Indetification</h5>
+
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>Study registration number</td>
+                                <td>Study registration country</td>
+                                <td>Study name</td>
+                                <td>Sponsor study number</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Study type where reaction(s) / event (s) were observed</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <h5 style="background: #18C4D1; padding:20px;">Patient Characteristics</h5>
+
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <th>Patient's Name or Initials</th>
+                                <th>Patient's medical record number</th>
+                                <th>Patient's Age</th>
+                                <th>Patient's Date of Birth</th>
+                            </tr>
+                            <tr>
+                                <td><?php echo $ce2b['Ce2b']['patient_name']; ?></td>
+                                <td><?php echo $ce2b['Ce2b']['patient_number']; ?></td>
+                                <td></td>
                                 <td>
-                                    <p>Type of report</p>
                                     <?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['reporttype'])) ? $reporttype[$e2b['ichicsr']['safetyreport']['reporttype']] : null; 
-                                    $re = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.reporttype'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.reporttype'));
-                                    array_walk($re, function (&$value, &$key) use ($reporttype) {
-                                        $value = (isset($reporttype[$value])) ? $reporttype[$value] : $value;
-                                    });
-                                    echo implode(" | ", $re);
-                                    ?>
-                                    <p>Literature reference(s)</p>
-                                    <?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['primarysource']['literaturereference'])) ? $e2b['ichicsr']['safetyreport']['primarysource']['literaturereference'] : null; 
-                                    echo implode(" | ", array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.primarysource.literaturereference'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.primarysource.{n}.literaturereference')));
-                                    ?>
-                                    <p>Qualification</p>
-                                    <?php
-                                    //echo (!empty($e2b['ichicsr']['safetyreport']['primarysource']['qualification'])) ? $qualification[$e2b['ichicsr']['safetyreport']['primarysource']['qualification']] : null; 
-                                    $qa = array_merge(Hash::extract($e2b, 'ichicsr.safetyreport.primarysource.qualification'), Hash::extract($e2b, 'ichicsr.safetyreport.{n}.primarysource.{n}.qualification'));
-                                    array_walk($qa, function (&$value, &$key) use ($qualification) {
-                                        $value = (isset($qualification[$value])) ? $qualification[$value] : $value;
-                                    });
-                                    echo implode(" | ", $qa);
+                                    $dob = isset($ce2b['Ce2b']['patient_dob']) ? trim($ce2b['Ce2b']['patient_dob']) : '';
+
+                                    if (!empty($dob) && strtotime($dob)) {
+                                        echo date('Y-m-d', strtotime($dob));
+                                    } else {
+                                        echo 'N/A'; // Display a placeholder when the date is null or invalid
+                                    }
                                     ?>
                                 </td>
+                            </tr> 
+                            <tr>
+                                <th>Body weight (kg)</th>
+                                <th>Height (cm)</th>
+                                <th colspan="2">Sex</th>
                             </tr>
-                        </tbody>
-                    </table>
-<hr>
-                    <?php
-                if ($this->Session->read('Auth.User.user_type') != 'Public Health Program') {
-                ?>
-                    <table style="width: 100%;">
-                        <tr>
-                            <td style="width: 25%;">NAME OF PERSON REPORTING:</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_name'] ?></strong></td>
-                            <td style="width: 25%;">E-MAIL ADDRESS: </td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_email'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 25%;">DESIGNATION:</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Designation']['name'] ?></strong></td>
-                            <td style="width: 25%;">PHONE NO.</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_phone'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 25%;">Date:</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_date'] ?></strong></td>
-                            <td style="width: 25%;"></td>
-                            <td style="width: 25%;"></td>
-                        </tr>
-                    </table>
-                    <hr>
-                    <table style="width: 100%;">
-                        <tr>
-                            <td style="width: 50%;">Is the person submitting different from reporter?</td>
-                            <td><strong><?php echo $ce2b['Ce2b']['person_submitting'] ?></strong></td>
-                        </tr>
-                    </table>
-                    <hr>
-                    <table style="width: 100%;">
-                        <tr>
-                            <td style="width: 25%;">NAME OF PERSON REPORTING:</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_name_diff'] ?></strong></td>
-                            <td style="width: 25%;">E-MAIL ADDRESS: </td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_email_diff'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 25%;">DESIGNATION:</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_designation_diff'] ?></strong></td>
-                            <td style="width: 25%;">PHONE NO.</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_phone_diff'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 25%;">Date:</td>
-                            <td style="width: 25%;"><strong><?php echo $ce2b['Ce2b']['reporter_date_diff'] ?></strong></td>
-                            <td style="width: 25%;"></td>
-                            <td style="width: 25%;"></td>
-                        </tr>
-                    </table>
-                    <hr>
-                <?php } ?>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td colspan="2"><?php
+                                                if (isset($ce2b['Ce2b']['patient_sex'])) {
+                                                    $patientSex = $ce2b['Ce2b']['patient_sex'];
+                                                    if ($patientSex == 2) {
+                                                        echo 'Female';
+                                                    } elseif ($patientSex == 1) {
+                                                        echo 'Male';
+                                                    }
+                                                }
+                                                ?></td>
+                            </tr> 
+                            <tr>
+                                <th colspan="4">Text for relevant medical history and concurrent conditions (not including reaction/event)</th>
+                            </tr>
+                            <tr>
+                                <td colspan="4"><?php echo $ce2b['Ce2b']['past_medical']; ?></td>
+                            </tr> 
+                        </table>
+                        <!-- <h5>Structured information on relevant medical history</h5>
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>MedDRA Version for medical History</td>
+                                <td>Medical History (MedDRA code)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Start Date</td>
+                                <td>Continuing</td>
+                                <td>End Date</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Comments</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Family History</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table> -->
+                        <!-- <h5>Relevant past Drug History</h5>
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>Name of drug as reported</td>
+                                <td>MPID version date/number</td>
+                                <td>Medicinal Product Identifier (MPID)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>PhPID version date/number</td>
+                                <td>Pharmaceutical Product Identifier (PhPID)</td>
+
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Start Date</td>
+                                <td>End Date</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>MedDRA version for indication</td>
+                                <td>Indication (MedDRA Code)</td>
+                                <td>MedDRA version for reaction</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>Date of Death</td>
+                                <td>Reported cause(s) of death</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>MedDRA version for reported causes(s) of death</td>
+                                <td>Reported cause(s) of death (MedDRA code)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Reported cause(s) of death (free text)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Was the autopsy done?</td>
+
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <h5>Autopsy-Determined cause(s) of Death</h5>
+                        //Repeat if possible 
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>MedDRA version for autopsy-determined cause of death</td>
+                                <td>Autopsy-determined cause(s) of death (MedDRA code)</td>
+                                <td>Autopsy-determined cause(s) of death (free text)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <br>
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>Parent Identification</td>
+                                <td>Date of Birth of parent</td>
+                                <td>Parent's Age</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Body weight (kg) of parent</td>
+                                <td>Height (cm) of parent</td>
+                                <td>Sex of parent</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Text for relevant medical history and concurent conditions of parent</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <h5> Relevant Medical history and concurrent conditions of Parent</h5>
+
+ 
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>MedDRa version for medical history</td>
+                                <td>Medical history (disease /surgical procedure /etc) (MedDRA code)</td>
+
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Start Date</td>
+                                <td>Continuing</td>
+                                <td>End Date</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Comments</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <br>
+                        <h5>Relevant Past drug history of parent</h5>
+                        
+                        <table class="table" style="width: 100%;">
+                            <tr width="100%">
+                                <td>Name of drug as reported</td>
+                                <td>MPID version date/number</td>
+                                <td>MEdical Product Identifier (MPID)</td>
+                                <td>PhPID version date/number</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Pharmaceutical Product Identifier (PhPID)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Start Date</td>
+                                <td>End Date</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>MedDRA version for indication</td>
+                                <td>Indication (MedDRA code)</td>
+                                <td>MedDRA version for reaction</td>
+                                <td>Reactions (MedDRA code)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table> -->
+                        <h5 style="background: #18C4D1; padding:20px;">Reaction(s)/Event(s)</h5>
+
+                        <table class="table" style="width: 100%;">
+                            <tr>
+                                <th>Reaction Name</th>
+                                <th>Start Date</th>
+                                <th>MedDRA Code</th> 
+                                <th>Results in death</th>
+                                <th>Life threatening</th>
+                                <th>Caused / prolonged hospitalization </th>
+                                <th>Disabling / Incapacitating</th>
+                                <th>Congenital anomaly / birth defect</th>
+                                <th>Occurence Country</th>
+                                <th>Outcome</th>
+                            </tr>
+                            <?php
+
+                            foreach ($ce2b['Ce2bReaction'] as $reaction) {
+                            ?>
+                                <tr>
+                                    <td><?php echo $reaction['reaction_name'] ?></td>
+                                    <td><?php echo $reaction['start_date'] ?></td>
+                                    <td><?php echo $reaction['meddra_code'] ?></td>
+                                    <!-- <td></td> -->
+                                    <td><?php if (!empty($reaction['criteria_death_value'])) {
+                                            echo $reaction['criteria_death_value'];
+                                        } else {
+                                            echo  $reaction['criteria_death_null'];
+                                        } ?></td>
+                                    <td><?php if (!empty($reaction['life_threatening_value'])) {
+                                            echo $reaction['life_threatening_value'];
+                                        } else {
+                                            echo  $reaction['life_threatening_null'];
+                                        } ?></td>
+                                    <td><?php if (!empty($reaction['prolonged_hospitalisation_value'])) {
+                                            echo $reaction['prolonged_hospitalisation_value'];
+                                        } else {
+                                            echo  $reaction['prolonged_hospitalisation_null'];
+                                        } ?></td>
+                                    <td><?php if (!empty($reaction['incapacitating_value'])) {
+                                            echo $reaction['incapacitating_value'];
+                                        } else {
+                                            echo  $reaction['incapacitating_null'];
+                                        } ?></td>
+                                    <td><?php if (!empty($reaction['birth_defect_value'])) {
+                                            echo $reaction['birth_defect_value'];
+                                        } else {
+                                            echo  $reaction['birth_defect_null'];
+                                        } ?></td>
+                                    <td><?php echo $reaction['source_country'] ?></td>
+                                    <td><?php
+                                        $outcomes = array(
+                                            '1' => 'Recovered/Resolved',
+                                            '2' => 'Recovering/Resolving',
+                                            '3' => 'Recovered/Resolved with sequelae',
+                                            '4,' => 'Not recovered/Not resolved',
+                                            '5' => 'Fatal',
+                                            '6' => 'unknown',
+                                        );
+                                        if (!empty($reaction['reaction_outcome_value'])) echo $outcomes[strtolower($reaction['reaction_outcome_value'])];
+                                        ?></td>
+                                </tr>
+
+                                <!-- 
+                              
+                            
+                            
+                            <tr width="100%">
+                                <td>Reaction / event as reported by the primary source in native language</td>
+
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Reaction / event as reported by the primary source language</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Reaction / event as reported by the primary source for translation</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>MedDRA version for reaction/event</td>
+                                <td>Reaction/event (MedDRA code)</td>
+                                <td>Term highlighted by the reporter</td>
+                                <td>Seriousness criteria at event level</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>--->
+                                <!--  <tr>
+                                <td>Results in death</td>
+                                <td>Life threatening</td>
+                                <td>Caused / prolonged hospitalization </td>
+                                <td>Disabling / Incapacitating</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr> -->
+                                <!-- <tr>
+                                <td>Congenital anomaly / birth defect</td>
+                                <td>Other medically important condition</td>
+                            </tr> 
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Date of start of reaction / event</td>
+                                <td>Date of end of reaction / event</td>
+                                <td>Duration of reaction / event (number)</td>
+                                <td>Duration of reaction / event (unit)</td>
+                            </tr>
+                            <tr>
+                                <td>Outcome of Reaction / Event at the time of Last Observation</td>
+                                <td>Medical confirmation by healthcare professional </td>
+                                <td>Country where the reaction / event occured</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr> -->
+                            <?php } ?>
+                        </table>
+                        <!-- <h5 style="background: #18C4D1; padding:20px;">Criteria</h5>
+                        <table class="table" style="width: 20%;">
+
+                            <tr>
+                                <th>Results in death</th>
+                                <th> 
+                                <?php echo ($ce2b['Ce2b']['results_in_detah']   ? $ichecked : $nchecked); ?>
+                            </th>
+                            <tr>
+                                <th>Life threatening</th>
+                                <th> 
+                                <?php echo ($ce2b['Ce2b']['life_threatening']   ? $ichecked : $nchecked); ?></th>
+                            <tr>
+                                <th>Caused / prolonged hospitalization </th>
+                                <th> 
+                                <?php echo ($ce2b['Ce2b']['prolonged_hospitalization']   ? $ichecked : $nchecked); ?></th>
+                            <tr>
+                                <th>Disabling / Incapacitating</th>
+                                <th> 
+                                <?php echo ($ce2b['Ce2b']['incapacitating']   ? $ichecked : $nchecked); ?></th>
+                            </tr>
+                            <tr>
+                            <th>Congenital anomaly / birth defect</th>  <th> 
+                            <?php echo ($ce2b['Ce2b']['incapacitating']   ? $ichecked : $nchecked); ?></th>
+                            </tr>
+
+                        </table> -->
+
+                        <!-- <h5 style="background: #18C4D1; padding:20px;">Outcome</h5>
+                        <table class="table" style="width: 20%;">
+
+                            <tr> 
+                                <th> 
+                                <?php echo $ce2b['Ce2b']['results_in_detah']; ?>
+                            </th>
+                            </tr>
+                        </table> -->
+                        <!-- <h5 style="background: #18C4D1; padding:20px;">Results of Tests and Procedures Relevant to the Investigation of the Patient</h5>
+                        <table class="table" style="width: 100%;"> -->
+                        <!-- <tr width="100%">
+                                <td>Test date</td>
+                                <td>Test name</td>
+                                <td>Test name (free text)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>MedDRA version for test name</td>
+                                <td>Test name (MedDRA code)</td> 
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td> 
+                            </tr>
+                            <tr>
+                                <td>Test results</td>
+                                <td>Test results (code)</td>
+                                <td>Test results (value /qualifier)</td>
+                                <td>Test results (unit)</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Results unstructured data (free text)</td> 
+                            </tr>
+                            <tr>
+                                <td></td> 
+                            </tr>
+                            <tr>
+                                <td>Normal low value</td>
+                                <td>Normal high value</td> 
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td> 
+                            </tr>
+                            <tr>
+                                <td>Comments (free text)</td> 
+                            </tr>
+                            <tr>
+                                <td></td> 
+                            </tr>
+                            <tr>
+                                <td>More information available</td> 
+                            </tr>
+                            <tr>
+                                <td></td> 
+                            </tr> -->
+                        <!-- </table> -->
+                        <h5 style="background: #18C4D1; padding:20px;">Drugs Information</h5>
+
+                        <table class="table" style="width: 100%;">
+                            <thead>
+                                <th>Drug Name</th>
+                                <th>Brand</th>
+                                <th>Dose</th>
+                                <th>Route</th>
+                            </thead>
+                            <tbody>
+                                <?php
+
+                                foreach ($ce2b['Ce2bListOfDrug'] as $drug) {
+                                ?>
+                                    <tr>
+                                        <td><?php echo $drug['drug_name'] ?></td>
+                                        <td><?php echo $drug['brand_name'] ?></td>
+                                        <td><?php echo $drug['dose'] ?></td>
+                                        <td><?php echo $drug['Route']['name'] ?></td>
+                                    </tr>
+
+                                <?php } ?>
+
+                            </tbody>
+                        </table>
+
+                        <h5 style="background: #18C4D1; padding:20px;">Narrative case summary and further information</h5>
+
+                        <table class="table" style="width: 100%;">
+
+
+                            <tr>
+                                <td colspan="2"><?php echo $ce2b['Ce2b']['case_narrative']; ?></td>
+                            </tr>
+
+                        </table>
+
+                    </div>
                 </div>
-            </div>
-        </div>
+
+
+                <!-- End of Updated UI -->
+
+
+
+            </div> <!-- /art-sheet -->
+        </div> <!-- /art-sheet -->
     </div>
 </div>

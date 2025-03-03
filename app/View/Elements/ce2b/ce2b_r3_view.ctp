@@ -242,8 +242,17 @@ $nchecked = "&#x2610;";
                                 <td><?php echo $ce2b['Ce2b']['patient_name']; ?></td>
                                 <td><?php echo $ce2b['Ce2b']['patient_number']; ?></td>
                                 <td></td>
-                                <td><?php
-                                    echo date('Y-m-d', strtotime($ce2b['Ce2b']['patient_dob'])); ?></td>
+                                <td>
+                                    <?php
+                                    $dob = isset($ce2b['Ce2b']['patient_dob']) ? trim($ce2b['Ce2b']['patient_dob']) : '';
+
+                                    if (!empty($dob) && strtotime($dob)) {
+                                        echo date('Y-m-d', strtotime($dob));
+                                    } else {
+                                        echo 'N/A'; // Display a placeholder when the date is null or invalid
+                                    }
+                                    ?>
+                                </td>
                             </tr>
                             <!-- <tr>
                                 <td>Age at the time of onset of reaction/ event (number)</td>
@@ -549,10 +558,10 @@ $nchecked = "&#x2610;";
                                         } else {
                                             echo  $reaction['criteria_death_null'];
                                         } ?></td>
-                                    <td><?php if (!empty($reaction['life_hreatening_value'])) {
-                                            echo $reaction['life_hreatening_value'];
+                                    <td><?php if (!empty($reaction['life_threatening_value'])) {
+                                            echo $reaction['life_threatening_value'];
                                         } else {
-                                            echo  $reaction['life_hreatening_null'];
+                                            echo  $reaction['life_threatening_null'];
                                         } ?></td>
                                     <td><?php if (!empty($reaction['prolonged_hospitalisation_value'])) {
                                             echo $reaction['prolonged_hospitalisation_value'];
