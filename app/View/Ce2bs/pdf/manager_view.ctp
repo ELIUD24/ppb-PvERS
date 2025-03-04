@@ -9,8 +9,9 @@
                     <p><b>(FOM001/HPT/VMS/SOP/001)</b></p>
                     <div class="row-fluid">
                         <div class="span12">
-                            <?= $this->Html->image('confidence.png', ['alt' => 'in confidence', 'class' => 'pull-right']) ?>
-                            <?= $this->Html->image('coa.png', ['alt' => 'COA', 'style' => 'margin-left: 45%;']) ?>
+                            <?php
+                            echo ($this->Html->image('arms.png', array('alt' => 'in confidence', 'style' => 'margin-left: 45%;', 'fullBase' => true, 'class' => 'pull-right')));
+                            ?>
                             <div class="babayao" style="text-align: center;">
                                 <h4>MINISTRY OF HEALTH</h4>
                                 <h5>PHARMACY AND POISONS BOARD</h5>
@@ -21,6 +22,12 @@
                             </div>
                         </div>
 
+                    </div>
+                    <div class="row-fluid">
+                        <div class="span12">
+
+                            <?php echo $this->element('ce2b/download'); ?>
+                        </div>
                     </div>
                 </div>
             </div>
