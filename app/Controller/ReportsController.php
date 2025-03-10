@@ -953,13 +953,14 @@ class ReportsController extends AppController
 
         // Change to the correct directory and execute the command
         $jsonParams = escapeshellarg(json_encode($params));
-        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams"; 
- 
+        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+
         // Log command execution for debugging
         file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
 
         // Execute the command in the correct directory
-        $output = shell_exec("$command 2>&1");
+        $command .= " > /dev/null 2>&1 &";
+        $output = exec($command);
 
         // Log output for debugging
         file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
@@ -969,17 +970,7 @@ class ReportsController extends AppController
         } else {
             $this->log("❌ Failed to start process", 'error');
         }
-
-        // Convert parameters to JSON and escape them 
-        // $jsonParams = escapeshellarg(json_encode($params));
-        // $phpPath = '/usr/bin/php'; // Adjust this path based on your PHP installation
-        // $cakePath = escapeshellarg(APP . "Console/cake");
-        // $logPath = LOGS . "process_data.log"; // Path to log output
-
-        // $command = "nohup $phpPath $cakePath process_data $jsonParams > $logPath 2>&1 & echo $!";
-        // $pid = shell_exec($command);
-
-        // $this->log("Shell PID: $pid", 'debug');
+ 
 
         $this->set(compact('vaccines'));
         $this->set('_serialize', 'vaccines');
@@ -1046,108 +1037,39 @@ class ReportsController extends AppController
 
         $inputData = [];
         $total_report_count = count($sadrsIds);
-        $reactionLists = $this->generate_reaction_list($sadrsIds);
-
-        foreach ($suspected as $vc) {
-            $current_drug_name = $vc['SadrListOfDrug']['drug_name'];
-            $drug_related_reports = $vc[0]['cnt'];
-            $reactionDetails = [];
-            foreach ($reactionLists as $reactionName) {
-
-                $reactionCount = count($this->get_sadr_reports_with_reaction($reactionName));
-                $drugReactionCount = count($this->get_sadr_reports_with_drug_and_reaction($reactionName, $current_drug_name, $sadrsIds));
 
 
-                // Calculating Expected Counts
-                // $expected_count = (($drug_related_reports +  $drugReactionCount) * ($reactionCount + $drugReactionCount)) / $total_report_count;
-                $expected_count_raw = ($drug_related_reports * $reactionCount) / $total_report_count;
-                $expected_count = round($expected_count_raw, 5);
+        $params = [
+            'sadr' => true,
+            'sadrsIds' => $sadrsIds,
+            'criteria' => $criteria,
+            'suspected' => $suspected,
+        ];
 
-                $numerator = $drugReactionCount + 0.5;
-                $denominator = $expected_count + 0.5;
-                $calculated_data = $numerator / $denominator;
+        // Change to the correct directory and execute the command
+        $jsonParams = escapeshellarg(json_encode($params));
+        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
 
-                // Observed vs. Expected -> IC (Information Component):
+        // Log command execution for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
 
-                $calculated_log_data_raw = log($calculated_data, 2);
-                $calculated_log_data = round($calculated_log_data_raw, 5);
+        // Execute the command in the correct directory
+        // $output = shell_exec("$command 2>&1");
+        $command .= " > /dev/null 2>&1 &";
+        $output = exec($command);
 
-                //Confidence Interval for IC
 
-                /**
-                 * 
-                 * Var(IC)= 1/(AB+0.5) + 1/(A−AB+0.5) + 1/(B−AB+0.5)  + 1/(N−A−B+AB+0.5)​
+        // Log output for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
 
-                 */
-
-                $variance_of_ic_raw = 1 / ($numerator) + 1 / ($drug_related_reports - $drugReactionCount + 0.5) + 1 / ($reactionCount - $drugReactionCount + 0.5) + 1 / ($total_report_count - $drug_related_reports - $reactionCount + $drugReactionCount + 0.5);
-
-                $variance_of_ic = round($variance_of_ic_raw, 5);
-                // $variance_of_ic_first = (1 / $numerator) + (1 / $denominator);
-                // $constant = 0.4804530139182;
-
-                // $variance_of_ic = (1 / $constant) * $variance_of_ic_first;
-                // Standard Error (SE) of IC:
-                /*
-                SE(IC)= Var(IC)
-                */
-                $standard_error = sqrt($variance_of_ic);
-
-                /**
-                 * 95% Confidence Interval: -> Lower Bound(IC025)=IC−1.96×SE(IC)
-                 * */
-                $lower_bound = $calculated_log_data - 1.96 * $standard_error;
-
-                $reactionDetails[] = array(
-                    'B_reports_with_reaction' => $reactionCount,
-                    'AB_reports_with_drug_and_reaction' => $drugReactionCount,
-                    'reaction_at_hand' => $reactionName,
-                    'E_(AB)_expected_count' => $expected_count,
-                    'IC_raw_calculated_data' => $calculated_data,
-                    'IC_raw_calculated_log_data' => $calculated_log_data,
-                    'Var(IC)_Variance_of_IC' => $variance_of_ic,
-                    'Standard_Error_(SE)_of_IC' => $standard_error,
-                    '95%_Confidence_Interval' => $lower_bound
-                );
-            }
-
-            $inputData[] = array(
-                'current_drug_name' => $current_drug_name,
-                'N_total_reports' => $total_report_count,
-                'A_reports_with_drug' => $drug_related_reports,
-                'reactionDetails' => $reactionDetails
-            );
+        if ($output) {
+            $this->log("✅ Process started successfully", 'debug');
+        } else {
+            $this->log("❌ Failed to start process", 'error');
         }
-        $this->loadModel('Disproportionality');
 
-        foreach ($inputData as $dt) {
-
-            foreach ($dt['reactionDetails'] as $kk) {
-                // debug($dt);
-                // exit;
-                $drug_name = $dt['current_drug_name'];
-                $reaction_name = $kk['reaction_at_hand'];
-                $data = array(
-                    'Disproportionality' => array(
-                        'drug_name' => $drug_name,
-                        'reaction_name' => $reaction_name,
-                        'model' => 'Sadr'
-                    )
-                );
-                // check if the drug and reaction exists, ignore else create
-                $existing = $this->Disproportionality->find('first', array(
-                    'conditions' => array('Disproportionality.drug_name' => $drug_name, 'Disproportionality.reaction_name' => $reaction_name)
-                ));
-                if (!$existing) {
-                    $this->Disproportionality->create();
-                    $this->Disproportionality->save($data);
-                }
-            }
-        }
-        $total = $total_report_count;
         $this->set(compact('inputData'));
-        $this->set(compact('total'));
-        $this->set('_serialize', 'inputData', 'total');
+        $this->set('_serialize', 'inputData');
     }
 
     public function get_sadr_reports_with_drug_and_reaction($reactionName, $current_drug_name, $sadrsIds)

@@ -45,10 +45,17 @@ $cakeDescription = __d('cake_dev', 'PvERS: the Pharmacovigilance Electronic Repo
 
   echo $this->fetch('meta');
   echo $this->fetch('css');
+  echo $this->Html->script('https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js');
+  echo $this->Html->css('https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css');
+  echo $this->Html->script('https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js');
+
   echo $this->fetch('script');
   echo $this->Html->meta('icon', $this->webroot . 'img/favicon.ico');
   // echo $this->Html->css('https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css') ;
   // echo $this->Html->script('https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js');
+  // echo $this->Html->script('https://code.jquery.com/jquery-3.6.0.min.js'); 
+  // echo $this->Html->script('https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js');
+  // echo $this->Html->css('https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css');
 
   ?>
 </head>
@@ -76,7 +83,7 @@ $cakeDescription = __d('cake_dev', 'PvERS: the Pharmacovigilance Electronic Repo
               echo '<li class="' . $this->fetch('Guest') . '">' . $this->Html->link('<i class="fa fa-user"></i> Guest', array('controller' => 'users', 'action' => 'guest'), array('escape' => false)) . '</li>';
             ?>
 
-            
+
               <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                 <i class="fa fa-question-circle"></i> Guest
               </button> -->
@@ -120,7 +127,7 @@ $cakeDescription = __d('cake_dev', 'PvERS: the Pharmacovigilance Electronic Repo
       ?>
       <?php echo $this->fetch('content'); ?>
 
-       
+
     </div>
   </div>
   <hr>

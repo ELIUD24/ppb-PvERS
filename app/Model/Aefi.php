@@ -338,7 +338,7 @@ class Aefi extends AppModel
                 'rule'     => 'ageOrDate',
                 // 'required' => false,
                 'allowEmpty' => true,
-                'message'  => 'Please specify the patient\'s date / Year of birth or age in months'
+                'message'  => 'Please specify the patient\'s date / Year of birth OR only one Age field, not both.'
             ),
         ),
         'county_id' => array(
@@ -528,12 +528,48 @@ class Aefi extends AppModel
 
     public function ageOrDate($field = null)
     {
-        return !empty($this->data['Aefi']['date_of_birth']['year']) ||
-            !empty($this->data['Aefi']['age_years']) ||
-            !empty($this->data['Aefi']['age_months']) ||
-            !empty($this->data['Aefi']['age_weeks']) ||
-            !empty($this->data['Aefi']['age_days']) ||
-            !empty($this->data['Aefi']['age_group']);
+
+        $dobYear = isset($this->data['Aefi']['date_of_birth']['year']) ? trim($this->data['Aefi']['date_of_birth']['year']) : '';
+        $ageYears = isset($this->data['Aefi']['age_years']) ? trim($this->data['Aefi']['age_years']) : '';
+        $ageMonths = isset($this->data['Aefi']['age_months']) ? trim($this->data['Aefi']['age_months']) : '';
+        $ageWeeks = isset($this->data['Aefi']['age_weeks']) ? trim($this->data['Aefi']['age_weeks']) : '';
+        $ageDays = isset($this->data['Aefi']['age_days']) ? trim($this->data['Aefi']['age_days']) : '';
+
+        // Check if Date of Birth is provided
+        $dobProvided = !empty($dobYear);
+
+        // Count how many Age fields are filled
+        $ageFields = array_filter([$ageYears, $ageMonths, $ageWeeks, $ageDays]);
+        $ageFieldsCount = count($ageFields);
+
+        // If both DOB and any Age field(s) are provided, validation fails
+        if ($dobProvided && $ageFieldsCount > 0) {
+            return false; // Error: both DOB and Age are provided
+        }
+
+        // If more than one Age field is provided, validation fails
+        if ($ageFieldsCount > 1) {
+            return false; // Error: multiple Age fields provided
+        }
+
+        // If neither DOB nor any Age field is provided, validation fails
+        if (!$dobProvided && $ageFieldsCount === 0) {
+            return false; // Error: neither DOB nor Age provided
+        }
+
+        return true;
+        // $do_year=$this->data['Aefi']['date_of_birth']['year'];
+        // $age_years=$this->data['Aefi']['age_years'];
+        // $age_months=$this->data['Aefi']['age_months'];
+        // $age_weeks=$this->data['Aefi']['age_weeks'];
+        // $age_days=$this->data['Aefi']['age_days']; 
+        
+        // return !empty() ||
+        //     !empty() ||
+        //     !empty($this->data['Aefi']['age_months']) ||
+        //     !empty($this->data['Aefi']['age_weeks']) ||
+        //     !empty($this->data['Aefi']['age_days']) ||
+        //     !empty($this->data['Aefi']['age_group']);
     }
 
     public function treatOrSpecimen($field = null)
