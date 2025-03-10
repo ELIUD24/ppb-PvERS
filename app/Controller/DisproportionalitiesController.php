@@ -440,9 +440,25 @@ class DisproportionalitiesController extends AppController
 
         return $drugReactionCount;
     }
-
-
     public function manager_index()
+    {
+        $this->Prg->commonProcess();
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->request->query['pages'])) $this->paginate['limit'] = $this->request->query['pages'];
+        else $this->paginate['limit'] = reset($this->page_options);
+
+        $criteria = $this->Disproportionality->parseCriteria($this->passedArgs);
+        $this->paginate['conditions'] = $criteria;
+        $this->paginate['order'] = array('Disproportionality.created' => 'desc');
+
+        $data = Sanitize::clean($this->paginate(), array('encode' => false));
+        $total_reports = count($data);
+        $this->set('page_options', $this->page_options);
+        $this->set('data', $data);
+        $this->set(compact('total_reports'));
+    }
+
+    public function manager_index_old()
     {
         $this->Prg->commonProcess();
         if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;

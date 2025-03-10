@@ -202,23 +202,44 @@ class ReportsController extends AppController
     }
     public function manager_transfusions_analytics()
     {
-        $criteria['Padr.copied !='] = '1';
-        $criteria['Padr.deleted'] = false;
-        $criteria['Padr.archived'] = false;
-        $criteria['Padr.report_sadr'] = 'Adverse Reaction';
+        $criteria['Transfusion.copied !='] = '1';
+        $criteria['Transfusion.deleted'] = false;
+        $criteria['Transfusion.archived'] = false; 
         if (!empty($this->request->data['Report']['start_date']) && !empty($this->request->data['Report']['end_date']))
-            $criteria['Padr.submitted_date between ? and ?'] = array(date('Y-m-d', strtotime($this->request->data['Report']['start_date'])), date('Y-m-d', strtotime($this->request->data['Report']['end_date'])));
+            $criteria['Transfusion.submitted_date between ? and ?'] = array(date('Y-m-d', strtotime($this->request->data['Report']['start_date'])), date('Y-m-d', strtotime($this->request->data['Report']['end_date'])));
 
-        $reportIds = $this->Padr->find('list', array(
-            'fields' => array('Padr.id'),
+        $reportIds = $this->Transfusion->find('list', array(
+            'fields' => array('Transfusion.id'),
             'conditions' => $criteria
         ));
-        $inputData = [];
         $reportIds = array_keys($reportIds);
-        $total = count($reportIds);
-        $this->set(compact('inputData'));
-        $this->set(compact('total'));
-        $this->set('_serialize', 'inputData', 'total');
+        $params = [
+            'reportIds' => $reportIds,
+            'criteria' => $criteria,
+            'transfusion' => true
+
+        ];
+
+        // Change to the correct directory and execute the command
+        $jsonParams = escapeshellarg(json_encode($params));
+        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+
+        // Log command execution for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
+
+        // Execute the command in the correct directory
+        $command .= " > /dev/null 2>&1 &";
+        $output = exec($command);
+
+        // Log output for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
+
+        if ($output) {
+            $this->log("✅ Process started successfully", 'debug');
+        } else {
+            $this->log("❌ Failed to start process", 'error');
+        }
+        
     }
 
     public function medication_count_specific_reaction($reportIds, $reaction)
@@ -276,90 +297,36 @@ class ReportsController extends AppController
             'fields' => array('Medication.id'),
             'conditions' => $criteria
         ));
-        $inputData = [];
         $reportIds = array_keys($reportIds);
-        $total_report_count = count($reportIds);
-        $total = $total_report_count;
+        $params = [
+            'reportIds' => $reportIds,
+            'criteria' => $criteria,
+            'medication' => true
 
+        ];
 
-        $vaccines = $this->Medication->MedicationProduct->find('all', array(
-            'fields' => array(
-                'MedicationProduct.generic_name_ii',
-                'COUNT(DISTINCT MedicationProduct.medication_id) as cnt'
-            ),
-            'contain' => array(),
-            'conditions' => array(
-                'MedicationProduct.medication_id' => $reportIds,
-                'MedicationProduct.generic_name_ii IS NOT NULL',
-                'MedicationProduct.generic_name_ii !=' => ''
-            ),
-            'group' => array('MedicationProduct.generic_name_ii'),
-            // 'having' => array('cnt >' => 0),
-        ));
-        // get list of all reactions
-
-        $criteria['Medication.direct_result !='] = '';
-        $allreactions = $this->Medication->find('list', array(
-            'fields' => array('Medication.direct_result'),
-            'conditions' => $criteria
-        ));
-        //  debug($allreactions);
+        // debug($params);
         // exit;
 
-        foreach ($vaccines as $vc) {
-            $drug_related_reports = $vc[0]['cnt'];
-            $drug_name = $vc['MedicationProduct']['generic_name_ii'];
+        // Change to the correct directory and execute the command
+        $jsonParams = escapeshellarg(json_encode($params));
+        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
 
+        // Log command execution for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
 
-            $reactionDetails = [];
-            foreach ($allreactions as $reaction) {
+        // Execute the command in the correct directory
+        $command .= " > /dev/null 2>&1 &";
+        $output = exec($command);
 
-                $reactionCount = $this->medication_count_specific_reaction($reportIds, $reaction); // B
-                $drugReactionCount = $this->medication_count_specific_drug_reaction($reportIds, $drug_name, $reaction); //AB
+        // Log output for debugging
+        file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
 
-                $expected_count_raw = ($drug_related_reports * $reactionCount) / $total_report_count;
-                $expected_count = round($expected_count_raw, 5);
-
-                $numerator = $drugReactionCount + 0.5;
-                $denominator = $expected_count + 0.5;
-                $calculated_data = $numerator / $denominator;
-
-                // Observed vs. Expected -> IC (Information Component):
-
-                $calculated_log_data_raw = log($calculated_data, 2);
-                $calculated_log_data = round($calculated_log_data_raw, 5);
-                $variance_of_ic_raw = 1 / ($numerator) + 1 / ($drug_related_reports - $drugReactionCount + 0.5) + 1 / ($reactionCount - $drugReactionCount + 0.5) + 1 / ($total_report_count - $drug_related_reports - $reactionCount + $drugReactionCount + 0.5);
-
-                $variance_of_ic = round($variance_of_ic_raw, 5);
-
-                $standard_error = sqrt($variance_of_ic);
-
-                $lower_bound = $calculated_log_data - 1.96 * $standard_error;
-
-                $reactionDetails[] = array(
-
-                    'B_reports_with_reaction' => $reactionCount,
-                    'AB_reports_with_drug_and_reaction' =>  $drugReactionCount,
-                    'reaction_at_hand' => $reaction,
-                    'E_(AB)_expected_count' =>  $expected_count,
-                    'IC_raw_calculated_data' => $calculated_data,
-                    'IC_raw_calculated_log_data' => $calculated_log_data,
-                    'Var(IC)_Variance_of_IC' => $variance_of_ic,
-                    'Standard_Error_(SE)_of_IC' => $standard_error,
-                    '95%_Confidence_Interval' => $lower_bound
-                );
-            }
-
-            $inputData[] = array(
-                'current_drug_name' => $drug_name,
-                'N_total_reports' => $total_report_count,
-                'A_reports_with_drug' => $drug_related_reports,
-                'reactionDetails' => $reactionDetails
-            );
+        if ($output) {
+            $this->log("✅ Process started successfully", 'debug');
+        } else {
+            $this->log("❌ Failed to start process", 'error');
         }
-        $this->set(compact('inputData'));
-        $this->set(compact('total'));
-        $this->set('_serialize', 'inputData', 'total');
     }
     public function general()
     {

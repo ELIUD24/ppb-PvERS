@@ -1564,6 +1564,9 @@ class SadrsController extends AppController
                     $this->Sadr->saveField('submitted_date', date("Y-m-d H:i:s"));
                     $sadr = $this->Sadr->read(null, $id);
 
+                    // check if there was a downgrade:
+                        
+
                     $this->Session->setFlash(__('The SADR has been saved'), 'alerts/flash_success');
                     $this->redirect(array('action' => 'view', $this->Sadr->id));
                 }
