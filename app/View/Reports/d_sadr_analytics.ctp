@@ -6,106 +6,91 @@ $this->Html->css('summary', null, array('inline' => false));
 
 <?php $this->start('report'); ?>
 
+
 <div class="row-fluid">
 
     <div class="span12">
-        <!-- N- Total Reports <br>
-        A- Reports with the drug of interface_exists <br>
-        B- Reports with reaction of interest <br>
-        AB- Reports with both the drug and reaction of interest <br>
-        E_AB- Observed vs. Expected calculated as -> E(AB)= (A * B)/N<br>
-        IC- Raw Data Observed vs. Expected calculated as IC=(E(AB)+0.5)/(AB+0.5)<br> 
-        Loc IC -Log of the above  log2(IC)<br>
-        Variance of IC- Calculated <br>
-        Standard Error <br>
-        95% Confidence -> Calculated -->
-        <table class="table table-condensed table-bordered">
+        <table id="data-table" class="table table-condensed table-bordered">
+
             <thead>
                 <tr>
-                    <th>Total Cases <?php echo $total ?></th>
+                    <th id="totalCases">Total Cases: </th>
                 </tr>
                 <tr>
-                    <th>Drug Name</th>
-                    <!-- <th>Total Cases</th> -->
-                    <!-- <th>A-Drug</th> -->
-                    <th colspan="2">Disproportionality Analysis Data</th>
+                    <th><?php echo $this->Paginator->sort('Vaccine Name'); ?></th>
+                    <th><?php echo $this->Paginator->sort('Drug Reaction'); ?></th>
+                    <th><?php echo $this->Paginator->sort('Observed'); ?></th>
+                    <th><?php echo $this->Paginator->sort('Expected'); ?></th>
+                    <th><?php echo $this->Paginator->sort('IC025>0'); ?></th>
+                    <th><?php echo $this->Paginator->sort('IC'); ?></th>
                 </tr>
             </thead>
             <tbody>
-                <?php
-                foreach ($inputData as $key => $value) {
-                    echo "<tr>";
-                    echo "<th>" . $value['current_drug_name'] . "</th>";
-                    // echo "<th>" . $value['N_total_reports'] . "</th>";
-                    // echo "<th>" . $value['A_reports_with_drug'] . "</th>";
-                    echo "<td>"; ?>
-                    <table class="table table-condensed table-bordered">
-                        <thead>
-                            <tr>
-                                <!-- <th>Drug Reaction</th>
-                                <th>B-Observed</th>
-                                <th>AB - (Both Drug and Reaction)</th>
-                                <th>E_AB (Expected)</th>
-                                <th>IC</th>
-                                <th>Log IC</th>
-                                <th>Var(IC)</th>
-                                <th>Standard Error (SE) of IC</th>
-                                <th>95% Confidence Interval</th> -->
-
-                                <th>Drug Reaction</th>
-                                <th>Observed</th> 
-                                <th>Expected</th>
-                                <th>IC025>0</th> 
-                                <th>IC</th> 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            foreach ($value['reactionDetails'] as $key => $dt) { ?>
-                                <?php
-                                //   echo "<tr>"; 
-                                //   echo "<td>" . $dt['reaction_at_hand'] . "</td>";
-                                //   echo "<td>" . $dt['B_reports_with_reaction'] . "</td>";
-                                //   echo "<td>" . $dt['AB_reports_with_drug_and_reaction'] . "</td>";
-                                //   echo "<td>" . $dt['E_(AB)_expected_count'] . "</td>";
-                                //   echo "<td>" . $dt['IC_raw_calculated_data'] . "</td>";
-                                //   echo "<td>" . $dt['IC_raw_calculated_log_data'] . "</td>"; 
-                                //   echo "<td>" . $dt['Var(IC)_Variance_of_IC'] . "</td>";
-                                //   echo "<td>" . $dt['Standard_Error_(SE)_of_IC'] . "</td>";
-                                //   echo "<td>" . $dt['95%_Confidence_Interval'] . "</td>";
-                                //   echo "</tr>";  
-
-                                // Assuming $dt is an array with your data
-                                $confidenceInterval = $dt['95%_Confidence_Interval']; //round($dt['95%_Confidence_Interval']);
-
-                                // Determine the color based on the value
-                                $color = $confidenceInterval > 0 ? 'red' : 'green';
-
-                                $log = $dt['IC_raw_calculated_log_data']; //round($dt['IC_raw_calculated_log_data']);
-
-
-                                echo "<tr>";
-                                echo "<td>" . $dt['reaction_at_hand'] . "</td>";
-                                echo "<td>" . $dt['B_reports_with_reaction'] . "</td>"; 
-                                echo "<td>" . (int)$dt['E_(AB)_expected_count'] . "</td>";
-                                echo "<td style='color: $color;'>" . round($confidenceInterval,2) . "</td>";  
-                                echo "<td>" . $log . "</td>"; 
-                                echo "</tr>";
-                                ?>
-
-                            <?php } ?>
-                        </tbody>
-                    </table><?php
-
-                            echo "</td>";
-                            echo "</tr>";
-                        }
-                            ?>
-
             </tbody>
         </table>
     </div>
 </div>
 
 <hr>
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    let table = $("#data-table").DataTable({
+        "paging": true, // Enable pagination
+        "searching": true, // Enable search
+        "ordering": true, // Enable column sorting
+        "info": true, // Show info (e.g., "Showing 1 to 10 of 50 entries")
+        "lengthMenu": [5, 10, 25, 50,100], // Control number of rows per page
+        "pageLength": 10 // Default number of rows per page
+    });
+    $.blockUI({
+            message: '<h3>Please wait...</h3>',
+            css: {
+                border: '3px solid #aaa',
+                padding: '10px'
+            }
+        });
+
+    fetch('/reports/load_data/Sadr') // Adjust endpoint as necessary
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                let total = data[0].Disproportionality.total; // Pick total from the first row
+                document.getElementById("totalCases").textContent = `Total Cases: ${total}`;
+            }
+
+            // Clear existing DataTable data
+            table.clear();
+
+            // Process each data row
+            let rowDataArray = data.map(item => {
+                let rowData = item.Disproportionality;
+                let confidenceInterval = parseFloat(rowData.confidence_interval);
+                let expected = parseInt(rowData.eab_expected);
+
+                // Ensure values are not NaN, default to 0
+                confidenceInterval = isNaN(confidenceInterval) ? 0 : confidenceInterval;
+                expected = isNaN(expected) ? 0 : expected;
+
+                let color = confidenceInterval > 0 ? 'red' : 'green';
+
+                return [
+                    rowData.drug_name || "N/A", // Default to "N/A" if missing
+                    rowData.reaction_name || "N/A",
+                    rowData.b_reports || 0, // Default to 0 if missing
+                    expected,
+                    `<span style="color: ${color};">${confidenceInterval.toFixed(2)}</span>`,
+                    rowData.ic_calculated_data || "N/A"
+                ];
+            });
+
+            // Add new data to DataTable
+            table.rows.add(rowDataArray).draw();
+            $.unblockUI();
+        })
+        .catch(error => console.error("Error fetching data:", error));
+});
+
+</script>
+
 <?php $this->end(); ?>

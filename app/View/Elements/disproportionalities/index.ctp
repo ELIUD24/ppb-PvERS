@@ -165,16 +165,16 @@ echo $this->Session->flash();
         $cc = 0;
         foreach ($data as $dt) :
           $cc++;
-          $confidenceInterval = $dt['Disproportionality']['95%_Confidence_Interval'];
+          $confidenceInterval = $dt['Disproportionality']['confidence_interval'];
           $color = $confidenceInterval > 0 ? 'red' : 'green';
-          $log = $dt['Disproportionality']['IC_raw_calculated_log_data'];
+          $log = $dt['Disproportionality']['ic_calculated_data'];
         ?>
           <tr class="">
             <td><?php echo $cc; ?>&nbsp;</td>
             <td><?php echo h($dt['Disproportionality']['drug_name']); ?>&nbsp;</td>
             <td><?php echo h($dt['Disproportionality']['reaction_name']); ?>&nbsp;</td>
-            <td><?php echo h($dt['Disproportionality']['B_reports_with_reaction']); ?>&nbsp;</td>
-            <td><?php echo h((int)$dt['Disproportionality']['E_(AB)_expected_count']); ?> &nbsp;</td>
+            <td><?php echo h($dt['Disproportionality']['b_reports']); ?>&nbsp;</td>
+            <td><?php echo h((int)$dt['Disproportionality']['eab_expected']); ?> &nbsp;</td>
             <?php echo "<td style='color: $color;'>" . round($confidenceInterval, 2) . "&nbsp;</td>"; ?>
             <td><?php echo $log; ?>&nbsp;</td>
 

@@ -2,6 +2,7 @@
 $this->extend('/Reports/upgrade/menu/d_aefi');
 $this->assign('d-aefi-analysis', 'active');
 $this->Html->css('summary', null, array('inline' => false));
+
 ?>
 
 <?php $this->start('report'); ?>
@@ -34,34 +35,57 @@ $this->Html->css('summary', null, array('inline' => false));
 
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
-        fetch('/reports/load_data/Aefi') // Adjust the endpoint as necessary
+        let table = $("#data-table").DataTable({
+            "paging": true, // Enable pagination
+            "searching": true, // Enable search
+            "ordering": true, // Enable column sorting
+            "info": true, // Show info (e.g., "Showing 1 to 10 of 50 entries")
+            "lengthMenu": [5, 10, 25, 50, 100], // Control number of rows per page
+            "pageLength": 10 // Default number of rows per page
+        });
+        $.blockUI({
+            message: '<h3>Please wait...</h3>',
+            css: {
+                border: '3px solid #aaa',
+                padding: '10px'
+            }
+        });
+        fetch('/reports/load_data/Aefi') // Adjust endpoint as necessary
             .then(response => response.json())
             .then(data => {
-                let tbody = document.querySelector("#data-table tbody");
-                tbody.innerHTML = ""; // Clear existing rows
-
                 if (data.length > 0) {
                     let total = data[0].Disproportionality.total; // Pick total from the first row
                     document.getElementById("totalCases").textContent = `Total Cases: ${total}`;
                 }
 
-                data.forEach(item => {
-                    let rowData = item.Disproportionality; // Extract Disproportionality object
+                // Clear existing DataTable data
+                table.clear();
+
+                // Process each data row
+                let rowDataArray = data.map(item => {
+                    let rowData = item.Disproportionality;
                     let confidenceInterval = parseFloat(rowData.confidence_interval);
-                    let log = rowData.ic_calculated_data;
+                    let expected = parseInt(rowData.eab_expected);
+
+                    // Ensure values are not NaN, default to 0
+                    confidenceInterval = isNaN(confidenceInterval) ? 0 : confidenceInterval;
+                    expected = isNaN(expected) ? 0 : expected;
+
                     let color = confidenceInterval > 0 ? 'red' : 'green';
 
-                    let tr = document.createElement("tr");
-                    tr.innerHTML = `
-                    <td>${rowData.drug_name}</td>
-                    <td>${rowData.reaction_name}</td>
-                    <td>${rowData.b_reports}</td>
-                    <td>${parseInt(rowData.eab_expected)}</td>
-                    <td style="color: ${color};">${confidenceInterval.toFixed(2)}</td>
-                    <td>${log}</td>
-                `;
-                    tbody.appendChild(tr);
+                    return [
+                        rowData.drug_name || "N/A", // Default to "N/A" if missing
+                        rowData.reaction_name || "N/A",
+                        rowData.b_reports || 0, // Default to 0 if missing
+                        expected,
+                        `<span style="color: ${color};">${confidenceInterval.toFixed(2)}</span>`,
+                        rowData.ic_calculated_data || "N/A"
+                    ];
                 });
+
+                // Add new data to DataTable
+                table.rows.add(rowDataArray).draw();
+                $.unblockUI();
             })
             .catch(error => console.error("Error fetching data:", error));
     });
