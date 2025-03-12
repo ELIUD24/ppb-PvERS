@@ -1906,11 +1906,15 @@ class Ce2bsController extends AppController
         }
         $this->Ce2b->id = $id;
         $drugs = $this->manipulate_r2_drugs($flattenedData['Patient']['Drugs']);
-        $this->request->data['Ce2bListOfDrug'] = $drugs;
-        $this->request->data['Ce2b']['id'] = $id;
-        // debug($this->request->data);
+        $data['Ce2bListOfDrug'] = $drugs;
+        $data['Ce2b']['id'] = $id;
+        // debug($data);
         // exit;
-        if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => false, 'deep' => true))) {
+        //         debug($this->Ce2b->Ce2bListOfDrug->find('all', ['conditions' => ['Ce2bListOfDrug.ce2b_id' => $id]]));
+        // exit; 
+        $this->Ce2b->Ce2bListOfDrug->deleteAll(['Ce2bListOfDrug.ce2b_id' => $id], false);
+
+        if ($this->Ce2b->saveAssociated($data, array('validate' => false, 'deep' => true))) {
             // debug("Drugs Updated");
         }
     }
@@ -1922,10 +1926,10 @@ class Ce2bsController extends AppController
         }
         $this->Ce2b->id = $id;
         $reactions = $this->manipulate_r2_reactions($flattenedData['Patient']['Reactions']);
-        $this->request->data['Ce2bReaction'] = $reactions;
-        $this->request->data['Ce2b']['id'] = $id;
+        $data['Ce2bReaction'] = $reactions;
+        $data['Ce2b']['id'] = $id;
 
-        if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => false, 'deep' => true))) {
+        if ($this->Ce2b->saveAssociated($data, array('validate' => false, 'deep' => true))) {
             // debug("Reactions Updated");
         }
     }

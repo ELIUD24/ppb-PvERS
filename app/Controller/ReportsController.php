@@ -92,19 +92,36 @@ class ReportsController extends AppController
         }
         $this->set('is_mobile', $this->is_mobile);
     }
-
     public function load_data($model)
     {
-
         $this->autoRender = false;
         $this->loadModel('Disproportionality');
-        $data = $this->Disproportionality->find('all', array(
-            'conditions' => array('Disproportionality.model' => $model)
-        ));
-
+    
+        // Load pagination component
+        $this->paginate = [
+            'conditions' => ['Disproportionality.model' => $model],
+            'limit' => 10, // Set the number of records per page
+            'order' => ['Disproportionality.id' => 'desc']
+        ];
+    
+        $data = $this->paginate('Disproportionality');
+    
         echo json_encode($data);
         return;
     }
+    
+    // public function load_data($model)
+    // {
+
+    //     $this->autoRender = false;
+    //     $this->loadModel('Disproportionality');
+    //     $data = $this->Disproportionality->find('all', array(
+    //         'conditions' => array('Disproportionality.model' => $model)
+    //     ));
+
+    //     echo json_encode($data);
+    //     return;
+    // }
 
     public function padr_reports_with_reaction($reportReactions, $reaction)
     {
@@ -176,7 +193,7 @@ class ReportsController extends AppController
 
         // Change to the correct directory and execute the command
         $jsonParams = escapeshellarg(json_encode($params));
-        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+        $command = "cd /var/www/html/pvers/app && sudo ./Console/cake process_data $jsonParams";
 
         // Log command execution for debugging
         file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
@@ -222,7 +239,7 @@ class ReportsController extends AppController
 
         // Change to the correct directory and execute the command
         $jsonParams = escapeshellarg(json_encode($params));
-        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+        $command = "cd /var/www/html/pvers/app && sudo ./Console/cake process_data $jsonParams";
 
         // Log command execution for debugging
         file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
@@ -310,7 +327,7 @@ class ReportsController extends AppController
 
         // Change to the correct directory and execute the command
         $jsonParams = escapeshellarg(json_encode($params));
-        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+        $command = "cd /var/www/html/pvers/app && sudo ./Console/cake process_data $jsonParams";
 
         // Log command execution for debugging
         file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
@@ -818,7 +835,7 @@ class ReportsController extends AppController
 
         // Change to the correct directory and execute the command
         $jsonParams = escapeshellarg(json_encode($params));
-        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+        $command = "cd /var/www/html/pvers/app && sudo ./Console/cake process_data $jsonParams";
 
         // Log command execution for debugging
         file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
@@ -827,14 +844,14 @@ class ReportsController extends AppController
         $command .= " > /dev/null 2>&1 &";
         $output = exec($command);
 
-        // Log output for debugging
-        file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
+        // // Log output for debugging
+        // file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
 
-        if ($output) {
-            $this->log("✅ Process started successfully", 'debug');
-        } else {
-            $this->log("❌ Failed to start process", 'error');
-        }
+        // if ($output) {
+        //     $this->log("✅ Process started successfully", 'debug');
+        // } else {
+        //     $this->log("❌ Failed to start process", 'error');
+        // }
 
 
         $this->set(compact('vaccines'));
@@ -913,7 +930,7 @@ class ReportsController extends AppController
 
         // Change to the correct directory and execute the command
         $jsonParams = escapeshellarg(json_encode($params));
-        $command = "cd /var/www/pvers/app && sudo ./Console/cake process_data $jsonParams";
+        $command = "cd /var/www/html/pvers/app && sudo ./Console/cake process_data $jsonParams";
 
         // Log command execution for debugging
         file_put_contents(LOGS . 'process_debug.log', "Executing: $command\n", FILE_APPEND);
@@ -925,13 +942,13 @@ class ReportsController extends AppController
 
 
         // Log output for debugging
-        file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
+        // file_put_contents(LOGS . 'process_debug.log', "Output: $output\n", FILE_APPEND);
 
-        if ($output) {
-            $this->log("✅ Process started successfully", 'debug');
-        } else {
-            $this->log("❌ Failed to start process", 'error');
-        }
+        // if ($output) {
+        //     $this->log("✅ Process started successfully", 'debug');
+        // } else {
+        //     $this->log("❌ Failed to start process", 'error');
+        // }
 
         $this->set(compact('inputData'));
         $this->set('_serialize', 'inputData');

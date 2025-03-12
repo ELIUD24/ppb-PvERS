@@ -8,7 +8,7 @@ App::uses('Sanitize', 'Utility');
 
 class ProcessDataShell extends AppShell
 {
-    public $uses = array('Disproportionality', 'Aefi', 'Sadr','Padr','Medication','Transfusion'); // Load required models
+    public $uses = array('Disproportionality', 'Aefi', 'Sadr', 'Padr', 'Medication', 'Transfusion'); // Load required models
 
 
 
@@ -89,20 +89,19 @@ class ProcessDataShell extends AppShell
         if ($isSadr) {
             $this->logMessage("📦 Processing SADR data...");
             $this->sadr_startup($params);
-        }else if($isPublic){
+        } else if ($isPublic) {
             $this->logMessage("📦 Processing Public data...");
             $this->public_startup($params);
-        }else if($isMedication){
+        } else if ($isMedication) {
             $this->logMessage("📦 Processing Medication data...");
             $this->medication_startup($params);
-        }else if($isTransfusion){
+        } else if ($isTransfusion) {
 
             $this->logMessage("📦 Processing Medication data...");
-        }
-         else {
-            
+        } else {
+
             $this->logMessage("📦 Processing AEFI data...");
-            $this->aefi_startup($params); 
+            $this->aefi_startup($params);
         }
         $this->logMessage("✅ Finished processing.");
     }
@@ -197,6 +196,80 @@ class ProcessDataShell extends AppShell
 
         return $commonReports;
     }
+    public function sadr_startup_alt($params)
+    {
+        $sadrsIds = isset($params['sadrsIds']) ? $params['sadrsIds'] : [];
+        $criteria = isset($params['criteria']) ? $params['criteria'] : [];
+        $suspected = isset($params['suspected']) ? $params['suspected'] : [];
+
+        if (empty($sadrsIds) || empty($suspected)) {
+            return;
+        }
+
+        $total_report_count = count($sadrsIds);
+        $reactionLists = $this->generate_reaction_list($sadrsIds);
+
+        $this->loadModel('Disproportionality');
+
+        // Optimize by deleting only relevant data
+        // $this->Disproportionality->deleteAll(['Disproportionality.model' => 'Sadr'], false);
+        // $this->Disproportionality->query('TRUNCATE TABLE disproportionalities;');
+
+        $bulkData = [];
+
+        foreach ($suspected as $vc) {
+            $current_drug_name = $vc['SadrListOfDrug']['drug_name'];
+            $drug_related_reports = $vc[0]['cnt'];
+
+            foreach ($reactionLists as $reactionName) {
+                $reactionCount = $this->get_sadr_reports_with_reaction($reactionName);
+                $drugReactionCount = $this->get_sadr_reports_with_drug_and_reaction($reactionName, $current_drug_name, $sadrsIds);
+
+                if ($reactionCount == 0 || $total_report_count == 0) {
+                    continue; // Skip unnecessary calculations
+                }
+
+                $expected_count = round(($drug_related_reports * count($reactionCount)) / $total_report_count, 5);
+                $numerator = $drugReactionCount + 0.5;
+                $denominator = $expected_count + 0.5;
+                $calculated_data = $numerator / $denominator;
+                $calculated_log_data = round(log($calculated_data, 2), 5);
+
+                $variance_of_ic = round(
+                    1 / $numerator +
+                        1 / ($drug_related_reports - $drugReactionCount + 0.5) +
+                        1 / (count($reactionCount) - $drugReactionCount + 0.5) +
+                        1 / ($total_report_count - $drug_related_reports - count($reactionCount) + $drugReactionCount + 0.5),
+                    5
+                );
+
+                $standard_error = sqrt($variance_of_ic);
+                $confidence_interval = $calculated_log_data - (1.96 * $standard_error);
+
+                $bulkData[] = [
+                    'total' => $total_report_count,
+                    'drug_name' => $current_drug_name,
+                    'reaction_name' => $reactionName,
+                    'model' => 'Sadr',
+                    'b_reports' => count($reactionCount),
+                    'ab_reports' => $drugReactionCount,
+                    'eab_expected' => $expected_count,
+                    'ic_raw_data' => $calculated_data,
+                    'ic_calculated_data' => $calculated_log_data,
+                    'ic_variance' => $variance_of_ic,
+                    'standard_error' => $standard_error,
+                    'confidence_interval' => $confidence_interval
+                ];
+            }
+        }
+        // $this->Disproportionality->query('TRUNCATE TABLE disproportionalities;');
+
+        // Use bulk insert for better performance
+        if (!empty($bulkData)) {
+            $this->Disproportionality->saveMany($bulkData);
+        }
+    }
+
     public function sadr_startup($params)
     {
         $sadrsIds = isset($params['sadrsIds']) ? $params['sadrsIds'] : [];
@@ -211,6 +284,8 @@ class ProcessDataShell extends AppShell
             $current_drug_name = $vc['SadrListOfDrug']['drug_name'];
             $drug_related_reports = $vc[0]['cnt'];
             $reactionDetails = [];
+
+            $this->logMessage("📦 Processing SADR data...Suspected Drug {$current_drug_name}");
             foreach ($reactionLists as $reactionName) {
 
                 $reactionCount = count($this->get_sadr_reports_with_reaction($reactionName));
@@ -379,7 +454,7 @@ class ProcessDataShell extends AppShell
         ));
         $commonMedications = array_intersect($allreactions, $vaccines);
 
-        
+
 
         return count($commonMedications);
     }
@@ -403,15 +478,15 @@ class ProcessDataShell extends AppShell
             // 'having' => array('cnt >' => 0),
         ));
         // get list of all reactions
-        $vaccinesd=json_encode($vaccines);
+        $vaccinesd = json_encode($vaccines);
         $this->logMessage("📦 Processing Medication data... as vaccines here {$vaccinesd}");
         $criteria['Medication.direct_result !='] = '';
         $allreactions = $this->Medication->find('list', array(
             'fields' => array('Medication.direct_result'),
             'conditions' => $criteria
         ));
-       
-        $total_report_count = count($reportIds); 
+
+        $total_report_count = count($reportIds);
 
         $inputData = [];
         foreach ($vaccines as $vc) {
@@ -463,7 +538,7 @@ class ProcessDataShell extends AppShell
                 'reactionDetails' => $reactionDetails
             );
         }
-        $inputs=json_encode($inputData);
+        $inputs = json_encode($inputData);
         $this->logMessage("📦 Processing Medication data... as like {$inputs}");
         $total = $total_report_count;
 
@@ -695,6 +770,182 @@ class ProcessDataShell extends AppShell
         }
     }
     public function aefi_startup($params)
+    {
+        $aefiIds = isset($params['aefiIds']) ? $params['aefiIds'] : [];
+        $criteria = isset($params['criteria']) ? $params['criteria'] : [];
+
+        if (empty($aefiIds)) {
+            return []; // No data to process
+        }
+
+        // Fetch vaccines with distinct AEFI IDs
+        $vaccines = $this->Aefi->AefiListOfVaccine->find('all', [
+            'fields' => [
+                'Vaccine.vaccine_name',
+                'COUNT(DISTINCT AefiListOfVaccine.aefi_id) as cnt'
+            ],
+            'contain' => ['Vaccine'],
+            'conditions' => [
+                'AefiListOfVaccine.aefi_id' => $aefiIds,
+                'AefiListOfVaccine.vaccine_name IS NOT NULL',
+            ],
+            'group' => ['Vaccine.vaccine_name', 'Vaccine.id'],
+            'having' => ['COUNT(DISTINCT AefiListOfVaccine.aefi_id) >' => 0],
+        ]);
+
+        $reactionMap = [
+            'bcg' => 'BCG Lymphadenitis',
+            'convulsion' => 'Convulsion',
+            'urticaria' => 'Generalized urticaria (hives)',
+            'high_fever' => 'High Fever',
+            'abscess' => 'Injection site abscess',
+            'local_reaction' => 'Severe Local Reaction',
+            'anaphylaxis' => 'Anaphylaxis',
+            'meningitis' => 'Encephalopathy, Encephalitis/Meningitis',
+            'paralysis' => 'Paralysis',
+            'toxic_shock' => 'Toxic shock'
+        ];
+
+        $data = [];
+        foreach ($vaccines as $vc) {
+            $vaccineName = $vc['Vaccine']['vaccine_name'];
+
+            $commonElements = array_intersect($this->count_every_vaccine($vc), $aefiIds);
+            $reports = [];
+
+            foreach ($commonElements as $cm) {
+                $aefi = $this->Aefi->find('first', [
+                    'conditions' => ['Aefi.id' => $cm],
+                    'contain' => ['AefiDescription', 'AefiListOfVaccine.Vaccine'],
+                ]);
+
+                if (!$aefi) {
+                    continue;
+                }
+
+                $aefi = Sanitize::clean($aefi, ['escape' => true]);
+
+                $reactions = [];
+                foreach ($reactionMap as $key => $reaction) {
+                    if (!empty($aefi['Aefi'][$key])) {
+                        $reactions[] = $reaction;
+                    }
+                }
+
+                if (!empty($aefi['Aefi']['aefi_symptoms'])) {
+                    $reactions[] = $aefi['Aefi']['aefi_symptoms'];
+                }
+
+                foreach ($aefi['AefiDescription'] as $other) {
+                    $reactions[] = $other['description'];
+                }
+
+                $reports[] = [
+                    'aefi_id' => $cm,
+                    'reactions' => $reactions
+                ];
+            }
+
+            $data[] = [
+                'total_reports' => count($aefiIds),
+                'name' => $vaccineName,
+                'drug_reports' => count($reports),
+                'reports' => $reports
+            ];
+        }
+
+        // Disproportionality Analysis
+        $totalReports = count($aefiIds);
+        $inputData = [];
+
+        foreach ($data as $dt) {
+            $currentDrug = $dt['name'];
+            $drugReports = count($dt['reports']);
+
+            $reactionDetails = [];
+            foreach (array_values($reactionMap) as $reaction) {
+                $reactionCount = $this->count_specific_reaction($data, $reaction);
+                $drugReactionCount = $this->count_specific_drug_reaction($dt, $reaction);
+
+                $expectedCount = round(($drugReports * $reactionCount) / $totalReports, 5);
+                $numerator = $drugReactionCount + 0.5;
+                $denominator = $expectedCount + 0.5;
+
+                $icRaw = $numerator / $denominator;
+                $icLog = round(log($icRaw, 2), 5);
+
+                $varianceIC = round(
+                    1 / ($numerator) + 1 / ($drugReports - $drugReactionCount + 0.5) +
+                        1 / ($reactionCount - $drugReactionCount + 0.5) +
+                        1 / ($totalReports - $drugReports - $reactionCount + $drugReactionCount + 0.5),
+                    5
+                );
+
+                $standardError = sqrt($varianceIC);
+                $lowerBound = $icLog - 1.96 * $standardError;
+
+                $reactionDetails[] = [
+                    'B_reports_with_reaction' => $reactionCount,
+                    'AB_reports_with_drug_and_reaction' => $drugReactionCount,
+                    'reaction_at_hand' => $reaction,
+                    'E_(AB)_expected_count' => $expectedCount,
+                    'IC_raw_calculated_data' => $icRaw,
+                    'IC_raw_calculated_log_data' => $icLog,
+                    'Var(IC)_Variance_of_IC' => $varianceIC,
+                    'Standard_Error_(SE)_of_IC' => $standardError,
+                    '95%_Confidence_Interval' => $lowerBound
+                ];
+            }
+
+            $inputData[] = [
+                'current_drug_name' => $currentDrug,
+                'N_total_reports' => $totalReports,
+                'A_reports_with_drug' => $drugReports,
+                'reactionDetails' => $reactionDetails
+            ];
+        }
+
+        // Save to Disproportionality table
+        $this->loadModel('Disproportionality');
+        $this->Disproportionality->query('TRUNCATE TABLE disproportionalities;');
+
+        foreach ($inputData as $dt) {
+            foreach ($dt['reactionDetails'] as $kk) {
+                $data = [
+                    'Disproportionality' => [
+                        'total' => $totalReports,
+                        'drug_name' => $dt['current_drug_name'],
+                        'reaction_name' => $kk['reaction_at_hand'],
+                        'model' => 'Aefi',
+                        'b_reports' => $kk['B_reports_with_reaction'],
+                        'ab_reports' => $kk['AB_reports_with_drug_and_reaction'],
+                        'eab_expected' => $kk['E_(AB)_expected_count'],
+                        'ic_raw_data' => $kk['IC_raw_calculated_data'],
+                        'ic_calculated_data' => $kk['IC_raw_calculated_log_data'],
+                        'ic_variance' => $kk['Var(IC)_Variance_of_IC'],
+                        'standard_error' => $kk['Standard_Error_(SE)_of_IC'],
+                        'confidence_interval' => $kk['95%_Confidence_Interval']
+                    ]
+                ];
+
+                $existing = $this->Disproportionality->find('first', [
+                    'conditions' => [
+                        'Disproportionality.drug_name' => $dt['current_drug_name'],
+                        'Disproportionality.reaction_name' => $kk['reaction_at_hand']
+                    ]
+                ]);
+
+                if ($existing) {
+                    $data['Disproportionality']['id'] = $existing['Disproportionality']['id'];
+                }
+
+                $this->Disproportionality->create();
+                $this->Disproportionality->save($data);
+            }
+        }
+    }
+
+    public function aefi_startup_original($params)
     {
         $aefiIds = isset($params['aefiIds']) ? $params['aefiIds'] : [];
         $criteria = isset($params['criteria']) ? $params['criteria'] : [];
