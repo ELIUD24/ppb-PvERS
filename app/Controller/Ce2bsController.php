@@ -1106,10 +1106,10 @@ class Ce2bsController extends AppController
                 }
             }
             // Extract Drug Information
-            if (isset($patient['drug'])) { 
+            if (isset($patient['drug'])) {
                 $drugs = is_array($patient['drug']) && isset($patient['drug'][0])
-                ? $patient['drug']
-                : [$patient['drug']]; 
+                    ? $patient['drug']
+                    : [$patient['drug']];
                 foreach ($drugs as $drug) {
                     $flattenedData['Patient']['Drugs'][] = [
                         'MedicinalProduct' => isset($drug['medicinalproduct']) ? $drug['medicinalproduct'] : '',
@@ -1929,6 +1929,17 @@ class Ce2bsController extends AppController
             // debug("Reactions Updated");
         }
     }
+
+    public function update_r3_latest($id,$data){
+        $this->Ce2b->id = $id;
+        if (!$this->Ce2b->exists()) {
+            throw new NotFoundException(__('Invalid Ce2b'));
+        }
+       
+        if ($this->Ce2b->saveAssociated($data, array('validate' => false, 'deep' => true))) {
+            // debug("Drugs Updated");
+        }
+    }
     public function general_view($id = null)
     {
         # code...
@@ -2012,7 +2023,7 @@ class Ce2bsController extends AppController
             // $this->set(['ce2b' => $ce2b, 'data' => $data]);
 
 
-           
+
 
             // debug($ce2b);
             // exit;
@@ -2031,6 +2042,7 @@ class Ce2bsController extends AppController
                     $this->extract_and_update_reactions($id, $flattenedData);
                 }
             }
+
 
             $ce2b = $this->Ce2b->find('first', array(
                 'conditions' => array('Ce2b.id' => $id),
@@ -2081,10 +2093,29 @@ class Ce2bsController extends AppController
             $this->set(['ce2b' => $ce2b]);
             $this->set(['e2b' => $e2b]);
         } else {
+            $filePath = $ce2b['Ce2b']['e2b_content'];
+            $reactions = $this->manipulate_reaction_information($filePath);
+            $reactions = $this->map_full_reaction_details($reactions);
+            $drugs = $this->manipulate_drug_information($filePath);
 
-            // Manipulate data retrived:
+            if (empty($ce2b['Ce2bListOfDrug'])) {
 
-            // Convert to Unix timestamp (optional step)
+                $ce2b['Ce2bListOfDrug'] = $drugs;
+                $this->update_r3_latest($id, $ce2b);
+                $ce2b = $this->Ce2b->find('first', array(
+                    'conditions' => array('Ce2b.id' => $id),
+                    'contain' => array('Designation', 'Ce2bListOfDrug' => array('Route'), 'Ce2bReaction', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment')
+                ));
+            }
+            if (empty($ce2b['Ce2bReaction'])) {
+                $ce2b['Ce2bReaction'] = $reactions;
+                $this->update_r3_latest($id, $ce2b);
+                $ce2b = $this->Ce2b->find('first', array(
+                    'conditions' => array('Ce2b.id' => $id),
+                    'contain' => array('Designation', 'Ce2bListOfDrug' => array('Route'), 'Ce2bReaction', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment', 'ReviewComment', 'ReviewComment.Attachment')
+                ));
+            }
+
 
             $ce2b['Ce2b']['creation_time'] = $this->generateDesiredDate($ce2b['Ce2b']['creation_time']);
             $ce2b['Ce2b']['date_first_received'] = $this->generateDesiredDate($ce2b['Ce2b']['date_first_received']);

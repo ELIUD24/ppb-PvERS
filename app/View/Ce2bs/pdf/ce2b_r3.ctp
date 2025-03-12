@@ -224,10 +224,10 @@
                                                                         } else {
                                                                             echo  $reaction['criteria_death_null'];
                                                                         } ?></td>
-                                                <td style="width: 5%;"><?php if (!empty($reaction['life_hreatening_value'])) {
-                                                                            echo $reaction['life_hreatening_value'];
+                                                <td style="width: 5%;"><?php if (!empty($reaction['life_threatening_value'])) {
+                                                                            echo $reaction['life_threatening_value'];
                                                                         } else {
-                                                                            echo  $reaction['life_hreatening_null'];
+                                                                            echo  $reaction['life_threatening_null'];
                                                                         } ?></td>
                                                 <td style="width: 5%;"><?php if (!empty($reaction['prolonged_hospitalisation_value'])) {
                                                                             echo $reaction['prolonged_hospitalisation_value'];
