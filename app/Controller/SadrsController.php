@@ -762,6 +762,7 @@ class SadrsController extends AppController
                 'ReviewComment',
                 'ReviewComment.Attachment',
                 'SadrOriginal',
+                'SadrOriginal.SadrReaction',
                 'SadrOriginal.SadrDescription',
                 'SadrOriginal.SadrListOfDrug',
                 'SadrOriginal.SadrListOfDrug.Route',
@@ -1549,6 +1550,16 @@ class SadrsController extends AppController
         $this->general_editor($id);
     }
 
+    public function clear_previous_seriousness($id)
+    {
+        $this->Sadr->id = $id;
+        if (!$this->Sadr->exists()) {
+            throw new NotFoundException(__('Invalid SADR'));
+        }
+        $this->Sadr->saveField('serious', "No", false);
+        $this->Sadr->saveField('serious_reason', null, false);
+    }
+
     public function general_editor($id = null)
     {
         # code...
@@ -1557,7 +1568,10 @@ class SadrsController extends AppController
             $validate = false;
             // debug($this->request->data);
             // exit;
-            // $validate = 'first';                
+            // $validate = 'first';   
+            if ($this->request->data['Sadr']['serious'] == "No") {
+                $this->request->data['Sadr']['serious_reason'] = null;
+            }
             if ($this->Sadr->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
                     $this->Sadr->saveField('submitted', 2);
@@ -1565,8 +1579,15 @@ class SadrsController extends AppController
                     $sadr = $this->Sadr->read(null, $id);
 
                     // check if there was a downgrade:
-                        
 
+                    if ($sadr['Sadr']['serious'] == "No") {
+
+                        $this->clear_previous_seriousness($sadr['SadrOriginal']['id']);
+                    }
+
+                    // debug($sadr);
+                    // exit;                        
+                    $this->Sadr->id = $id;
                     $this->Session->setFlash(__('The SADR has been saved'), 'alerts/flash_success');
                     $this->redirect(array('action' => 'view', $this->Sadr->id));
                 }
