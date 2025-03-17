@@ -1274,6 +1274,9 @@ class AefisController extends AppController
             if (isset($this->request->data['submitReport'])) {
                 $validate = 'first';
             }
+            if ($this->request->data['Aefi']['serious'] == "No") {
+                $this->request->data['Aefi']['serious_reason'] = null;
+            }
             if ($this->Aefi->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
                     $this->Aefi->saveField('submitted', 2);

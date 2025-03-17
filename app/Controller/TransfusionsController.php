@@ -916,6 +916,7 @@ class TransfusionsController extends AppController
             if (isset($this->request->data['submitReport'])) {
                 $validate = 'first';
             }
+            
             if ($this->Transfusion->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
                     $this->Transfusion->saveField('submitted', 2);
