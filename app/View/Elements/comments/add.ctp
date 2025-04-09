@@ -1,6 +1,8 @@
 <?php
 $this->Html->css('comments', null, array('inline' => false));
 $this->Html->script('comments/comments', array('inline' => false));
+$this->Html->script('ckeditor/ckeditor', array('inline' => false));
+$this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
 ?>
 <div class="bs-example">
   <?php
@@ -31,11 +33,27 @@ $this->Html->script('comments/comments', array('inline' => false));
     echo $this->Form->input('sender', ['type' => 'hidden', 'value' => $this->Session->read('Auth.User.name')]);
   }
   if ($model['review'] === true) {
-
-    echo $this->Form->input('review', ['label' => array('class' => 'required'), 'type' => 'textarea']);
+ 
+    echo $this->Form->input('review', array(
+      'label' => array(
+        'class' => 'control-label required', 
+        'text' => 'Content <span class="sterix">*</span>'
+      ),
+      'between' => '<div class="controls">',
+      'placeholder' => '',
+      'class' => 'input-large span12' ,
+    ));
   } else {
-    echo $this->Form->input('subject', ['label' => array('class' => 'required')]);
-    echo $this->Form->input('content', ['label' => array('class' => 'required'), 'type' => 'textarea']);
+    echo $this->Form->input('subject', ['label' => array('class' => 'required span12')]);
+    echo $this->Form->input('content', array(
+      'label' => array(
+        'class' => 'control-label required', 
+        'text' => 'Content <span class="sterix">*</span>'
+      ),
+      'between' => '<div class="controls">',
+      'placeholder' => '',
+      'class' => 'input-large span12' ,
+    ));
   }
   ?>
   <div class="row-fluid">
@@ -54,4 +72,9 @@ $this->Html->script('comments/comments', array('inline' => false));
     </div>
   </div>
   <?php echo $this->Form->end() ?>
+
+  <script type="text/javascript">
+    CKEDITOR.replace('data[Comment][content]');
+    CKEDITOR.replace('data[Comment][review]');
+  </script>
 </div>

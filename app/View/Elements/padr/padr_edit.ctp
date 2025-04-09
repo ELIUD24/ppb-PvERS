@@ -471,7 +471,7 @@ $this->Html->css('padr', false, array('inline' => false));
                                     onclick="$(\'.outcome\').removeAttr(\'checked\');" >
                                     <em class="accordion-toggle">clear!</em></a>
                         </div>',
-                    'options' => array('Unknown' => 'Unknown'),
+                    'options' => array('unknown' => 'Unknown'),
                 ));
 
 

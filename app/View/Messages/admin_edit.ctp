@@ -22,7 +22,7 @@
 		<legend>Edit <strong><?php echo $this->Form->value('Message.name');?></strong></legend>
 	<?php
 		echo $this->Form->input('id');
-		// echo $this->Form->input('content');
+		// echo $this->Form->input('content'); 
 		echo $this->Form->input('subject');
       	echo $this->Form->input('style',
             array('type' => 'select', 'empty' => true,
