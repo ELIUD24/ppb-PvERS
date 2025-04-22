@@ -105,6 +105,14 @@ class Aggregate extends AppModel
 				'message'  => 'Please provide the submission frequency'
 			),
 		),
+		'date_of_birth' => array(
+            'ageOrDate' => array(
+                'rule'     => 'ageOrDate',
+                // 'required' => false,
+                'allowEmpty' => true,
+                'message'  => 'Please specify the international date of birth'
+            ),
+        ),
 
 		'reporter_name' => array(
 			'notBlank' => array(
@@ -151,7 +159,10 @@ class Aggregate extends AppModel
 		),
 
 	);
-
+	public function ageOrDate($field = null)
+    {
+        return !empty($this->data['Aggregate']['date_of_birth']['year']);
+    }
 	public function seriousYes($field = null)
 	{
 		if ($this->data['Aggregate']['summary_available'] == 'Yes') return !empty($this->data['Aggregate']['brand_name']);
@@ -166,6 +177,29 @@ class Aggregate extends AppModel
 		}
 		// If the condition is not met, return true to bypass validation
 		return true;
+	}
+	public function beforeSave($options = array())
+    {
+        if (!empty($this->data['Aggregate']['date_of_birth'])) {
+            if (is_array($this->data['Aggregate']['date_of_birth'])) {
+                $this->data['Aggregate']['date_of_birth'] = implode('-', $this->data['Aggregate']['date_of_birth']);
+            }else{
+                $this->data['Aggregate']['date_of_birth'] = $this->data['Aggregate']['date_of_birth'];
+            }
+           
+        } else {
+            $this->data['Aggregate']['date_of_birth'] = '';
+        }
+	}
+	public function afterFind($results, $primary = false)
+    {
+        foreach ($results as $key => $val) {
+            if (!empty($val['Aggregate']['date_of_birth'])) {
+                if (empty($val['Aggregate']['date_of_birth'])) $val['Aggregate']['date_of_birth'] = '--';
+                $a = explode('-', $val['Aggregate']['date_of_birth']);
+                $results[$key]['Aggregate']['date_of_birth'] = array('day' => $a[0], 'month' => $a[1], 'year' => $a[2]);
+            }
+		}
 	}
 
 	public function atleastOneAttachment($field = null)

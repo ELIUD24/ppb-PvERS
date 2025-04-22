@@ -208,6 +208,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
 
                                         ?>
                                     </div>
+                                    
                                 </div>
                                 <hr>
                             </div>

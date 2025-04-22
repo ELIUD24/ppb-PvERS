@@ -210,6 +210,35 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                     </div>
                                     <hr>
                                 </div>
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        <?php
+                                       
+
+                                        echo $this->Form->input('date_of_birth', array(
+                                            'type' => 'date',
+                                            // 'dateFormat' => 'DMY',   'minYear' => date('Y') - 100, 'maxYear' => date('Y'), 'empty' => true,
+                                            'dateFormat' => 'DMY',
+                                            'minYear' => date('Y') - 100,
+                                            'maxYear' => date('Y'),
+                                            'empty' => array('day' => '(choose day)', 'month' => '(choose month)', 'year' => '(choose year)'),
+                                            'label' => array('class' => 'control-label required', 'text' => 'International Birth Date <span style="color:red;">*</span>'),
+                                            'title' => 'select beginning of the month if unsure',
+                                            'data-content' => '',
+                                            'after' => ' <a style="font-weight:normal" onclick="$(\'.birthdate\').removeAttr(\'disabled\'); $(\'.birthdate\').val(\'\');
+                                            $(\'#SadrAgeGroup\').attr(\'disabled\',\'disabled\'); $(\'#SadrAgeGroup\').val(\'\');" >
+                                            <em class="accordion-toggle">clear!</em></a>
+                                            <p class="help-block"></div>',
+                                            'class' => 'tooltipper birthdate autosave-ignore ',
+                                            //add onclick to clear disable age group
+                                        
+            
+                                        )
+                                        );
+
+                                        ?>
+                                    </div>
+                                </div>
                             </div>
 
 
