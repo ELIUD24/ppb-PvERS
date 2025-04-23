@@ -104,6 +104,15 @@ $nchecked = "&#x2610;";
                             echo $aggregate['Aggregate']['interval_code'] . " " . $frequency;
                             ?> </div>
                     </div>
+                    <div class="row-fluid">
+                    <div class="span3"> <p><strong>International Date of Birth</strong></p>
+</div>
+</div>
+                    <div class="row-fluid">
+                    <div class="span3">
+                    <?php echo $aggregate['Aggregate']['date_of_birth'] ?> </div>
+                    
+</div>
                 </div>
                 <hr>
 

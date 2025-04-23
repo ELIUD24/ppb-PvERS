@@ -10,6 +10,7 @@ $(document).ready(function () {
         $('input[name="data[Aggregate][therapeutic_group]"]').attr('disabled', true);
         $('input[name="data[Aggregate][authorised_indications]"]').attr('disabled', true);
         $('input[name="data[Aggregate][form_strength]"]').attr('disabled', true);
+        $('input[name="data[Aggregate][date_of_birth]"]').attr('disabled', true);
 
     }
     $('.date-pick-field').datepicker({

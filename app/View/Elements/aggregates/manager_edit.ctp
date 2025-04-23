@@ -186,6 +186,20 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         );
 
                                         ?>
+
+                                    </div>
+                                    <div class="span6">
+<?php
+
+
+echo $this->Form->input(
+    'date_of_birth',
+    array(
+        'class' => 'span8 available',
+        'label' => array('class' => 'control-label ', 'text' => 'International Birth date<span style="color:red;">*</span>'),
+        'after' => '<p class="help-block"> </p></div>',
+    )
+);?>
                                     </div>
                                 </div>
                                 <hr>
