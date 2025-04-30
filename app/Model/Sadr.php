@@ -12,7 +12,7 @@ class Sadr extends AppModel
 {
 
     //The Associations below have been created with all possible keys, those that are not needed can be removed
-    public $actsAs = array('Search.Searchable', 'Containable');
+    public $actsAs = array('Search.Searchable', 'Containable'); 
     // public $drug_dictionary = ClassRegistry::init('DrugDictionary');
 
     public $filterArgs = array(
@@ -781,9 +781,9 @@ class Sadr extends AppModel
                 $b = explode('-', $val['Sadr']['date_of_onset_of_reaction']);
                 $results[$key]['Sadr']['date_of_onset_of_reaction'] = array('day' => $b[0], 'month' => $b[1], 'year' => $b[2]);
             }
-            // if (isset($val['Sadr']['created'])) {
-            // $results[$key]['Sadr']['created'] = $this->dateFormatAfterFind($val['Sadr']['created']);
-            // }
+            if (isset($val['Sadr']['created'])) {
+            $results[$key]['Sadr']['created'] = $this->dateFormatAfterFind($val['Sadr']['created']);
+            }
             if (isset($val['SadrListOfDrug'])) {
                 foreach ($val['SadrListOfDrug'] as $kay => $vall) {
                     if (isset($vall['start_date'])) {

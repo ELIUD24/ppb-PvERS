@@ -9,7 +9,7 @@ $header = array(
 	'name_of_institution' => 'Institution',
 	'institution_code' => 'Institution code',
 	'counties' => 'County',
-	//'patient_name' => 'Patient name', 
+	//'patient_name' => 'Patient name',  
 	'date_born' => 'Date of birth',
 	'gender' => 'Gender',
 	'age_group' => 'Age Group', 'pregnancy_status' => 'Pregnancy Status',

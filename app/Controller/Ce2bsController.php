@@ -22,6 +22,7 @@ class Ce2bsController extends AppController
     public $paginate = array();
     public $presetVars = true;
     public $page_options = array('25' => '25', '50' => '50', '100' => '100');
+    public $uses = array('Ce2b');
 
     /**
      * index method
@@ -544,10 +545,33 @@ class Ce2bsController extends AppController
         $criteria['Ce2b.archived'] = false;
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Ce2b.created' => 'desc');
+
+        //in case of csv export
+        if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
+
+            $sadrs = $this->Ce2b->find(
+                'all',
+                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 10000)
+            );
+            // debug($sadrs);
+            // exit;
+            $this->csv_export($this->Ce2b->find(
+                'all',
+                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 10000)
+            ));
+        }
+        //end csv export
         $this->set('ce2bs', Sanitize::clean($this->paginate(), array('encode' => false)));
         $this->set('page_options', $this->page_options);
     }
 
+    private function csv_export($ce2bs = '')
+    {
+        $this->response->download('CE2Bs_' . date('Ymd_Hi') . '.csv'); // <= setting the file name
+        $this->set(compact('ce2bs'));
+        $this->layout = false;
+        $this->render('csv_export');
+    }
 
     public function manager_index()
     {
@@ -565,14 +589,39 @@ class Ce2bsController extends AppController
         } else {
             $criteria['Ce2b.submitted'] = array(2, 3);
         }
-        $criteria['Ce2b.deleted'] = false;
+        $criteria['Ce2b.deleted'] = 0;
         if (!empty($this->passedArgs['archived'])) {
-            $criteria['Ce2b.archived'] = true;
+            $criteria['Ce2b.archived'] = 1;
         } else {
-            $criteria['Ce2b.archived'] = false;
+            $criteria['Ce2b.archived'] = 0;
         }
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Ce2b.created' => 'desc');
+
+        //in case of csv export
+        if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
+           
+            $this->Ce2b->recursive = -1;
+
+            $fields = ['Ce2b.id', 'Ce2b.reference_no','Ce2b.company_name','Ce2b.reporter_email' ,'Ce2b.sender_unique_identifier' ,'Ce2b.case_narrative' ,'Ce2b.date_first_received' ,'Ce2b.sender_organization', 'Ce2b.sender_department', 'Ce2b.created','Ce2b.reporter_date','Ce2b.submitted_date']; // adjust to your needs
+            
+            $data = $this->Ce2b->find('all', [
+                'conditions' => $this->paginate['conditions'],
+                'order' => $this->paginate['order'],
+                'limit' => 1000,
+                'fields' => $fields
+            ]);
+            
+            $this->csv_export($data);
+            
+        //   $data=  Sanitize::clean($this->paginate(), array('encode' => false));
+        //   debug($data);
+        //   exit;
+        //   $this->csv_export($data);
+        
+        }
+
+        //end csv export
         $this->set('ce2bs', Sanitize::clean($this->paginate(), array('encode' => false)));
         $this->set('page_options', $this->page_options);
     }
@@ -1934,12 +1983,13 @@ class Ce2bsController extends AppController
         }
     }
 
-    public function update_r3_latest($id,$data){
+    public function update_r3_latest($id, $data)
+    {
         $this->Ce2b->id = $id;
         if (!$this->Ce2b->exists()) {
             throw new NotFoundException(__('Invalid Ce2b'));
         }
-       
+
         if ($this->Ce2b->saveAssociated($data, array('validate' => false, 'deep' => true))) {
             // debug("Drugs Updated");
         }
