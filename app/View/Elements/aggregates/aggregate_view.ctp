@@ -105,14 +105,33 @@ $nchecked = "&#x2610;";
                             ?> </div>
                     </div>
                     <div class="row-fluid">
-                    <div class="span3"> <p><strong>International Date of Birth</strong></p>
-</div>
-</div>
+                        <div class="span3">
+                            <p><strong>PBRER/PSUR reporting interval
+                                </strong></p>
+                        </div>
+                        <div class="span3">
+                            <p><strong>Data lock point
+                                </strong></p>
+                        </div>
+                        <div class="span3">
+                            <p><strong>Next data lock point
+                                </strong></p>
+                        </div>
+                        <div class="span3">
+                            <p><strong>International Date of Birth</strong></p>
+                        </div>
+                    </div>
                     <div class="row-fluid">
-                    <div class="span3">
-                    <?php echo $aggregate['Aggregate']['date_of_birth'] ?> </div>
-                    
-</div>
+                        <div class="span3"> <?php echo $aggregate['Aggregate']['data_interval'] ?> 
+                        </div>
+                        <div class="span3"> <?php echo $aggregate['Aggregate']['data_lock'] ?> 
+                        </div>
+                        <div class="span3"> <?php echo $aggregate['Aggregate']['next_data_lock'] ?> 
+                        </div>
+                        <div class="span3">
+                            <?php echo $aggregate['Aggregate']['date_of_birth'] ?> </div>
+
+                    </div>
                 </div>
                 <hr>
 
@@ -264,87 +283,87 @@ $nchecked = "&#x2610;";
                         <p><?php echo $aggregate['Aggregate']['conclusion'] ?></p>
                     </div>
                 </div>
-             
-            <hr>
 
-            <?php if (count($aggregate['Attachment']) > 0) { ?>
-                <table class="change_order_items" style="width: 100%;">
-                    <tbody>
-                        <tr id="attachmentsTableHeader">
-                            <th>#</th>
-                            <th class="required" style="width : 30%;"><label class="required">FILE</label></th>
-                            <th class="required"><label class="required">A DESCRIPTION OF THE CONTENTS</label></th>
-                        </tr>
-                        <?php
-                        $i = 1;
-                        foreach ($aggregate['Attachment'] as $attachment) : ?>
-                            <tr>
-                                <td style="width: 10%;"><?php echo $i++; ?></td>
-                                <td style="width : 30%;">
-                                    <a href="/attachments/download/<?php echo $attachment['id']; ?>"><?php echo __($attachment['basename']); ?></a>
-                                </td>
-                                <td><?php echo $attachment['description']; ?></td>
+                <hr>
+
+                <?php if (count($aggregate['Attachment']) > 0) { ?>
+                    <table class="change_order_items" style="width: 100%;">
+                        <tbody>
+                            <tr id="attachmentsTableHeader">
+                                <th>#</th>
+                                <th class="required" style="width : 30%;"><label class="required">FILE</label></th>
+                                <th class="required"><label class="required">A DESCRIPTION OF THE CONTENTS</label></th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php }; ?>
-            <hr>
-            <?php
-            if ($this->Session->read('Auth.User.user_type') != 'Public Health Program') {
-            ?>
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="width: 25%;">NAME OF PERSON REPORTING:</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_name'] ?></strong></td>
-                        <td style="width: 25%;">E-MAIL ADDRESS: </td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_email'] ?></strong></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 25%;">DESIGNATION:</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Designation']['name'] ?></strong></td>
-                        <td style="width: 25%;">PHONE NO.</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_phone'] ?></strong></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 25%;">Date:</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_date'] ?></strong></td>
-                        <td style="width: 25%;"></td>
-                        <td style="width: 25%;"></td>
-                    </tr>
-                </table>
+                            <?php
+                            $i = 1;
+                            foreach ($aggregate['Attachment'] as $attachment) : ?>
+                                <tr>
+                                    <td style="width: 10%;"><?php echo $i++; ?></td>
+                                    <td style="width : 30%;">
+                                        <a href="/attachments/download/<?php echo $attachment['id']; ?>"><?php echo __($attachment['basename']); ?></a>
+                                    </td>
+                                    <td><?php echo $attachment['description']; ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php }; ?>
                 <hr>
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="width: 50%;">Is the person submitting different from reporter?</td>
-                        <td><strong><?php echo $aggregate['Aggregate']['person_submitting'] ?></strong></td>
-                    </tr>
-                </table>
-                <hr>
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="width: 25%;">NAME OF PERSON REPORTING:</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_name_diff'] ?></strong></td>
-                        <td style="width: 25%;">E-MAIL ADDRESS: </td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_email_diff'] ?></strong></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 25%;">DESIGNATION:</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_designation_diff'] ?></strong></td>
-                        <td style="width: 25%;">PHONE NO.</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_phone_diff'] ?></strong></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 25%;">Date:</td>
-                        <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_date_diff'] ?></strong></td>
-                        <td style="width: 25%;"></td>
-                        <td style="width: 25%;"></td>
-                    </tr>
-                </table>
-                <hr>
-            <?php } ?>
+                <?php
+                if ($this->Session->read('Auth.User.user_type') != 'Public Health Program') {
+                ?>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 25%;">NAME OF PERSON REPORTING:</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_name'] ?></strong></td>
+                            <td style="width: 25%;">E-MAIL ADDRESS: </td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_email'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%;">DESIGNATION:</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Designation']['name'] ?></strong></td>
+                            <td style="width: 25%;">PHONE NO.</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_phone'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%;">Date:</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_date'] ?></strong></td>
+                            <td style="width: 25%;"></td>
+                            <td style="width: 25%;"></td>
+                        </tr>
+                    </table>
+                    <hr>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 50%;">Is the person submitting different from reporter?</td>
+                            <td><strong><?php echo $aggregate['Aggregate']['person_submitting'] ?></strong></td>
+                        </tr>
+                    </table>
+                    <hr>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 25%;">NAME OF PERSON REPORTING:</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_name_diff'] ?></strong></td>
+                            <td style="width: 25%;">E-MAIL ADDRESS: </td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_email_diff'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%;">DESIGNATION:</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_designation_diff'] ?></strong></td>
+                            <td style="width: 25%;">PHONE NO.</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_phone_diff'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 25%;">Date:</td>
+                            <td style="width: 25%;"><strong><?php echo $aggregate['Aggregate']['reporter_date_diff'] ?></strong></td>
+                            <td style="width: 25%;"></td>
+                            <td style="width: 25%;"></td>
+                        </tr>
+                    </table>
+                    <hr>
+                <?php } ?>
 
+            </div> <!-- /art-sheet -->
         </div> <!-- /art-sheet -->
-    </div> <!-- /art-sheet -->
-</div>
+    </div>
 </div>

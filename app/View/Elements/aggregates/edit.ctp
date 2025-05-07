@@ -1,7 +1,7 @@
 <?php
 $this->assign('AGGREGATE', 'active');
 $this->Html->script('jquery/combobox', array('inline' => false));
-$this->Html->script('aggregate', array('inline' => false));
+$this->Html->script('aggregates', array('inline' => false));
 $this->Html->script('ckeditor/ckeditor', array('inline' => false));
 $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
 ?>
@@ -154,52 +154,6 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                 </div>
 
 
-                                <!-- Start of Added Field -->
-                                <div class="row-fluid">
-                                    <div class="span6">
-                                        <?php
-                                        echo $this->Form->input(
-                                            'interval',
-                                            array(
-                                                'class' => 'span8 available',
-                                                'label' => array('class' => 'control-label ', 'text' => 'PBRER/PSUR reporting interval<span style="color:red;">*</span>'),
-                                                'after' => '<p class="help-block"> </p></div>',
-                                            )
-                                        );
-
-                                        ?>
-                                    </div>
-                                    <div class="span6">
-                                        <?php
-                                        echo $this->Form->input(
-                                            'data_lock',
-                                            array(
-                                                'class' => 'span8 available',
-                                                'label' => array('class' => 'control-label ', 'text' => 'Data lock point<span style="color:red;">*</span>'),
-                                                'after' => '<p class="help-block"> </p></div>',
-                                            )
-                                        );
-
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="row-fluid">
-                                    <div class="span6">
-                                        <?php
-                                        echo $this->Form->input(
-                                            'next_data_lock',
-                                            array(
-                                                'class' => 'span8 available',
-                                                'label' => array('class' => 'control-label ', 'text' => 'Next data lock point<span style="color:red;">*</span>'),
-                                                'after' => '<p class="help-block"> </p></div>',
-                                            )
-                                        );
-
-                                        ?>
-                                    </div>
-                                </div>
-
-                                <!-- End of Added Fields -->
                                 <div class="row-fluid">
                                     <div class="span6">
                                         <?php
@@ -228,7 +182,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                                         'after' => '<p class="help-block"> </p></div>',
                                                         'type' => 'number', // Ensure the input is of type 'number'
                                                         'min' => 1,         // Set minimum value to 1
-                                                        'max' => 11
+                                                        'max' => 50
                                                     )
                                                 );
 
@@ -237,7 +191,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                             </div>
                                             <div class="span6">
                                                 <?php
-                                              
+
 
                                                 echo $this->Form->input(
                                                     'submission_frequency',
@@ -245,7 +199,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                                         'class' => 'span4 available',
                                                         'type' => 'select',
                                                         'options' => $units,
-                                                        'empty' => true, 
+                                                        'empty' => true,
                                                         'label' => array('class' => 'control-label required', 'text' => 'Unit' . ' <span style="color:red;">*</span>'),
                                                         'empty' => true
                                                     )
@@ -258,29 +212,77 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                     </div>
                                     <hr>
                                 </div>
+
+
+
+                                <!-- Start of Added Field -->
                                 <div class="row-fluid">
                                     <div class="span6">
                                         <?php
-                                       
-                                       echo $this->Form->input('date_of_birth', array(
-                                        'type' => 'text',
-                                        'class' => 'span4 available dateInput',
-                                        'label' => array(
-                                            'class' => 'control-label required',
-                                            'text' => 'International Date of Birth <span style="color:red;">*</span>'
-                                        ),
-                                        'escape' => false,
-                                        'div' => false,
-                                        'between' => '',
-                                        'after' => '',
-                                        'required' => true,
-                                        'autocomplete' => 'off',
-                                        'placeholder' => 'YYYY-MM-DD',
-                                        'onfocus' => "(this.type='date')",
-                                        'max' => date('Y-m-d'),
-                                    ));
-                                    
-                                    
+                                        echo $this->Form->input(
+                                            'data_interval',
+                                            array(
+                                                'class' => 'span8 available',
+                                                'label' => array('class' => 'control-label ', 'text' => 'PBRER/PSUR reporting interval<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'data_lock',
+                                            array(
+                                                'class' => 'span8 available dateInput',
+                                                'label' => array('class' => 'control-label ', 'text' => 'Data lock point<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'next_data_lock',
+                                            array(
+                                                'class' => 'span8 available dateInputFuture',
+                                                'label' => array('class' => 'control-label ', 'text' => 'Next data lock point<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                                'autocomplete' => 'off',
+                                                'placeholder' => 'YYYY-MM-DD',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                     
+                                    <div class="span6">
+                                        <?php
+
+                                        echo $this->Form->input('date_of_birth', array(
+                                            'type' => 'text',
+                                            'class' => 'span4 available dateInput',
+                                            'label' => array(
+                                                'class' => 'control-label required',
+                                                'text' => 'International Date of Birth <span style="color:red;">*</span>'
+                                            ),
+                                            'escape' => false,
+                                            'div' => false,
+                                            'between' => '',
+                                            'after' => '',
+                                            'required' => true,
+                                            'autocomplete' => 'off',
+                                            'placeholder' => 'YYYY-MM-DD',
+                                            'onfocus' => "(this.type='date')",
+                                            'max' => date('Y-m-d'),
+                                        ));
+
+
                                         ?>
                                     </div>
                                 </div>
@@ -487,7 +489,8 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                         'name' => 'saveChanges',
                         'class' => 'btn btn-success mapop',
                         'formnovalidate' => 'formnovalidate',
-                        'id' => 'SadrSaveChanges', 'title' => 'Save & continue editing',
+                        'id' => 'SadrSaveChanges',
+                        'title' => 'Save & continue editing',
                         'data-content' => 'Save changes to form without submitting it.
 	                                              The form will still be available for further editing.',
                         'div' => false,
@@ -500,7 +503,8 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                         'name' => 'submitReport',
                         'onclick' => "return confirm('Are you sure you wish to submit the report?');",
                         'class' => 'btn btn-primary btn-block mapop',
-                        'id' => 'SiteInspectionSubmitReport', 'title' => 'Save and Submit Report',
+                        'id' => 'SiteInspectionSubmitReport',
+                        'title' => 'Save and Submit Report',
                         'data-content' => 'Submit report for peer review and approval.',
                         'div' => false,
                     ));
