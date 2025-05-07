@@ -874,7 +874,11 @@ class AefisController extends AppController
         if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
             $csv_export = $this->Aefi->find(
                 'all',
-                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'contain' => $this->paginate['contain'], 'limit' => 1000)
+                array(
+                    'conditions' => $this->paginate['conditions'], 
+                    'order' => $this->paginate['order'],
+                     'contain' => $this->paginate['contain'],
+                      'limit' => 1000)
             );
             // debug($csv_export);
             // exit;
@@ -1253,6 +1257,9 @@ class AefisController extends AppController
             $data_save['user_id'] = $this->Auth->User('id');;
             $this->Aefi->saveField('copied', 1);
             $data_save['copied'] = 2;
+            $now = date('Y-m-d H:i:s');
+            $data_save['created'] = $now;
+            $data_save['modified'] = $now;
 
             if ($this->Aefi->saveAssociated($data_save, array('deep' => true, 'validate' => false))) {
                 $this->Session->setFlash(__('Clean copy of ' . $data_save['reference_no'] . ' has been created'), 'alerts/flash_info');

@@ -193,6 +193,53 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         ?>
                                     </div>
                                 </div>
+
+                                <!-- Start of Added Field -->
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'interval',
+                                            array(
+                                                'class' => 'span8 available',
+                                                'label' => array('class' => 'control-label ', 'text' => 'PBRER/PSUR reporting interval<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'data_lock',
+                                            array(
+                                                'class' => 'span8 available',
+                                                'label' => array('class' => 'control-label ', 'text' => 'Data lock point<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'next_data_lock',
+                                            array(
+                                                'class' => 'span8 available',
+                                                'label' => array('class' => 'control-label ', 'text' => 'Next data lock point<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                </div>
+
+                                <!-- End of Added Fields -->
                                 <div class="row-fluid">
                                     <div class="span6">
                                         <?php

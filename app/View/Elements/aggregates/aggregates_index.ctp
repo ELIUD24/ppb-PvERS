@@ -30,7 +30,8 @@ echo $this->Session->flash();
         <?php
         echo $this->Form->create('Aggregate', array(
             'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-            'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+            'class' => 'ctr-groups',
+            'style' => array('padding:9px;', 'background-color: #F5F5F5'),
         ));
         ?>
         <table class="table table-condensed" style="margin-bottom: 2px;">
@@ -43,7 +44,8 @@ echo $this->Session->flash();
                             array(
                                 'div' => false,
                                 'placeholder' => 'aggregates/2023',
-                                'class' => 'span12', 'label' => array('class' => 'required', 'text' => 'Reference No.')
+                                'class' => 'span12',
+                                'label' => array('class' => 'required', 'text' => 'Reference No.')
                             )
                         );
                         ?>
@@ -53,8 +55,10 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'company_name',
                             array(
-                                'div' => false, 'placeholder' => '',
-                                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Company Name ')
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index',
+                                'label' => array('class' => 'required', 'text' => 'Company Name ')
                             )
                         );
                         ?>
@@ -64,8 +68,10 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'reporter_email',
                             array(
-                                'div' => false, 'placeholder' => '',
-                                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Reporter Email ')
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index',
+                                'label' => array('class' => 'required', 'text' => 'Reporter Email ')
                             )
                         );
                         ?>
@@ -75,17 +81,24 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'start_date',
                             array(
-                                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index', 'after' => '-to-',
-                                'label' => array('class' => 'required', 'text' => 'Report Dates'), 'placeHolder' => 'Start Date'
+                                'div' => false,
+                                'type' => 'text',
+                                'class' => 'input-small unauthorized_index',
+                                'after' => '-to-',
+                                'label' => array('class' => 'required', 'text' => 'Report Dates'),
+                                'placeHolder' => 'Start Date'
                             )
                         );
                         echo $this->Form->input(
                             'end_date',
                             array(
-                                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index',
+                                'div' => false,
+                                'type' => 'text',
+                                'class' => 'input-small unauthorized_index',
                                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                               <em class="accordion-toggle">clear!</em></a>',
-                                'label' => false, 'placeHolder' => 'End Date'
+                                'label' => false,
+                                'placeHolder' => 'End Date'
                             )
                         );
                         ?>
@@ -97,8 +110,10 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'brand_name',
                             array(
-                                'div' => false, 'placeholder' => '',
-                                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Brand Name ')
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index',
+                                'label' => array('class' => 'required', 'text' => 'Brand Name ')
                             )
                         );
                         ?>
@@ -108,8 +123,10 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'inn_name',
                             array(
-                                'div' => false, 'placeholder' => '',
-                                'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Inn Name ')
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index',
+                                'label' => array('class' => 'required', 'text' => 'Inn Name ')
                             )
                         );
                         ?>
@@ -119,13 +136,14 @@ echo $this->Session->flash();
                         echo $this->Form->input(
                             'submission_frequency',
                             array(
-                                'div' => false, 
-                                'class' => 'span12', 'label' => array('class' => 'required submission_frequency', 'text' => 'Submission Frequency '),
-                                'type'=>'select',
-                                'empty'=>true, 
-                                'options'=>array(
-                                    '0'=>'Monthly',
-                                    '1'=>'Yearly'
+                                'div' => false,
+                                'class' => 'span12',
+                                'label' => array('class' => 'required submission_frequency', 'text' => 'Submission Frequency '),
+                                'type' => 'select',
+                                'empty' => true,
+                                'options' => array(
+                                    '0' => 'Monthly',
+                                    '1' => 'Yearly'
                                 )
                             )
                         );
@@ -149,7 +167,10 @@ echo $this->Session->flash();
                     <td>
                         <?php
                         echo $this->Form->input('pages', array(
-                            'type' => 'select', 'div' => false, 'class' => 'input-small', 'selected' => $this->request->params['paging']['Aggregate']['limit'],
+                            'type' => 'select',
+                            'div' => false,
+                            'class' => 'input-small',
+                            'selected' => $this->request->params['paging']['Aggregate']['limit'],
                             'empty' => true,
                             'options' => $page_options,
                             'label' => false,
@@ -157,15 +178,25 @@ echo $this->Session->flash();
                         ?>
                     </td>
                     <td>
+                    <td>
+                        <h5>Report Status</h5>
                         <?php
 
+                        echo $this->Form->input('submitted', array(
+                            'options' => array('1' => 'UnSubmitted', '2' => 'Submitted'),
+                            'legend' => false,
+                            'type' => 'radio'
+                        ));
                         ?>
+                    </td>
                     </td>
                     <td></td>
                     <td>
                         <?php
                         echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-                            'class' => 'btn btn-primary', 'div' => 'control-group', 'div' => false,
+                            'class' => 'btn btn-primary',
+                            'div' => 'control-group',
+                            'div' => false,
                             'formnovalidate' => 'formnovalidate',
                             'style' => array('margin-bottom: 5px')
                         ));
@@ -275,13 +306,13 @@ echo $this->Session->flash();
                                     array('controller' => 'aggregates', 'action' => 'archive', $aggregate['Aggregate']['id']),
                                     array('escape' => false),
                                     __('Are you sure you want to archive the report?')
-                                  );
-                                  if ($redir == 'manager' && $aggregate['Aggregate']['archived'] == 1) echo $this->Html->link(
+                                );
+                                if ($redir == 'manager' && $aggregate['Aggregate']['archived'] == 1) echo $this->Html->link(
                                     '<span class="label label-warning tooltipper" title="Restore"><i class="fa fa-refresh" aria-hidden="true"></i> Restore </span>',
                                     array('controller' => 'aggregates', 'action' => 'restore_archive', $aggregate['Aggregate']['id']),
                                     array('escape' => false),
                                     __('Are you sure you want to restore archive the report?')
-                                  );
+                                );
                             } else {
                                 if ($redir == 'reporter') echo $this->Html->link(
                                     '<span class="label label-success tooltipper" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit </span>',

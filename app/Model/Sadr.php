@@ -12,7 +12,7 @@ class Sadr extends AppModel
 {
 
     //The Associations below have been created with all possible keys, those that are not needed can be removed
-    public $actsAs = array('Search.Searchable', 'Containable'); 
+    public $actsAs = array('Search.Searchable', 'Containable');
     // public $drug_dictionary = ClassRegistry::init('DrugDictionary');
 
     public $filterArgs = array(
@@ -713,13 +713,24 @@ class Sadr extends AppModel
 
     public function beforeSave($options = array())
     {
+
+        // $now = date('Y-m-d H:i:s');
+
+        // // Automatically override 'created' and 'modified' fields
+        // if (array_key_exists('created', $this->schema()) && empty($this->data[$this->alias]['created'])) {
+        //     $this->data[$this->alias]['created'] = $now;
+        // }
+
+        // if (array_key_exists('modified', $this->schema())) {
+        //     $this->data[$this->alias]['modified'] = $now;
+        // }
+
         if (!empty($this->data['Sadr']['date_of_birth'])) {
             if (is_array($this->data['Sadr']['date_of_birth'])) {
                 $this->data['Sadr']['date_of_birth'] = implode('-', $this->data['Sadr']['date_of_birth']);
-            }else{
+            } else {
                 $this->data['Sadr']['date_of_birth'] = $this->data['Sadr']['date_of_birth'];
             }
-           
         } else {
             $this->data['Sadr']['date_of_birth'] = '';
         }
@@ -782,7 +793,7 @@ class Sadr extends AppModel
                 $results[$key]['Sadr']['date_of_onset_of_reaction'] = array('day' => $b[0], 'month' => $b[1], 'year' => $b[2]);
             }
             if (isset($val['Sadr']['created'])) {
-            $results[$key]['Sadr']['created'] = $this->dateFormatAfterFind($val['Sadr']['created']);
+                $results[$key]['Sadr']['created'] = $this->dateFormatAfterFind($val['Sadr']['created']);
             }
             if (isset($val['SadrListOfDrug'])) {
                 foreach ($val['SadrListOfDrug'] as $kay => $vall) {

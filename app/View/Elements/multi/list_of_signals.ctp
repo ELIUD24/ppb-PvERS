@@ -25,17 +25,17 @@ $this->Html->css('sadr', false, array('inline' => false));
                 <tr>
                     <th></th>
                     <th colspan="" class="required tooltipper" title="This is the signal term" data-content=""> Signal term </th>
-                    <th style="width: 9%;">Date detected <span style="color:red;">*</span></th>
-                    <th style="width: 7%;">Status<span style="color:red;">*</span></th>
-                    <th style="width: 7%;">Data closed (for closed signals)<span style="color:red;">*</span></th>
+                    <th style="width: 9%;">Date detected </th>
+                    <th style="width: 7%;">Status</th>
+                    <th style="width: 7%;">Data closed (for closed signals)</th>
                     <th colspan="1" style="width: 15%;" class="required" title="Dosage" data-content="">
-                        <label class="required">Source or trigger of signal <span style="color:red;">*</span></label>
+                        <label class="required">Source or trigger of signal </label>
                     </th>
                     <th colspan="" class="required" style="width: 15%;">
                         <label class="required">Reason summary</label>
                     </th>
                     <th style="width: 28%;" colspan="1">
-                        <label class="required pull-left">Method of signal valuation<span style="color:red;">*</span></label>
+                        <label class="required pull-left">Method of signal valuation</label>
                         <span class="pull-right" style="padding-right: 10px;"></span>
                     </th>
                     <th style="width: 3%;">

@@ -597,19 +597,17 @@ class Ce2bsController extends AppController
         }
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Ce2b.created' => 'desc');
-
+        $this->paginate['contain'] = array('Ce2bListOfDrug', 'Ce2bReaction');
         //in case of csv export
         if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
            
-            $this->Ce2b->recursive = -1;
-
-            $fields = ['Ce2b.id', 'Ce2b.reference_no','Ce2b.company_name','Ce2b.reporter_email' ,'Ce2b.sender_unique_identifier' ,'Ce2b.case_narrative' ,'Ce2b.date_first_received' ,'Ce2b.sender_organization', 'Ce2b.sender_department', 'Ce2b.created','Ce2b.reporter_date','Ce2b.submitted_date']; // adjust to your needs
-            
+             
             $data = $this->Ce2b->find('all', [
                 'conditions' => $this->paginate['conditions'],
                 'order' => $this->paginate['order'],
+                'contain' => $this->paginate['contain'],
                 'limit' => 1000,
-                'fields' => $fields
+                // 'fields' => $fields
             ]);
             
             $this->csv_export($data);

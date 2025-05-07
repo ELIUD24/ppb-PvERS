@@ -9,7 +9,7 @@ App::uses('AppModel', 'Model');
  * @property Designation $Designation
  */
 class Ce2b extends AppModel
-{
+{ 
 
 	public $actsAs = array('Media.Transfer', 'Media.Coupler', 'Media.Meta', 'Search.Searchable', 'Containable');
 

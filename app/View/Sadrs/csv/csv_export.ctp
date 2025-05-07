@@ -74,7 +74,8 @@ foreach ($csadrs as $csadr) :
 				(!empty($bod['year'])) ? $dob .= $bod['year'] : $dob .= '1970';
 			}
 			($dob) ? $row[$key] = $dob : $row[$key] = '""';
-		} elseif ($key == 'onset_date') {
+		}
+		 elseif ($key == 'onset_date') {
 			$rod = '';
 			$dor = $csadr['Sadr']['date_of_onset_of_reaction'];
 			if (!empty($dor['year'])) {
@@ -83,7 +84,8 @@ foreach ($csadrs as $csadr) :
 				(!empty($dor['year'])) ? $rod .= $dor['year'] : $rod .= '1970';
 			}
 			($rod) ? $row[$key] = $rod : $row[$key] = '""';
-		} elseif ($key == 'drugs') {
+		}
+		 elseif ($key == 'drugs') {
 			foreach ($csadr['SadrListOfDrug'] as $sadrListOfDrug) {
 				(isset($row[$key])) ? $row[$key] .= '; ' . $sadrListOfDrug['drug_name'] : $row[$key] = $sadrListOfDrug['drug_name'];
 			}

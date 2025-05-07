@@ -21,5 +21,23 @@ $(document).ready(function () {
         changeYear: true,
         showAnim: 'show'
     });
+    $('.dateInput').datepicker({
+        minDate: "-100Y", maxDate: "0",
+        dateFormat: 'yy-mm-dd',
+        showButtonPanel: true,
+        changeMonth: true,
+        changeYear: true,
+        showAnim: 'show'
+    });
+    $('.dateInputFuture').datepicker({
+        minDate: "0", maxDate: "10Y",
+        dateFormat: 'yy-mm-dd',
+        showButtonPanel: true,
+        changeMonth: true,
+        changeYear: true,
+        showAnim: 'show'
+    });
+    
+    
 
 });

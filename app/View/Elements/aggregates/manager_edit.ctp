@@ -1,7 +1,7 @@
 <?php
 $this->assign('AGGREGATE', 'active');
 $this->Html->script('jquery/combobox', array('inline' => false));
-$this->Html->script('psur', array('inline' => false));
+$this->Html->script('psurs', array('inline' => false));
 $this->Html->script('ckeditor/ckeditor', array('inline' => false));
 $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
 ?>
@@ -189,22 +189,111 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
 
                                     </div>
                                     <div class="span6">
-<?php
+                                        <?php
 
 
-echo $this->Form->input(
-    'date_of_birth',
-    array(
-        'class' => 'span8 available',
-        'label' => array('class' => 'control-label ', 'text' => 'International Birth date<span style="color:red;">*</span>'),
-        'after' => '<p class="help-block"> </p></div>',
-    )
-);?>
+                                        echo $this->Form->input(
+                                            'date_of_birth',
+                                            array(
+                                                'class' => 'span8 available dateInput',
+                                                'label' => array('class' => 'control-label ', 'text' => 'International Birth date<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        ); ?>
                                     </div>
                                 </div>
                                 <hr>
                             </div>
                         </div>
+
+
+                                <!-- Start of Added Field -->
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'data_interval',
+                                            array(
+                                                'class' => 'span8 available',
+                                                'label' => array('class' => 'control-label ', 'text' => 'PBRER/PSUR reporting interval<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'data_lock',
+                                            array(
+                                                'class' => 'span8 available dateInput',
+                                                'label' => array('class' => 'control-label ', 'text' => 'Data lock point<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                </div>
+                                <div class="row-fluid">
+                                    <div class="span6">
+                                        <?php
+                                        echo $this->Form->input(
+                                            'next_data_lock',
+                                            array(
+                                                'class' => 'span8 available dateInputFuture',
+                                                'label' => array('class' => 'control-label ', 'text' => 'Next data lock point<span style="color:red;">*</span>'),
+                                                'after' => '<p class="help-block"> </p></div>',
+                                            )
+                                        );
+
+                                        ?>
+                                    </div>
+                                    <div class="span6">
+                                        <div class="row-fluid">
+                                            <div class="span6">
+
+                                                <?php
+                                                echo $this->Form->input(
+                                                    'interval_code',
+                                                    array(
+                                                        'class' => 'span12 available',
+                                                        'label' => array('class' => 'control-label ', 'text' => 'Submission Frequency<span style="color:red;">*</span>'),
+                                                        'after' => '<p class="help-block"> </p></div>',
+                                                        'type' => 'number', // Ensure the input is of type 'number'
+                                                        'min' => 1,         // Set minimum value to 1
+                                                        'max' => 11
+                                                    )
+                                                );
+
+                                                ?>
+
+                                            </div>
+                                            <div class="span6">
+                                                <?php
+                                              
+
+                                                echo $this->Form->input(
+                                                    'submission_frequency',
+                                                    array(
+                                                        'class' => 'span4 available',
+                                                        'type' => 'select',
+                                                        'options' => $units,
+                                                        'empty' => true, 
+                                                        'label' => array('class' => 'control-label required', 'text' => 'Unit' . ' <span style="color:red;">*</span>'),
+                                                        'empty' => true
+                                                    )
+                                                );
+
+                                                ?>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- End of Added Fields -->
 
                         <div class="" id="parentDetails" style="margin: 10px;">
                             <div class="row-fluid">
@@ -378,7 +467,7 @@ echo $this->Form->input(
                                             'rows' => '3',
                                             'label' => array('class' => 'control-label ', 'text' => '5 Recommendations <span style="color:red;">*</span><p class="help-block">(Include any queries raised)</p>'),
                                             'after' => '<p class="help-block"></p></div>',
-                                            'before'=>'<p></p>'
+                                            'before' => '<p></p>'
                                         )
                                     );
                                     echo $this->Form->input(
@@ -401,9 +490,9 @@ echo $this->Form->input(
                             <!-- Start of Attachments -->
 
                             <?php
-                            
+
                             // if($this->request->data['Aggregate']['manager_initiated']){
-                            
+
                             ?>
                             <div style="margin: 10px;">
                                 <div class="row-fluid">
@@ -427,14 +516,15 @@ echo $this->Form->input(
                             </div>
 
                             <?php
-                            // } ?>
+                            // } 
+                            ?>
 
                             <!-- End of Attachements -->
 
 
 
                             <!-- Reporter Details -->
-                            <div style="margin: 10px; " hidden>
+                            <div style="margin: 10px; ">
                                 <div class="row-fluid">
                                     <div class="span6">
                                         <?php
@@ -608,13 +698,14 @@ echo $this->Form->input(
                         'name' => 'saveChanges',
                         'class' => 'btn btn-success mapop',
                         'formnovalidate' => 'formnovalidate',
-                        'id' => 'SadrSaveChanges', 'title' => 'Save & continue editing',
+                        'id' => 'SadrSaveChanges',
+                        'title' => 'Save & continue editing',
                         'data-content' => 'Save changes to form without submitting it.
 	                                              The form will still be available for further editing.',
                         'div' => false,
                     ));
                     ?>
-                    <?php 
+                    <?php
                     ?>
                     <br>
                     <hr>
@@ -623,7 +714,8 @@ echo $this->Form->input(
                         'name' => 'submitReport',
                         'onclick' => "return confirm('Are you sure you wish to submit the report?');",
                         'class' => 'btn btn-primary btn-block mapop',
-                        'id' => 'AggregateSubmitReport', 'title' => 'Save and Submit Report',
+                        'id' => 'AggregateSubmitReport',
+                        'title' => 'Save and Submit Report',
                         'data-content' => 'Submit report for peer review and approval.',
                         'div' => false,
                     ));
@@ -639,8 +731,8 @@ echo $this->Form->input(
                         array('escape' => false, 'class' => 'btn btn-danger btn-block')
                     );
 
-                ?>
-                    
+                    ?>
+
                 </div>
             </div>
         </div>
@@ -662,8 +754,8 @@ echo $this->Form->input(
     CKEDITOR.replace('data[Aggregate][safety_concerns]');
     CKEDITOR.replace('data[Aggregate][risks_evaluation]');
     CKEDITOR.replace('data[Aggregate][risks_characterisation]');
-    CKEDITOR.replace('data[Aggregate][benefit_evaluation]'); 
-    CKEDITOR.replace('data[Aggregate][risk_balance]'); 
+    CKEDITOR.replace('data[Aggregate][benefit_evaluation]');
+    CKEDITOR.replace('data[Aggregate][risk_balance]');
     CKEDITOR.replace('data[Aggregate][recommendation]');
     CKEDITOR.replace('data[Aggregate][conclusion]');
 </script>

@@ -98,7 +98,9 @@ class Aggregate extends AppModel
 				'required' => true,
 				'message'  => 'Please provide interval number'
 			),
-		),'submission_frequency' => array(
+		),
+		
+		'submission_frequency' => array(
 			'notBlank' => array(
 				'rule'     => 'notBlank',
 				'required' => true,
