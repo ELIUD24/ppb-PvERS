@@ -68,7 +68,8 @@ class AggregatesController extends AppController
 			'fields' => 'Aggregate.reference_no',
 			'conditions' => array(
 				'Aggregate.submitted_date BETWEEN ? and ?' => array(
-					date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")
+					date("Y-01-01 00:00:00"),
+					date("Y-m-d H:i:s")
 				),
 				'Aggregate.reference_no !=' => 'new',
 				// 'Aggregate.report_type !='=>'Followup'
@@ -260,24 +261,23 @@ class AggregatesController extends AppController
 		}
 	}
 
-	public function calculate_remider_date($data=null)
+	public function calculate_remider_date($data = null)
 	{
-		if(empty($data)){
+		if (empty($data)) {
 			return   date("Y-m-d H:i:s");
 		}
 		// get time interval
 		$today = new DateTime();
 
-		if($data['Aggregate']['submission_frequency']==="0")
-		{ 
+		if ($data['Aggregate']['submission_frequency'] === "0") {
 			$interval = new DateInterval('P' . $data['Aggregate']['interval_code'] . 'M');
-			$today->add($interval); 
-		}else{
+			$today->add($interval);
+		} else {
 			$interval = new DateInterval('P' . $data['Aggregate']['interval_code'] . 'Y');
-			$today->add($interval); 
+			$today->add($interval);
 		}
-		$reminder_date=$today->format("Y-m-d H:i:s");
-		 
+		$reminder_date = $today->format("Y-m-d H:i:s");
+
 		return $reminder_date;
 	}
 
@@ -334,9 +334,12 @@ class AggregatesController extends AppController
 						'reference_link' => $html->link(
 							$aggregate['Aggregate']['reference_no'],
 							array(
-								'controller' => 'aggregates', 
-								'action' => 'view', $aggregate['Aggregate']['id'], 
-								'reporter' => true, 'full_base' => true),
+								'controller' => 'aggregates',
+								'action' => 'view',
+								$aggregate['Aggregate']['id'],
+								'reporter' => true,
+								'full_base' => true
+							),
 							array('escape' => false)
 						),
 						'modified' => $aggregate['Aggregate']['modified']
@@ -367,15 +370,17 @@ class AggregatesController extends AppController
 					));
 					foreach ($users as $user) {
 						$variables = array(
-							'name' => $user['User']['name'], 
+							'name' => $user['User']['name'],
 							'reference_no' => $aggregate['Aggregate']['reference_no'],
 							'reference_link' => $html->link(
 								$aggregate['Aggregate']['reference_no'],
 								array(
-									'controller' => 'aggregates', 
-									'action' => 'view', $aggregate['Aggregate']['id'], 
-									'manager' => true, 
-									'full_base' => true),
+									'controller' => 'aggregates',
+									'action' => 'view',
+									$aggregate['Aggregate']['id'],
+									'manager' => true,
+									'full_base' => true
+								),
 								array('escape' => false)
 							),
 							'modified' => $aggregate['Aggregate']['modified']
@@ -483,7 +488,7 @@ class AggregatesController extends AppController
 			'conditions' => array('Aggregate.id' => $id),
 			'contain' => array('Designation', 'AggregateListOfSignal', 'Attachment', 'ExternalComment', 'ExternalComment.Attachment')
 		));
-		
+
 		$this->set(['aggregate' => $aggregate]);
 
 		if (strpos($this->request->url, 'pdf') !== false) {
@@ -520,10 +525,10 @@ class AggregatesController extends AppController
 		// add deleted condition to criteria
 		$criteria['Aggregate.deleted'] = false;
 		if (!empty($this->passedArgs['archived'])) {
-            $criteria['Aggregate.archived'] = true;
-        }else{
-            $criteria['Aggregate.archived'] = false;
-        }
+			$criteria['Aggregate.archived'] = true;
+		} else {
+			$criteria['Aggregate.archived'] = false;
+		}
 		$this->paginate['conditions'] = $criteria;
 		$this->paginate['order'] = array('Aggregate.submitted_date' => 'desc');
 		$this->set('aggregates', Sanitize::clean($this->paginate(), array('encode' => false)));
@@ -544,9 +549,19 @@ class AggregatesController extends AppController
 			$validate = false;
 			if (isset($this->request->data['submitReport'])) {
 
-
-				// debug($this->request->data);
-				// exit;
+				$managerIn = $this->request->data['Aggregate']['manager_initiated'];
+				if (empty($managerIn)) {
+					// debug($this->request->data);
+					// exit;
+					unset($this->Aggregate->validate["authorised_indications"]);
+					unset($this->Aggregate->validate["form_strength"]);
+					unset($this->Aggregate->validate["interval_code"]);
+					unset($this->Aggregate->validate["submission_frequency"]);
+					unset($this->Aggregate->validate["date_of_birth"]);
+					unset($this->Aggregate->validate["data_interval"]);
+					unset($this->Aggregate->validate["data_lock"]);
+					unset($this->Aggregate->validate["next_data_lock"]);
+				}
 				$validate = 'first';
 				$isValid = $this->validateEditorData($this->request->data);
 				if ($isValid['valid'] != true) {

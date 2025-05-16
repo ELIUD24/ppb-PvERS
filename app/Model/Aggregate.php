@@ -19,21 +19,21 @@ class Aggregate extends AppModel
 		'brand_name' => array('type' => 'like', 'encode' => true),
 		'inn_name' => array('type' => 'like', 'encode' => true),
 		'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Aggregate.submitted_date as DATE) BETWEEN ? AND ?'),
-        'start_date' => array('type' => 'query', 'method' => 'dummy'),
+		'start_date' => array('type' => 'query', 'method' => 'dummy'),
 		'archived' => array('type' => 'value'),
-        'end_date' => array('type' => 'query', 'method' => 'dummy'),
+		'end_date' => array('type' => 'query', 'method' => 'dummy'),
 		'submission_frequency' => array('type' => 'like', 'encode' => true),
 	);
 	public function makeRangeCondition($data = array())
-    {
-        if (!empty($data['start_date'])) $start_date = date('Y-m-d', strtotime($data['start_date']));
-        else $start_date = date('Y-m-d', strtotime('2012-05-01'));
+	{
+		if (!empty($data['start_date'])) $start_date = date('Y-m-d', strtotime($data['start_date']));
+		else $start_date = date('Y-m-d', strtotime('2012-05-01'));
 
-        if (!empty($data['end_date'])) $end_date = date('Y-m-d', strtotime($data['end_date']));
-        else $end_date = date('Y-m-d');
+		if (!empty($data['end_date'])) $end_date = date('Y-m-d', strtotime($data['end_date']));
+		else $end_date = date('Y-m-d');
 
-        return array($start_date, $end_date);
-    }
+		return array($start_date, $end_date);
+	}
 	public function dummy($data = array())
 	{
 		return array('1' => '1');
@@ -45,7 +45,7 @@ class Aggregate extends AppModel
 	 */
 	public $validate = array(
 
-	 
+
 		'brand_name' => array(
 			'seriousYes' => array(
 				'rule'     => 'seriousYes',
@@ -55,36 +55,39 @@ class Aggregate extends AppModel
 		),
 		'inn_name' => array(
 			'conditionalNotBlank' => array(
-				'rule' =>'notBlank',
+				'rule' => 'notBlank',
 				// 'required' => true,
 				'message'  => 'Please provide a INN Name'
 			),
 		),
 		'mah' => array(
 			'conditionalNotBlank' => array(
-				'rule' =>'notBlank',
+				'rule' => 'notBlank',
 				// 'required' => true,
 				'message'  => 'Please provide a Marketing Authorization Holder'
 			),
 		),
 		'therapeutic_group' => array(
 			'conditionalNotBlank' => array(
-				'rule' =>'notBlank',
+				'rule' => 'notBlank',
 				// 'required' => true,
 				'message'  => 'Please provide Therapeutic Group Code'
 			),
 		),
 		'authorised_indications' => array(
 			'conditionalNotBlank' => array(
-				'rule' =>'notBlank',
-				'required' => true,
-				'message'  => 'Please provide authorised indications'
+				'rule' => 'notBlank',
+				'message'  => 'Please provide authorised indications',
+				'required'  => true,
+				'allowEmpty' => false,
+				 
 			),
 		),
 		'form_strength' => array(
 			'notBlank' => array(
-				'rule' =>'notBlank',
-				'required' => true,
+				'rule' => 'notBlank',
+				'required'  => true,
+				'allowEmpty' => false,
 				'message'  => 'Please provide pharmaceutical form(s)'
 			),
 		),
@@ -95,15 +98,17 @@ class Aggregate extends AppModel
 		'interval_code' => array(
 			'notBlank' => array(
 				'rule'     => 'notBlank',
-				'required' => true,
+				'required'  => true,
+				'allowEmpty' => false,
 				'message'  => 'Please provide interval number'
 			),
 		),
-		
+
 		'submission_frequency' => array(
 			'notBlank' => array(
 				'rule'     => 'notBlank',
-				'required' => true,
+				'required'  => true,
+				'allowEmpty' => false,
 				'message'  => 'Please provide the submission frequency'
 			),
 		),
@@ -111,11 +116,38 @@ class Aggregate extends AppModel
 		'date_of_birth' => array(
 			'notBlank' => array(
 				'rule'     => 'notBlank',
-				'required' => true,
+				'required'  => true,
+				'allowEmpty' => false,
 				'message'  => 'Please provide the date of birth'
 			),
 		),
-		 
+		'data_interval' => array(
+			'notBlank' => array(
+				'rule'     => 'notBlank',
+				'required'  => true,
+				'allowEmpty' => false,
+				'message'  => 'Please provide the PBRER/PSUR reporting interval'
+			),
+		),
+		'data_lock' => array(
+			'notBlank' => array(
+				'rule'     => 'notBlank',
+				'required'  => true,
+				'allowEmpty' => false,
+				'message'  => 'Please provide the data lock point'
+			),
+		),
+		'next_data_lock' => array(
+			'notBlank' => array(
+				'rule'     => 'notBlank',
+				'required'  => true,
+				'allowEmpty' => false,
+				'message'  => 'Please provide next data lock point'
+			),
+		),
+
+
+
 
 		'reporter_name' => array(
 			'notBlank' => array(
@@ -125,11 +157,11 @@ class Aggregate extends AppModel
 			),
 		),
 		'reporter_date' => array(
-		    'notBlank' => array(
-		        'rule'     => 'notBlank',
-		        'required' => true,
-		        'message'  => 'Please provide the date of submission of the report'
-		    ),
+			'notBlank' => array(
+				'rule'     => 'notBlank',
+				'required' => true,
+				'message'  => 'Please provide the date of submission of the report'
+			),
 		),
 		'reporter_email' => array(
 			'notBlank' => array(
@@ -139,33 +171,33 @@ class Aggregate extends AppModel
 			),
 		),
 		'reporter_phone' => array(
-		    'notBlank' => array(
-		        'rule'     => 'notBlank',
-		        'required' => true,
-		        'message'  => 'Please provide a valid phone number'
-		    ),
+			'notBlank' => array(
+				'rule'     => 'notBlank',
+				'required' => true,
+				'message'  => 'Please provide a valid phone number'
+			),
 		),
 		// ensure reporter phone is numeric and 10 digits
 		'reporter_phone' => array(
-		    'numeric' => array(
-		        'rule' => array('numeric'),
-		        'message' => 'Please provide a valid phone number',
-		    ),
-		    'minLength' => array(
-		        'rule' => array('minLength', 10),
-		        'message' => 'Please provide a valid phone number',
-		    ),
-		    'maxLength' => array(
-		        'rule' => array('maxLength', 12),
-		        'message' => 'Please provide a valid phone number',
-		    ),
+			'numeric' => array(
+				'rule' => array('numeric'),
+				'message' => 'Please provide a valid phone number',
+			),
+			'minLength' => array(
+				'rule' => array('minLength', 10),
+				'message' => 'Please provide a valid phone number',
+			),
+			'maxLength' => array(
+				'rule' => array('maxLength', 12),
+				'message' => 'Please provide a valid phone number',
+			),
 		),
 
 	);
 	public function ageOrDate($field = null)
-    {
-        return !empty($this->data['Aggregate']['date_of_birth']['year']);
-    }
+	{
+		return !empty($this->data['Aggregate']['date_of_birth']['year']);
+	}
 	public function seriousYes($field = null)
 	{
 		if ($this->data['Aggregate']['summary_available'] == 'Yes') return !empty($this->data['Aggregate']['brand_name']);
@@ -181,7 +213,7 @@ class Aggregate extends AppModel
 		// If the condition is not met, return true to bypass validation
 		return true;
 	}
- 
+
 	public function atleastOneAttachment($field = null)
 	{
 		return !empty($this->data['Attachment']);
@@ -285,20 +317,20 @@ class Aggregate extends AppModel
 	);
 
 
-    // public function afterFind($results, $primary = false) {
-    //     if ($primary) {
-    //         foreach ($results as $key => $val) {
-    //             if (isset($val['Aggregate']['id'])) {
-    //                 // Fetch only one Post record
-    //                 $post = $this->ReviewerAggregate->find('first', array(
-    //                     'conditions' => array('ReviewerAggregate.aggregate_id' => $val['Aggregate']['id']),
-    //                     'order' => array('ReviewerAggregate.created' => 'DESC')
-    //                 ));
-    //                 // Replace the array of Posts with a single ReviewerAggregate
-    //                 $results[$key]['ReviewerAggregate'] = isset($post['ReviewerAggregate']) ? $post['ReviewerAggregate'] : null;
-    //             }
-    //         }
-    //     }
-    //     return $results;
-    // }
+	// public function afterFind($results, $primary = false) {
+	//     if ($primary) {
+	//         foreach ($results as $key => $val) {
+	//             if (isset($val['Aggregate']['id'])) {
+	//                 // Fetch only one Post record
+	//                 $post = $this->ReviewerAggregate->find('first', array(
+	//                     'conditions' => array('ReviewerAggregate.aggregate_id' => $val['Aggregate']['id']),
+	//                     'order' => array('ReviewerAggregate.created' => 'DESC')
+	//                 ));
+	//                 // Replace the array of Posts with a single ReviewerAggregate
+	//                 $results[$key]['ReviewerAggregate'] = isset($post['ReviewerAggregate']) ? $post['ReviewerAggregate'] : null;
+	//             }
+	//         }
+	//     }
+	//     return $results;
+	// }
 }

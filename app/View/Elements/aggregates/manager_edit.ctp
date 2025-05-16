@@ -1,7 +1,7 @@
 <?php
 $this->assign('AGGREGATE', 'active');
 $this->Html->script('jquery/combobox', array('inline' => false));
-$this->Html->script('psurs', array('inline' => false));
+$this->Html->script('psur', array('inline' => false));
 $this->Html->script('ckeditor/ckeditor', array('inline' => false));
 $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
 ?>
@@ -263,7 +263,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                                 'after' => '<p class="help-block"> </p></div>',
                                                 'type' => 'number', // Ensure the input is of type 'number'
                                                 'min' => 1,         // Set minimum value to 1
-                                                'max' => 11
+                                                'max' => 50
                                             )
                                         );
 
@@ -698,7 +698,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                         'name' => 'saveChanges',
                         'class' => 'btn btn-success mapop',
                         'formnovalidate' => 'formnovalidate',
-                        'id' => 'SadrSaveChanges',
+                        'id' => 'AggregateSaveChanges',
                         'title' => 'Save & continue editing',
                         'data-content' => 'Save changes to form without submitting it.
 	                                              The form will still be available for further editing.',
