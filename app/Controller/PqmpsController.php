@@ -1595,6 +1595,9 @@ class PqmpsController extends AppController
             $data_save['user_id'] = $this->Auth->User('id');;
             $this->Pqmp->saveField('copied', 1);
             $data_save['copied'] = 2;
+            $now = date('Y-m-d H:i:s');
+            $data_save['created'] = $now;
+            $data_save['modified'] = $now;
 
             if ($this->Pqmp->saveAssociated($data_save, array('deep' => true, 'validate' => false))) {
                 $this->Session->setFlash(__('Clean copy of ' . $data_save['reference_no'] . ' has been created'), 'alerts/flash_info');

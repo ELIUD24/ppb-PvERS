@@ -503,6 +503,9 @@ class Ce2bsController extends AppController
             $data_save['reference_no'] = $ce2b['Ce2b']['reference_no'];
             $data_save['report_type'] = 'Followup';
             $data_save['submitted'] = 0;
+            $now = date('Y-m-d H:i:s');
+            $data_save['created'] = $now;
+            $data_save['modified'] = $now;
 
             if ($this->Ce2b->saveAssociated($data_save, array('deep' => true, 'validate' => false))) {
                 $this->Session->setFlash(__('Follow up ' . $data_save['reference_no'] . ' has been created'), 'alerts/flash_info');
@@ -875,6 +878,9 @@ class Ce2bsController extends AppController
         $this->Ce2b->saveField('copied', 1);
         $data_save['copied'] = 2;
         $data_save['submitted'] = 2;
+        $now = date('Y-m-d H:i:s');
+        $data_save['created'] = $now;
+        $data_save['modified'] = $now;
 
         if ($this->Ce2b->saveAssociated($data_save, array('deep' => true, 'validate' => false))) {
             $this->Session->setFlash(__('Clean copy of ' . $data_save['reference_no'] . ' has been created'), 'alerts/flash_info');
