@@ -838,7 +838,8 @@ class UsersController extends AppController
             'Sadr.user_id' => $user_id
         );
         $cmed = array(
-            'Medication.deleted' => false,  'Medication.archived' => false,
+            'Medication.deleted' => false,  
+            'Medication.archived' => false,
             'Medication.user_id' => $user_id
         );
         $cpq = array(
@@ -846,8 +847,14 @@ class UsersController extends AppController
             'Pqmp.user_id' => $user_id
         );
         $cdev = array(
-            'Device.deleted' => false,  'Device.archived' => false,
+            'Device.deleted' => false,  
+            'Device.archived' => false,
             'Device.user_id' => $user_id
+        );
+        $caggregates = array(
+            'Aggregate.deleted' => false,  
+            'Aggregate.archived' => false,
+            'Aggregate.user_id' => $user_id
         );
         $cblood = array(
             'Transfusion.deleted' => false,  'Transfusion.archived' => false,
@@ -1082,6 +1089,21 @@ class UsersController extends AppController
         ));
         $this->set('ce2bs', $ce2bs);
 
+
+          // Aggregate
+          $aggregates = $this->User->Aggregate->find('all', array(
+            'limit' => 7,
+            'contain' => array(),
+            'fields' => array('Aggregate.id', 'Aggregate.user_id', 'Aggregate.created', 'Aggregate.submitted', 'Aggregate.reference_no'),
+            'order' => array('Aggregate.created' => 'desc'),
+            'conditions' => array(
+                // only show Reports that have been not been deleted
+                'Aggregate.deleted' => false,
+                'Aggregate.user_id' => $this->Auth->User('id')
+            ),
+        ));
+        $this->set('aggregates', $aggregates);
+
         $this->set('notifications', $this->User->Notification->find('all', array(
             'conditions' => array('Notification.user_id' => $this->Auth->User('id')),
             'order' => 'Notification.created DESC',
@@ -1188,6 +1210,39 @@ class UsersController extends AppController
             'order' => array('Sae.created' => 'desc'),
         ));
         $this->set('saes', $saes);
+
+
+
+        // CE2Bs
+        $ce2bs = $this->User->Ce2b->find('all', array(
+            'limit' => 7,
+            'contain' => array(),
+            'fields' => array('Ce2b.id', 'Ce2b.user_id','Ce2b.company_name', 'Ce2b.created', 'Ce2b.submitted', 'Ce2b.reference_no'),
+            'order' => array('Ce2b.created' => 'desc'),
+            'conditions' => array(
+                // only show Reports that have been not been deleted
+                'Ce2b.deleted' => false,
+                'Ce2b.archived' => false,
+                'Ce2b.submitted >' => 1,
+            ),
+        ));
+        $this->set('ce2bs', $ce2bs);
+
+
+          // Aggregate
+          $aggregates = $this->User->Aggregate->find('all', array(
+            'limit' => 7,
+            'contain' => array(),
+            'fields' => array('Aggregate.id', 'Aggregate.user_id','Aggregate.brand_name', 'Aggregate.created', 'Aggregate.submitted', 'Aggregate.reference_no'),
+            'order' => array('Aggregate.created' => 'desc'),
+            'conditions' => array(
+                // only show Reports that have been not been deleted
+                'Aggregate.deleted' => false,
+                'Aggregate.archived' => false,
+                'Aggregate.submitted >' => 1,
+            ),
+        ));
+        $this->set('aggregates', $aggregates);
 
         $this->set('notifications', $this->User->Notification->find('all', array(
             'conditions' => array('Notification.user_id' => $this->Auth->User('id')),

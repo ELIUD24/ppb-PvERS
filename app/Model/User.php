@@ -133,6 +133,12 @@ class User extends AppModel {
 			'foreignKey' => 'user_id',
 			'dependent' => false,
 		),
+
+		'Aggregate' => array(
+			'className' => 'Aggregate',
+			'foreignKey' => 'user_id',
+			'dependent' => false,
+		),
 	);
 
 	// public function beforeSave() {

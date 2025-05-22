@@ -299,9 +299,7 @@ $this->Html->script('dashboard', array('inline' => false));
                     array('escape' => false, 'class' => 'text-success')
                   );
                   echo "&nbsp;";
-                  if ($this->Session->read('Auth.User.user_type') == 'County Pharmacist' && $ce['Ce2b']['user_id'] != $this->Session->read('Auth.User.id')) {
-                    echo $this->Form->postLink('<span class="label label-inverse tooltipper" data-toggle="tooltip" title="Add Investigation up report"> <i class="fa fa-eye" aria-hidden="true"></i></span>', array('controller' => 'aefis', 'action' => 'investigation', $saefi['Aefi']['id']), array('escape' => false), __('Add a Investigation report?'));
-                  }
+                 
                   echo "</li>";
                 } else {
                   echo "<li>";
@@ -315,6 +313,38 @@ $this->Html->script('dashboard', array('inline' => false));
               }
               echo '</ol>';
               echo $this->Html->link('All E2Bs >>', array('controller' => 'ce2bs', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link'));
+              echo $this->Form->postLink('Report E2B', array('controller' => 'ce2bs', 'action' => 'add'), array('class' => 'btn btn-success pull-right btn-mini'), __('Report E2b Report?'));
+              ?>
+
+            </div>
+            <div class="span4 formbackd" style="padding: 4px;">
+              <h5>Aggregate Reports </h5>
+              <?php
+              echo '<ol>';
+              foreach ($aggregates as $ce) {
+                if ($ce['Aggregate']['submitted'] > 1) {
+                  echo "<li>";
+                  echo $this->Html->link(
+                    ' <small class="muted">(' . $ce['Aggregate']['reference_no'] . ')</small>',
+                    array('controller' => 'aggregates', 'action' => 'view', $ce['Aggregate']['id']),
+                    array('escape' => false, 'class' => 'text-success')
+                  );
+                  echo "&nbsp;";
+                  
+                  echo "</li>";
+                } else {
+                  echo "<li>";
+                  echo $this->Html->link(
+                    $ce['Aggregate']['created'] . ' <small class="muted">(unsubmitted)</small>',
+                    array('controller' => 'aggregates', 'action' => 'edit', $ce['Aggregate']['id']),
+                    array('escape' => false)
+                  );
+                  echo "</li>";
+                }
+              }
+              echo '</ol>';
+              echo $this->Html->link('All Aggregates >>', array('controller' => 'aggregates', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link'));
+              echo $this->Form->postLink('Report Aggregate', array('controller' => 'aggregates', 'action' => 'add'), array('class' => 'btn btn-success pull-right btn-mini'), __('Report Aggregate Report?'));
               ?>
 
             </div>
