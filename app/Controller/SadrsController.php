@@ -1053,6 +1053,9 @@ class SadrsController extends AppController
             $data_save['reference_no'] = $sadr['Sadr']['reference_no']; //.'_F'.$count;
             $data_save['report_type'] = 'Followup';
             $data_save['submitted'] = 0;
+            $now = date('Y-m-d H:i:s');
+            $data_save['created'] = $now;
+            $data_save['modified'] = $now;
 
             if ($this->Sadr->saveAssociated($data_save, array('deep' => true, 'validate' => false))) {
                 $this->Session->setFlash(__('Follow up ' . $data_save['reference_no'] . ' has been created'), 'alerts/flash_info');
