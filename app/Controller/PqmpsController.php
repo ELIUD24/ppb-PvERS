@@ -1624,6 +1624,9 @@ class PqmpsController extends AppController
             if (isset($this->request->data['submitReport'])) {
                 $validate = 'first';
             }
+
+            // debug($this->request->data);
+            // exit;
             if ($this->Pqmp->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
                     $this->Pqmp->saveField('submitted', 2);

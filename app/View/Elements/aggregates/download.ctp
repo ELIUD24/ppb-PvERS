@@ -88,6 +88,49 @@
                             <p><?php echo $aggregate['Aggregate']['form_strength'] ?></p>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            <p><strong>Submission Frequency</strong></p>
+                        </td>
+                        <td>
+                            <p> <?php 
+                            $frequency = $aggregate['Aggregate']['submission_frequency'] == 0 ? 'Months' : 'Years';
+                            echo $aggregate['Aggregate']['interval_code'] . " " . $frequency;
+                            ?> </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>PBRER/PSUR reporting interval</strong></p>
+                        </td>
+                        <td>
+                            <p><?php echo $aggregate['Aggregate']['data_interval'] ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>Data lock point</strong></p>
+                        </td>
+                        <td>
+                            <p><?php echo $aggregate['Aggregate']['data_lock'] ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>Next data lock point</strong></p>
+                        </td>
+                        <td>
+                            <p><?php echo $aggregate['Aggregate']['next_data_lock'] ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p><strong>International Date of Birth</strong></p>
+                        </td>
+                        <td>
+                            <p><?php echo $aggregate['Aggregate']['date_of_birth'] ?></p>
+                        </td>
+                    </tr>
 
                 </table>
                 <hr>
@@ -234,7 +277,7 @@
                         </div>
                     </div>
                     <?php if (count($aggregate['ExternalComment']) > 0) { ?>
-                        <h5>5 Request for supplementary information</h5>
+                        <h5>6 Request for supplementary information</h5>
                         <div class="row-fluid">
                             <div class="span11">
                                 <?php
@@ -246,35 +289,9 @@
                                 <?php endforeach; ?>
                             </div>
                         </div>
-                    <?php  }
-                    if (count($aggregate['ReviewerComment']) > 0) { ?>
-                        <h5>6 Conclusion/Reviewer’s comments</h5>
-                        <div class="row-fluid">
-                            <div class="span11">
-                                <?php
-                                $i = 1;
-                                foreach ($aggregate['ReviewerComment'] as $data) : ?>
-
-                                    <p><?php echo $data['content']; ?></p>
-
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    <?php  }
-                    if (count($aggregate['Recommendation']) > 0) { ?>
-                        <h5>7 Recommendations</h5>
-                        <div class="row-fluid">
-                            <div class="span11">
-                                <?php
-                                $i = 1;
-                                foreach ($aggregate['Recommendation'] as $data) : ?>
-
-                                    <p><?php echo $data['content']; ?></p>
-
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    <?php } ?>
+                    <?php  }?>
+                   
+                  
                 </div>
                 <hr>
 
