@@ -184,12 +184,24 @@ class Ce2bsController extends AppController
 
         $reactions_data = array();
         foreach ($reactions as $re) {
+
+            $start =  isset($re['start_date']) ? $re['start_date'] : null;
+            $end = isset($re['end_date']) ? $re['end_date'] : null;
+
+            if ($start !== null) {
+                $start = $this->generateDesiredDate($start);
+            }
+
+            if ($end !== null) {
+                $end = $this->generateDesiredDate($end);
+            }
             $reactions_data[] = array(
                 'index' => $re['id'],
                 'reaction_name' => !empty(Hash::extract($re['reactions'], '{n}[code=30].value'))
                     ? (string) Hash::extract($re['reactions'], '{n}[code=30].value')[0]
                     : null,
-                'start_date' => '',
+                'start_date' => $start,
+                'end_date'   => $end,
                 'meddra_code' => $re['value'],
                 'meddra_version' => '23',
                 'source_country' => $re['location'],
@@ -197,7 +209,7 @@ class Ce2bsController extends AppController
                 'criteria_death_null' => !empty(Hash::extract($re['reactions'], '{n}[code=34].value_null'))
                     ? (string) Hash::extract($re['reactions'], '{n}[code=34].value_null')[0]
                     : null,
-                'criteria_death_value' => !empty(Hash::extract($re['reactions'], '{n}[code=43].value'))
+                'criteria_death_value' => !empty(Hash::extract($re['reactions'], '{n}[code=34].value'))
                     ? (string) Hash::extract($re['reactions'], '{n}[code=34].value')[0]
                     : null,
                 'life_hreatening_code' => '21',
@@ -249,12 +261,26 @@ class Ce2bsController extends AppController
                 'medical_confirmation_value' => !empty(Hash::extract($re['reactions'], '{n}[code=24].value'))
                     ? (string) Hash::extract($re['reactions'], '{n}[code=24].value')[0]
                     : null,
-                'serious' => ''
+                'serious' => in_array('true', array(
+                    $this->extractReactionField($re['reactions'], 34), // criteria_death_value
+                    $this->extractReactionField($re['reactions'], 21), // life_threatening_value
+                    $this->extractReactionField($re['reactions'], 33), // prolonged_hospitalisation_value
+                    $this->extractReactionField($re['reactions'], 35), // incapacitating_value
+                    $this->extractReactionField($re['reactions'], 12), // birth_defect_value
+                    $this->extractReactionField($re['reactions'], 26)  // other_medical_value
+                )) ? 'true' : 'false',
+
             );
         }
 
         return $reactions_data;
     }
+    private function extractReactionField($reactions, $code, $field = 'value')
+    {
+        $result = Hash::extract($reactions, "{n}[code={$code}].{$field}");
+        return !empty($result) ? (string) $result[0] : null;
+    }
+
     public function manipulate_reaction_information($cc)
     {
         $reactions = [];
@@ -271,6 +297,19 @@ class Ce2bsController extends AppController
                     'code' => (string) $reaction->code['code'],
                     'value' => (string) $reaction->value['code'],
                 ];
+
+                // Extract effectiveTimes
+                if (isset($reaction->effectiveTime)) {
+                    $effectiveTime = $reaction->effectiveTime;
+
+                    if (isset($effectiveTime->low['value'])) {
+                        $details['start_date'] = (string) $effectiveTime->low['value'];
+                    }
+
+                    if (isset($effectiveTime->high['value'])) {
+                        $details['end_date'] = (string) $effectiveTime->high['value'];
+                    }
+                }
                 if (isset($reaction->location->locatedEntity->locatedPlace->code)) {
                     $codeElement = $reaction->location->locatedEntity->locatedPlace->code;
                     $locationCode = (string) $codeElement['code'];
@@ -279,16 +318,21 @@ class Ce2bsController extends AppController
                 if (isset($reaction->outboundRelationship2)) {
                     $dt = array();
                     foreach ($reaction->outboundRelationship2  as $kk) {
+
+
                         $obsc = (string) $kk->observation->code['code'];
-                        $re = (string) $kk->observation->value;
+                        $re =   $kk->observation->value;
+
+                        $value = isset($re['value']) ? (string) $re['value'] : $re;
+                        $nullFlavor = isset($re['nullFlavor']) ? (string) $re['nullFlavor'] : null;
                         $vnull = null;
                         if (empty($re)) {
                             $vnull = "NI";
                         }
                         $dt[] = array(
                             'code' => $obsc,
-                            'value' => trim($re),
-                            'value_null' => $vnull,
+                            'value' => trim($value),
+                            'value_null' => $nullFlavor,
                         );
                     }
                     $details['reactions'] = $dt;
@@ -304,6 +348,8 @@ class Ce2bsController extends AppController
     public function manipulate_drug_information($cc)
     {
         $drugs = [];
+        $doses = [];
+        $merged = [];
         try {
             $xml = new SimpleXMLElement($cc);
 
@@ -336,11 +382,111 @@ class Ce2bsController extends AppController
                     }
                 }
             }
+
+            foreach ($xml->xpath('//ns:substanceAdministration/ns:outboundRelationship2') as $dosage) {
+                $data = $dosage->substanceAdministration;
+                $route = $data->routeCode;
+                $doseQuantity = $data->doseQuantity;
+
+                if ($doseQuantity && $doseQuantity->attributes()) {
+                    $value = (string)$doseQuantity['value'];
+                    $unit = (string)$doseQuantity['unit'];
+                    $dose = "{$value} {$unit}";
+                }
+
+                if ($doseQuantity && $doseQuantity->attributes()) {
+                }
+                $doses[] = [
+                    'dosage_text' => (string)$data->text,
+                    'route_id' => (string)$route['code'],
+                    'route' => (string)$route['code'],
+                    'dose' => $dose,
+
+
+                ];
+            }
         } catch (Exception $e) {
+        }
+
+          // Merge by index dynamically — as many pairs as possible
+          $count = min(count($drugs), count($doses));
+          for ($i = 0; $i < $count; $i++) {
+              $merged[] = array_merge($drugs[$i], $doses[$i]);
+          }
+
+        return $merged;
+    }
+    public function manipulate_drug_information_alt($cc)
+    {
+        $drugs = [];
+        $doses = [];
+        $merged = [];
+
+        try {
+            $xml = new SimpleXMLElement($cc);
+            $xml->registerXPathNamespace('ns', 'urn:hl7-org:v3');
+
+            foreach ($xml->xpath('//ns:substanceAdministration') as $substance) {
+
+                // Get dose
+                $doseValue = isset($substance->doseQuantity['value']) ? (string)$substance->doseQuantity['value'] : null;
+                $doseUnit = isset($substance->doseQuantity['unit']) ? (string)$substance->doseQuantity['unit'] : null;
+                $dose = ($doseValue && $doseUnit) ? "{$doseValue} {$doseUnit}" : null;
+
+                // Get route code
+                $routeCode = isset($substance->routeCode['code']) ? (string)$substance->routeCode['code'] : null;
+
+                // Get form (e.g., Tablet)
+                $formNode = $substance->xpath('.//ns:formCode/ns:originalText');
+                $form = (!empty($formNode)) ? (string)$formNode[0] : null;
+
+                // Navigate to kindOfProduct
+                $product = $substance->xpath('.//ns:consumable/ns:instanceOfKind/ns:kindOfProduct');
+                if (empty($product)) {
+                    continue;
+                }
+                $product = $product[0];
+
+                // Extract drug name
+                $drugName = isset($product->name) ? trim((string)$product->name) : null;
+
+                // Extract brand name (if ingredientSubstance present)
+                $brandName = null;
+                if (isset($product->ingredient->ingredientSubstance->name)) {
+                    $brandName = (string)$product->ingredient->ingredientSubstance->name;
+                }
+
+                // Optional: Overwrite dose from ingredient quantity if available
+                if (isset($product->ingredient->quantity->numerator)) {
+                    $value = (string)$product->ingredient->quantity->numerator['value'];
+                    $unit = (string)$product->ingredient->quantity->numerator['unit'];
+                    $dose = "{$value} {$unit}";
+                }
+
+                // Only add complete entries with a drug name
+                if (!empty($drugName)) {
+                    $entryKey = $drugName . $brandName . $dose; // Prevent duplicates
+                    if (!isset($seen[$entryKey])) {
+                        $drugs[] = [
+                            'drug_name' => $drugName,
+                            'brand_name' => $brandName,
+                            'dose' => $dose,
+                            'route_code' => $routeCode,
+                            'form' => $form
+                        ];
+                        $seen[$entryKey] = true;
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // You may log $e->getMessage() if needed
         }
 
         return $drugs;
     }
+
+
+
     public function finalize_drugs($id = null)
     {
         $this->Ce2b->id = $id;
@@ -603,8 +749,8 @@ class Ce2bsController extends AppController
         $this->paginate['contain'] = array('Ce2bListOfDrug', 'Ce2bReaction');
         //in case of csv export
         if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
-           
-             
+
+
             $data = $this->Ce2b->find('all', [
                 'conditions' => $this->paginate['conditions'],
                 'order' => $this->paginate['order'],
@@ -612,14 +758,14 @@ class Ce2bsController extends AppController
                 'limit' => 1000,
                 // 'fields' => $fields
             ]);
-            
+
             $this->csv_export($data);
-            
-        //   $data=  Sanitize::clean($this->paginate(), array('encode' => false));
-        //   debug($data);
-        //   exit;
-        //   $this->csv_export($data);
-        
+
+            //   $data=  Sanitize::clean($this->paginate(), array('encode' => false));
+            //   debug($data);
+            //   exit;
+            //   $this->csv_export($data);
+
         }
 
         //end csv export
@@ -1398,8 +1544,8 @@ class Ce2bsController extends AppController
                             'message' => CakeText::insert($message['Message']['content'], $variables)
                         );
 
-                        // $this->QueuedTask->createJob('GenericEmail', $datum);
-                        // $this->QueuedTask->createJob('GenericNotification', $datum);
+                        $this->QueuedTask->createJob('GenericEmail', $datum);
+                        $this->QueuedTask->createJob('GenericNotification', $datum);
                     }
                     // **********************************    END   *********************************
 
@@ -2155,6 +2301,17 @@ class Ce2bsController extends AppController
             $reactions = $this->manipulate_reaction_information($filePath);
             $reactions = $this->map_full_reaction_details($reactions);
             $drugs = $this->manipulate_drug_information($filePath);
+
+            // debug($drugs);
+            // exit;
+            // if serious  
+            $seriousValues = Hash::extract($reactions, '{n}[serious=true]');
+
+            $hasSeriousReaction = !empty($seriousValues);
+
+            if ($hasSeriousReaction) {
+                $this->Ce2b->saveField('serious', 1);
+            }
 
             if (empty($ce2b['Ce2bListOfDrug'])) {
 
