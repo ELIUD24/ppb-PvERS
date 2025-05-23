@@ -79,6 +79,7 @@ $this->Html->script('ce2b', array('inline' => false));
                             'class' => 'control-label required', 
                             'text' => 'XML File <span style="color:red;">*</span>'),
                         'type' => 'file',
+                         'accept' => '.xml',
                         'text'=>'XML File'
                     ));
                     ?>
@@ -192,17 +193,23 @@ $this->Html->script('ce2b', array('inline' => false));
             <div class="my-sidebar" data-spy="affix">
                 <div class="awell">
                     <?php
-                    echo $this->Form->button('<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes', array(
+                   echo $this->Form->button(
+                    '<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes', 
+                    array(
                         'name' => 'saveChanges',
                         'class' => 'btn btn-success mapop d-none',
                         'formnovalidate' => 'formnovalidate',
-                        'disabled' => true, 
-                        'style' => 'display: none;',
-                        'id' => 'SadrSaveChanges', 'title' => 'Save & continue editing',
-                        'data-content' => 'Save changes to form without submitting it.
-	                                              The form will still be available for further editing.',
+                        'id' => 'SadrSaveChanges',
+                        'title' => 'Save & continue editing',
+                        'data-content' => 'Save changes to form without submitting it. 
+                                           The form will still be available for further editing. 
+                                           <strong>Note:</strong> You will need to upload before final submission.',
+                        'data-toggle' => 'popover', // Ensures Bootstrap popover behavior
+                        'data-html' => 'true',      // Allows HTML in the content
                         'div' => false,
-                    ));
+                    )
+                );
+                
                     ?>
                     <br>
                     <hr>
@@ -241,4 +248,6 @@ $this->Html->script('ce2b', array('inline' => false));
         </div>
     </div> <!-- /row -->
     <?php echo $this->Form->end(); ?>
+
+ 
 </section> <!-- /row -->

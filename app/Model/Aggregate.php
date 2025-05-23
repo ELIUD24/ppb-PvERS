@@ -21,6 +21,7 @@ class Aggregate extends AppModel
 		'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Aggregate.submitted_date as DATE) BETWEEN ? AND ?'),
 		'start_date' => array('type' => 'query', 'method' => 'dummy'),
 		'archived' => array('type' => 'value'),
+		'interval_code'=> array('type' => 'value'),
 		'end_date' => array('type' => 'query', 'method' => 'dummy'),
 		'submission_frequency' => array('type' => 'like', 'encode' => true),
 	);

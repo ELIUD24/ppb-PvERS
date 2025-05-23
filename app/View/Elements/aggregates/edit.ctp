@@ -217,6 +217,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
 
                                 <!-- Start of Added Field -->
                                 <div class="row-fluid">
+                                    
                                     <div class="span6">
                                         <?php
                                         echo $this->Form->input(

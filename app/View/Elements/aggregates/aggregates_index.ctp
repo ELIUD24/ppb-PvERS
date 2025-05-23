@@ -131,23 +131,40 @@ echo $this->Session->flash();
                         );
                         ?>
                     </td>
-                    <td>
-                        <?php
-                        echo $this->Form->input(
-                            'submission_frequency',
-                            array(
-                                'div' => false,
-                                'class' => 'span12',
-                                'label' => array('class' => 'required submission_frequency', 'text' => 'Submission Frequency '),
-                                'type' => 'select',
-                                'empty' => true,
-                                'options' => array(
-                                    '0' => 'Monthly',
-                                    '1' => 'Yearly'
+                    <td> <?php
+
+
+                            echo $this->Form->input(
+                                'interval_code',
+                                array(
+                                    'div' => false,
+                                    'type' => 'number', 'min' => 1,         // Set minimum value to 1
+                                    'max' => 50,
+                                    'class' => 'input-small submission_frequency',
+                                    'after' => '   ',
+                                    'label' => array('class' => 'required', 'text' => 'Submission Frequency'),
+                                    'placeHolder' => ''
                                 )
-                            )
-                        );
-                        ?>
+                            );
+                            echo $this->Form->input(
+                                'submission_frequency',
+                                array(
+                                    'div' => false,
+                                    'type' => 'select',
+                                    'empty' => true,
+                                    'options' => array(
+                                        '0' => 'Monthly',
+                                        '1' => 'Yearly'
+                                    ),
+                                    'class' => 'input-small submission_frequency',
+                                    'after' => '<a style="font-weight:normal" onclick="$(\'.submission_frequency\').val(\'\');" >
+      <em class="accordion-toggle">clear!</em></a>',
+                                    'label' => false,
+                                    'placeHolder' => ''
+                                )
+                            );
+                         
+                            ?>
                     </td>
                     <td>
                         <?php
@@ -260,7 +277,11 @@ echo $this->Session->flash();
                             echo $counter; ?>&nbsp;</td>
                         <td>
                             <?php
-                            echo $this->Html->link($aggregate['Aggregate']['reference_no'], array('action' => 'view', $aggregate['Aggregate']['id']), array('escape' => false));
+                            if ($aggregate['Aggregate']['submitted'] > 1) {
+                                echo $this->Html->link($aggregate['Aggregate']['reference_no'], array('action' => 'view', $aggregate['Aggregate']['id']), array('escape' => false));
+                            } else {
+                                echo $this->Html->link($aggregate['Aggregate']['reference_no'], array('action' => 'edit', $aggregate['Aggregate']['id']), array('escape' => false));
+                            }
                             ?>&nbsp;</td>
                         <td>
                             <?php

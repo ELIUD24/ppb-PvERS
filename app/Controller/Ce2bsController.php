@@ -189,11 +189,11 @@ class Ce2bsController extends AppController
             $end = isset($re['end_date']) ? $re['end_date'] : null;
 
             if ($start !== null) {
-                $start = $this->generateDesiredDate($start);
+                $start = $this->generateDesiredDateNoTime($start);
             }
 
             if ($end !== null) {
-                $end = $this->generateDesiredDate($end);
+                $end = $this->generateDesiredDateNoTime($end);
             }
             $reactions_data[] = array(
                 'index' => $re['id'],
@@ -201,7 +201,7 @@ class Ce2bsController extends AppController
                     ? (string) Hash::extract($re['reactions'], '{n}[code=30].value')[0]
                     : null,
                 'start_date' => $start,
-                'end_date'   => $end,
+                'stop_date'   => $end,
                 'meddra_code' => $re['value'],
                 'meddra_version' => '23',
                 'source_country' => $re['location'],
@@ -251,8 +251,8 @@ class Ce2bsController extends AppController
                 'reaction_outcome_null' => !empty(Hash::extract($re['reactions'], '{n}[code=27].value_null'))
                     ? (string) Hash::extract($re['reactions'], '{n}[code=27].value_null')[0]
                     : null,
-                'reaction_outcome_value' => !empty(Hash::extract($re['reactions'], '{n}[code=27].value'))
-                    ? (string) Hash::extract($re['reactions'], '{n}[code=27].value')[0]
+                'reaction_outcome_value' => !empty(Hash::extract($re['reactions'], '{n}[code=27].valueCode'))
+                    ? (string) Hash::extract($re['reactions'], '{n}[code=27].valueCode')[0]
                     : null,
                 'medical_confirmation_code' => '24',
                 'medical_confirmation_null' => !empty(Hash::extract($re['reactions'], '{n}[code=24].value_null'))
@@ -325,6 +325,7 @@ class Ce2bsController extends AppController
 
                         $value = isset($re['value']) ? (string) $re['value'] : $re;
                         $nullFlavor = isset($re['nullFlavor']) ? (string) $re['nullFlavor'] : null;
+                        $valueCode = isset($re['code']) ? (string) $re['code'] : $re;
                         $vnull = null;
                         if (empty($re)) {
                             $vnull = "NI";
@@ -333,6 +334,7 @@ class Ce2bsController extends AppController
                             'code' => $obsc,
                             'value' => trim($value),
                             'value_null' => $nullFlavor,
+                            'valueCode' => (string)$valueCode
                         );
                     }
                     $details['reactions'] = $dt;
@@ -408,11 +410,11 @@ class Ce2bsController extends AppController
         } catch (Exception $e) {
         }
 
-          // Merge by index dynamically — as many pairs as possible
-          $count = min(count($drugs), count($doses));
-          for ($i = 0; $i < $count; $i++) {
-              $merged[] = array_merge($drugs[$i], $doses[$i]);
-          }
+        // Merge by index dynamically — as many pairs as possible
+        $count = min(count($drugs), count($doses));
+        for ($i = 0; $i < $count; $i++) {
+            $merged[] = array_merge($drugs[$i], $doses[$i]);
+        }
 
         return $merged;
     }
@@ -2079,7 +2081,24 @@ class Ce2bsController extends AppController
         }
         $this->general_view($id);
     }
+    
+    public function generateDesiredDateNoTime($input)
+    {
 
+
+        try {
+            // Create a DateTime object from the input
+            $date = new DateTime($input);
+
+            // Format the DateTime object as YYYY-MM-DD HH:MM:SS
+            $formattedDate = $date->format('Y-m-d');
+
+            return $formattedDate;
+        } catch (Exception $e) {
+            // Handle exceptions if the input format is invalid
+            return '';
+        }
+    }
     public function generateDesiredDate($input)
     {
 
@@ -2302,7 +2321,7 @@ class Ce2bsController extends AppController
             $reactions = $this->map_full_reaction_details($reactions);
             $drugs = $this->manipulate_drug_information($filePath);
 
-            // debug($drugs);
+            // debug($reactions);
             // exit;
             // if serious  
             $seriousValues = Hash::extract($reactions, '{n}[serious=true]');
@@ -2334,6 +2353,20 @@ class Ce2bsController extends AppController
 
             $ce2b['Ce2b']['creation_time'] = $this->generateDesiredDate($ce2b['Ce2b']['creation_time']);
             $ce2b['Ce2b']['date_first_received'] = $this->generateDesiredDate($ce2b['Ce2b']['date_first_received']);
+
+            // loop though reactions and update the fields
+            foreach ($ce2b['Ce2bReaction'] as $key => $reaction) {
+                $ce2b['Ce2bReaction'][$key]['meddra_name'] = $this->getMedraName($reaction['meddra_code']);
+            }
+
+            // loop though drugs and update the fields
+            foreach ($ce2b['Ce2bListOfDrug'] as $key => $drug) {
+                $ce2b['Ce2bListOfDrug'][$key]['route'] = $drug['route'].'-'.$this->getRouteName($drug['route']);
+            }
+
+
+            // debug($ce2b['Ce2bReaction']);
+            // exit;
             $this->set(['ce2b' => $ce2b]);
             // $this->set(['e2b' => $e2b]);
             $this->render('ce2b_r3');
@@ -2343,6 +2376,38 @@ class Ce2bsController extends AppController
             $this->pdfConfig = array('filename' => 'E2b' . $id . '.pdf',  'orientation' => 'portrait');
             $this->response->download('Ce2b_' . $ce2b['Ce2b']['id'] . '.pdf');
         }
+    }
+    public function getRouteName($name)
+    {
+        $this->loadModel('Route');
+        $route = $this->Route->find('first', array(
+            'conditions' => array(
+                'Route.icsr_code' => $name
+            ),
+            'fields' => array('Route.name')
+        ));
+
+        if ($route) {
+            // Record found 
+            return $route['Route']['name'];
+        }
+        return null;
+    }
+    public function getMedraName($name)
+    {
+        $this->loadModel('Meddra');
+        $meddra = $this->Meddra->find('first', array(
+            'conditions' => array(
+                'Meddra.id' => $name
+            ),
+            'fields' => array('Meddra.llt_name', 'Meddra.pt_code')
+        ));
+
+        if ($meddra) {
+            // Record found 
+            return $meddra['Meddra']['llt_name'];
+        }
+        return null;
     }
     public function reporter_view($id = null)
     {
