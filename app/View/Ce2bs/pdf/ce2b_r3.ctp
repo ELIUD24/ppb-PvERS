@@ -87,7 +87,7 @@
                                             <td style="width: 20%;"><strong><?php echo $ce2b['Ce2b']['reporter_phone'] ?></strong></td>
                                         </tr>
                                     </table>
- 
+
                                     <h5 style="background: #18C4D1; padding:20px;">Information on Sender of Case Safety Report</h5>
                                     <table style="width: 100%;">
                                         <tr width="100%">
@@ -174,16 +174,17 @@
                                         <tr>
                                             <td style="width: 25%;"></td>
                                             <td style="width: 25%;"></td>
-                                            <td style="width: 25%;"><?php
-                                                                    if (isset($ce2b['Ce2b']['patient_sex'])) {
-                                                                        $patientSex = $ce2b['Ce2b']['patient_sex'];
-                                                                        if ($patientSex == 2) {
-                                                                            echo 'Female';
-                                                                        } elseif ($patientSex == 1) {
-                                                                            echo 'Male';
-                                                                        }
-                                                                    }
-                                                                    ?></td>
+                                            <td style="width: 25%;">
+                                                <?php
+                                                if (isset($ce2b['Ce2b']['patient_sex'])) {
+                                                    $patientSex = $ce2b['Ce2b']['patient_sex'];
+                                                    if ($patientSex == 2) {
+                                                        echo 'Female';
+                                                    } elseif ($patientSex == 1) {
+                                                        echo 'Male';
+                                                    }
+                                                }
+                                                ?></td>
                                             <td></td>
                                         </tr>
 
@@ -195,14 +196,27 @@
                                         </tr>
 
                                     </table>
+                                    <!-- show if serious -->
+                                    <h5>Serious</h5>
 
+                                    <?php
+
+                                    if (isset($ce2b['Ce2b']['serious']) && $ce2b['Ce2b']['serious'] == 1) {
+                                        echo '' . ' Yes';
+                                    } else {
+                                        echo ''  . ' No';
+                                    }
+
+                                    ?>
+                                    <br>
+                                    <br>
                                     <h5 style="background: #18C4D1; padding:20px;">Reaction(s)/Event(s)</h5>
 
                                     <table class="table" style="width: 100%;">
                                         <tr>
                                             <th style="width: 30%;">Reaction Name</th>
                                             <th style="width: 10%;">Start Date</th>
-                                            <th style="width: 10%;">MedDRA Code</th>
+                                            <th style="width: 10%;">Stop Date</th>
                                             <th style="width: 5%;">Results in death</th>
                                             <th style="width: 5%;">Life threatening</th>
                                             <th style="width: 5%;">Caused / prolonged hospitalization </th>
@@ -216,46 +230,44 @@
                                         foreach ($ce2b['Ce2bReaction'] as $reaction) {
                                         ?>
                                             <tr>
-                                                <td style="width: 30%;"><?php echo $reaction['reaction_name'] ?></td>
+                                                <td style="width: 30%;"><?php echo $reaction['meddra_name'] ?>
+
+                                                    <br>
+                                                    <!--  Add a smaller span text with value of   -->
+                                                    <span style="font-size: 0.8em; color: #888;">
+                                                        <?php echo $reaction['reaction_name'] ?>
+                                                    </span>
+                                                </td>
                                                 <td style="width: 10%;"><?php echo $reaction['start_date'] ?></td>
-                                                <td style="width: 10%;"><?php echo $reaction['meddra_code'] ?></td>
-                                                <td style="width: 5%;"><?php if (!empty($reaction['criteria_death_value'])) {
-                                                                            echo $reaction['criteria_death_value'];
-                                                                        } else {
-                                                                            echo  $reaction['criteria_death_null'];
-                                                                        } ?></td>
-                                                <td style="width: 5%;"><?php if (!empty($reaction['life_threatening_value'])) {
-                                                                            echo $reaction['life_threatening_value'];
-                                                                        } else {
-                                                                            echo  $reaction['life_threatening_null'];
-                                                                        } ?></td>
-                                                <td style="width: 5%;"><?php if (!empty($reaction['prolonged_hospitalisation_value'])) {
-                                                                            echo $reaction['prolonged_hospitalisation_value'];
-                                                                        } else {
-                                                                            echo  $reaction['prolonged_hospitalisation_null'];
-                                                                        } ?></td>
-                                                <td style="width: 5%;"><?php if (!empty($reaction['incapacitating_value'])) {
-                                                                            echo $reaction['incapacitating_value'];
-                                                                        } else {
-                                                                            echo  $reaction['incapacitating_null'];
-                                                                        } ?></td>
-                                                <td style="width: 10%;"><?php if (!empty($reaction['birth_defect_value'])) {
-                                                                            echo $reaction['birth_defect_value'];
-                                                                        } else {
-                                                                            echo  $reaction['birth_defect_null'];
-                                                                        } ?></td>
+                                                <td style="width: 10%;"><?php echo $reaction['stop_date'] ?></td>
+                                                <td style="width: 5%;">
+                                                    <input type="checkbox" disabled <?php if (!empty($reaction['criteria_death_value']) && $reaction['criteria_death_value'] === "true") echo 'checked'; ?>>
+                                                </td>
+                                                <td style="width: 5%;">
+                                                    <input type="checkbox" disabled <?php if (!empty($reaction['life_threatening_value']) && $reaction['life_threatening_value'] === "true") echo 'checked'; ?>>
+                                                </td>
+                                                <td style="width: 5%;">
+                                                    <input type="checkbox" disabled <?php if (!empty($reaction['prolonged_hospitalisation_value']) && $reaction['prolonged_hospitalisation_value'] === "true") echo 'checked'; ?>>
+                                                </td>
+                                                <td style="width: 5%;">
+                                                    <input type="checkbox" disabled <?php if (!empty($reaction['incapacitating_value']) && $reaction['incapacitating_value'] === "true") echo 'checked'; ?>>
+                                                </td>
+                                                <td style="width: 10%;">
+                                                    <input type="checkbox" disabled <?php if (!empty($reaction['birth_defect_value']) && $reaction['birth_defect_value'] === "true") echo 'checked'; ?>>
+                                                </td>
                                                 <td style="width: 10%;"><?php echo $reaction['source_country'] ?></td>
-                                                <td style="width: 10%;"><?php
-                                                                        $outcomes = array(
-                                                                            '1' => 'Recovered/Resolved',
-                                                                            '2' => 'Recovering/Resolving',
-                                                                            '3' => 'Recovered/Resolved with sequelae',
-                                                                            '4,' => 'Not recovered/Not resolved',
-                                                                            '5' => 'Fatal',
-                                                                            '6' => 'unknown',
-                                                                        );
-                                                                        if (!empty($reaction['reaction_outcome_value'])) echo $outcomes[strtolower($reaction['reaction_outcome_value'])];
-                                                                        ?></td>
+                                                <td style="width: 10%;">
+                                                    <?php
+                                                    $outcomes = array(
+                                                        '1' => 'Recovered/Resolved',
+                                                        '2' => 'Recovering/Resolving',
+                                                        '3' => 'Recovered/Resolved with sequelae',
+                                                        '4,' => 'Not recovered/Not resolved',
+                                                        '5' => 'Fatal',
+                                                        '6' => 'unknown',
+                                                    );
+                                                    if (!empty($reaction['reaction_outcome_value'])) echo $outcomes[strtolower($reaction['reaction_outcome_value'])];
+                                                    ?></td>
                                             </tr>
 
                                         <?php } ?>

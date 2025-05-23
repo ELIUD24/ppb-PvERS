@@ -24,8 +24,8 @@ $this->Html->script('dashboard', array('inline' => false));
             }
           }
           echo '</ol>';
-          echo '<p>' . $this->Html->link('All SADRs >>', array('controller' => 'sadrs', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link')) . '</p>';
-          echo $this->Html->link('<p> >> All </p>', array('controller' => 'sadrs', 'action' => 'index'), array('escape' => false));
+          // echo '<p>' . $this->Html->link('All SADRs >>', array('controller' => 'sadrs', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link')) . '</p>';
+          // echo $this->Html->link('<p> >> All </p>', array('controller' => 'sadrs', 'action' => 'index'), array('escape' => false));
           ?>
         </div>
         <div class="span4 formbacka" style="padding: 4px;">
@@ -156,7 +156,7 @@ $this->Html->script('dashboard', array('inline' => false));
             }
           }
           echo '</ol>';
-          echo $this->Html->link('All E2Bs >>', array('controller' => 'ce2bs', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link'));
+          // echo $this->Html->link('All E2Bs >>', array('controller' => 'ce2bs', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link'));
            ?>
 
         </div>
@@ -186,7 +186,7 @@ $this->Html->script('dashboard', array('inline' => false));
             }
           }
           echo '</ol>';
-          echo $this->Html->link('All Aggregates >>', array('controller' => 'aggregates', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link'));
+          // echo $this->Html->link('All Aggregates >>', array('controller' => 'aggregates', 'action' => 'index'), array('escape' => false, 'class' => 'btn btn-link'));
            ?>
 
         </div>
