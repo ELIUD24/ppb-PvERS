@@ -264,7 +264,7 @@
                                                         '3' => 'Recovered/Resolved with sequelae',
                                                         '4,' => 'Not recovered/Not resolved',
                                                         '5' => 'Fatal',
-                                                        '6' => 'unknown',
+                                                        '0' => 'unknown',
                                                     );
                                                     if (!empty($reaction['reaction_outcome_value'])) echo $outcomes[strtolower($reaction['reaction_outcome_value'])];
                                                     ?></td>

@@ -238,8 +238,11 @@ class AggregatesController extends AppController
 
 			$aggregate = Hash::remove($aggregate, 'AggregateListOfSignal.{n}.id');
 
-			$data_save = $aggregate['Aggregate'];
-			$data_save['AggregateListOfSignal'] = $aggregate['AggregateListOfSignal'];
+			$data_save = $aggregate['Aggregate']; 
+			if (isset($aggregate['AggregateListOfSignal'])) {
+				$data_save['AggregateListOfSignal'] = $aggregate['AggregateListOfSignal'];
+			}
+			
 			$data_save['aggregate_id'] = $id;
 
 			$count = $this->Aggregate->find('count',  array('conditions' => array(

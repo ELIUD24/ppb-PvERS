@@ -420,9 +420,7 @@ class Ce2bsController extends AppController
     }
     public function manipulate_drug_information_alt($cc)
     {
-        $drugs = [];
-        $doses = [];
-        $merged = [];
+        $drugs = []; 
 
         try {
             $xml = new SimpleXMLElement($cc);
