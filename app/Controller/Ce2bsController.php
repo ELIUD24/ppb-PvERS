@@ -1400,6 +1400,7 @@ class Ce2bsController extends AppController
                     $xmlString = $xml->asXML();
                     // debug($xmlString);
                     // exit;
+                    $this->Ce2b->saveField('e2b_content', $xmlString, false);
 
                     $filePath = WWW_ROOT . 'files' . DS . 'ce2bs' . DS . $file['name'];
                     move_uploaded_file($file['tmp_name'], $filePath);
@@ -1422,7 +1423,8 @@ class Ce2bsController extends AppController
 
                         $this->request->data['Ce2bReaction'] = $reactions;
                         $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
-                    } else {
+                    } 
+                    else {
                         $this->request->data['Ce2b']['e2b_type'] = "R2";
                         $flattenedData = $this->handle_r2_flattened($xmlArray);
                         // debug($xmlArray);

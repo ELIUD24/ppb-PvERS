@@ -717,7 +717,10 @@ class AefisController extends AppController
         $user_type = $this->Auth->User('user_type');
 
         $criteria = $this->Aefi->parseCriteria($this->passedArgs);
-        if ($this->Session->read('Auth.User.user_type') == 'Public Health Program') $criteria['Aefi.submitted'] = array(2);
+        if ($this->Session->read('Auth.User.user_type') == 'Public Health Program') {
+            $criteria['Aefi.submitted'] = array(2);
+            $criteria['Aefi.copied !='] = '2';
+        }
         if ($this->Session->read('Auth.User.user_type') != 'Public Health Program') {
             if ($user_type === 'County Pharmacist') {
                 $criteria['OR'] = array(
@@ -853,7 +856,7 @@ class AefisController extends AppController
         $criteria['Aefi.deleted'] = false;
         if (!empty($this->passedArgs['archived'])) {
             $criteria['Aefi.archived'] = true;
-        }else{
+        } else {
             $criteria['Aefi.archived'] = false;
         }
         $criteria['Aefi.copied !='] = '1';
@@ -875,10 +878,11 @@ class AefisController extends AppController
             $csv_export = $this->Aefi->find(
                 'all',
                 array(
-                    'conditions' => $this->paginate['conditions'], 
+                    'conditions' => $this->paginate['conditions'],
                     'order' => $this->paginate['order'],
-                     'contain' => $this->paginate['contain'],
-                      'limit' => 1000)
+                    'contain' => $this->paginate['contain'],
+                    'limit' => 1000
+                )
             );
             // debug($csv_export);
             // exit;
@@ -1855,7 +1859,7 @@ class AefisController extends AppController
 
                     $serious = $aefi['Aefi']['serious'];
                     if ($serious == "Yes") {
-                        $this->notifyCountyPharmacist($aefi);
+                        //                        $this->notifyCountyPharmacist($aefi);
                     }
 
                     $this->Session->setFlash(__('The Adverse Event Following Immunization has been submitted to PPB'), 'alerts/flash_success');
@@ -2493,11 +2497,14 @@ class AefisController extends AppController
                             'contain' => array(),
                             'conditions' => array(
                                 'OR' => array(
-                                    'User.group_id' => 2,
-                                    'User.is_active' => '1',
+                                    array(
+                                        'User.group_id' => 2,
+                                        'User.is_active' => 1
+                                    ),
                                     array(
                                         'User.county_id' => $county_id,
-                                        'User.user_type' => 'County Pharmacist'
+                                        'User.user_type' => 'County Pharmacist',
+                                        'User.is_active' => 1
                                     )
                                 )
                             ),
@@ -2536,8 +2543,8 @@ class AefisController extends AppController
                                 'message' => CakeText::insert($message['Message']['content'], $variables)
                             );
 
-                            $this->QueuedTask->createJob('GenericEmail', $datum);
-                            $this->QueuedTask->createJob('GenericNotification', $datum);
+                            // $this->QueuedTask->createJob('GenericEmail', $datum);
+                            // $this->QueuedTask->createJob('GenericNotification', $datum);
 
                             $reporter = ($user['User']['group_id'] == 2) ? 'manager' : 'reporter';
 
