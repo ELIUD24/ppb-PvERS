@@ -1391,15 +1391,19 @@ class Ce2bsController extends AppController
                 // exit;
 
                 $validate = 'first';
-                try {
+                // try {
 
                     // Manipulate R3
                     $file = $this->request->data['Ce2b']['e2b_file_data'];
-                    $xmlString = file_get_contents($file['tmp_name']);
-                    $xml = Xml::build($xmlString);
+                    $xmlRaw = file_get_contents($file['tmp_name']);
+                    $xmlUtf8 = mb_convert_encoding($xmlRaw, 'UTF-8', 'ISO-8859-1');
+                    $xml = Xml::build($xmlUtf8);
                     $xmlString = $xml->asXML();
                     // debug($xmlString);
                     // exit;
+                    
+                    $xmlString = preg_replace('/[\x{00A0}\x{200B}\x{FEFF}]/u', ' ', $xmlString);
+
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
 
                     $filePath = WWW_ROOT . 'files' . DS . 'ce2bs' . DS . $file['name'];
@@ -1437,14 +1441,13 @@ class Ce2bsController extends AppController
                         $this->request->data['Ce2bReaction'] = $reactions;
                         $this->request->data['Ce2bListOfDrug'] = $drugs;
                         // exit;
-                    }
-
+                    } 
                     $this->Ce2b->saveField('submitted', 2);
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
-                } catch (Exception $e) {
+                // } catch (Exception $e) {
 
-                    $this->request->data['Ce2b']['e2b_type'] = "R2";
-                }
+                //     $this->request->data['Ce2b']['e2b_type'] = "R2";
+                // }
             }
 
             if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
