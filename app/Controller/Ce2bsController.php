@@ -755,7 +755,7 @@ class Ce2bsController extends AppController
                 'conditions' => $this->paginate['conditions'],
                 'order' => $this->paginate['order'],
                 'contain' => $this->paginate['contain'],
-                'limit' => 1000,
+                'limit' => 10000,
                 // 'fields' => $fields
             ]);
 
