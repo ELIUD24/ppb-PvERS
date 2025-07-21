@@ -701,8 +701,11 @@
                         // echo $this->Form->input('death_date', array('type' => 'text', 'class' => 'date-pick-field', 'label' => array('class' => 'control-label', 'text' => 'Date of death'),));
 
                         echo $this->Form->input('description_of_reaction', array(
-                            'between' => false, 'div' => false, 'after'=>'<p class="help-block">     </p>',
-                            'label' => array('class' => 'control-label required', 'text' => 'Description of event'),));
+                            'between' => false, 
+                            'div' => false,
+                            'class' => 'span10',
+                             'after'=>'<p class="help-block"> </p>',
+                            'label' => array('class' => 'required', 'text' => 'Description of event <span style="color:red;">*</span>'),));
                     ?>
                 </div>
                 <div class="span4">

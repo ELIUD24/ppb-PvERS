@@ -293,6 +293,13 @@ class Device extends AppModel
                 'message'  => 'Please specify the event classification'
             ),
         ),
+        'description_of_reaction' => array(
+            'notBlank' => array(
+                'rule'     => 'notBlank',
+                'required' => true,
+                'message'  => 'Please provide a description of the event'
+            ),
+        ),
         'outcome' => array(
             'notBlank' => array(
                 'rule'     => 'notBlank',
