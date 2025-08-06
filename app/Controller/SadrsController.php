@@ -552,13 +552,13 @@ class SadrsController extends AppController
 
             $sadrs = $this->Sadr->find(
                 'all',
-                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 1000)
+                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 10000)
             );
             // debug($sadrs);
             // exit;
             $this->csv_export($this->Sadr->find(
                 'all',
-                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 1000)
+                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 10000)
             ));
         }
         //end csv export
@@ -1366,6 +1366,11 @@ class SadrsController extends AppController
         $save_data['Sadr']['user_id'] = $this->Auth->user('id');
         $save_data['Sadr']['submitted'] = 2;
         $save_data['Sadr']['submitted_date'] = date("Y-m-d H:i:s");
+
+        // check the report_type if it is like Intitial then change to Initial
+        if (isset($save_data['Sadr']['report_type']) && $save_data['Sadr']['report_type'] == 'Intitial') {
+            $save_data['Sadr']['report_type'] = 'Initial';
+        }
         //lucian
         if (empty($save_data['Sadr']['reference_no'])) {
             $count = $this->Sadr->find('count',  array(
