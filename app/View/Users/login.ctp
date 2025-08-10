@@ -11,7 +11,7 @@ $this->Html->css('upgrade', null, array('inline' => false));
 		<div class="span12">
 
 			<ul class="nav nav-tabs">
-				<li class="active"><a href="#">Login Area</a></li>
+				<li class="active"><a href="#">Login Area</a></li> <?php  date('Y-m-d H:i:s'); ?>
 				<li><?php echo $this->Html->link('Forgot Password?', array('controller' => 'users', 'action' => 'forgotPassword')); ?></li>
 				<?php if ($this->Session->read('Auth.User')) { ?>
 					<li><?php echo $this->Html->link('Change Password', array('controller' => 'users', 'action' => 'changePassword')); ?></li>

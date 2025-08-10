@@ -27,7 +27,25 @@ class Ce2b extends AppModel
 		'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Ce2b.reporter_date as DATE) BETWEEN ? AND ?'),
 		'drug_name' => array('type' => 'query', 'method' => 'findByDrugName', 'encode' => true),
 		'inn' => array('type' => 'query', 'method' => 'findByDrugINNName', 'encode' => true),
+        'vigiflow' => array('type' => 'query', 'method' => 'findByVigiflowStatus', 'encode' => true),
 	);
+
+	   public function findByVigiflowStatus($data = array())
+    {
+        $cond = array();
+        if (isset($data['vigiflow'])) {
+            if ($data['vigiflow'] == 0) {
+                $cond = array(
+                    $this->alias . '.vigiflow_ref IS NOT NULL'
+                );
+            } else {
+                $cond = array(
+                    $this->alias . '.vigiflow_ref IS NULL'
+                );
+            }
+        }
+        return $cond;
+    }
 	public function findByDrugName($data = array())
 	{
 		$conditions = array();

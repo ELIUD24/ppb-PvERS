@@ -1283,9 +1283,14 @@ class AefisController extends AppController
             if (isset($this->request->data['submitReport'])) {
                 $validate = 'first';
             }
-            if ($this->request->data['Aefi']['serious'] == "No") {
-                $this->request->data['Aefi']['serious_reason'] = null;
+
+            // The if statement below should ensure whenever a report is being edited, the serious reason field is set to null if the serious field is set to No
+            if (isset($this->request->data['Aefi']['serious']) && $this->request->data['Aefi']['serious'] == "No") {
+                $this->request->data['Aefi']['serious_yes'] = '';
             }
+
+          
+          
             if ($this->Aefi->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
                     $this->Aefi->saveField('submitted', 2);

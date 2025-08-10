@@ -553,83 +553,83 @@ class Ce2bsController extends AppController
         exit;
     }
 
-  private function manipulated_vigiflow_content($xmlContent, $ce2b)
-{
-    $doc = new DOMDocument();
-    $doc->preserveWhiteSpace = false;
-    $doc->formatOutput = true;
+    private function manipulated_vigiflow_content($xmlContent, $ce2b)
+    {
+        $doc = new DOMDocument();
+        $doc->preserveWhiteSpace = false;
+        $doc->formatOutput = true;
 
-    $doctype = '<!DOCTYPE ichicsr SYSTEM "http://eudravigilance.ema.europa.eu/dtd/icsr21xml.dtd">';
-    if (strpos($xmlContent, $doctype) === false) {
-        $xmlContent = preg_replace('/<\s*ichicsr\b/', "$doctype\n<ichicsr", $xmlContent, 1);
-    }
+        $doctype = '<!DOCTYPE ichicsr SYSTEM "http://eudravigilance.ema.europa.eu/dtd/icsr21xml.dtd">';
+        if (strpos($xmlContent, $doctype) === false) {
+            $xmlContent = preg_replace('/<\s*ichicsr\b/', "$doctype\n<ichicsr", $xmlContent, 1);
+        }
 
-    libxml_use_internal_errors(true);
-    if (!$doc->loadXML($xmlContent)) {
-        foreach (libxml_get_errors() as $error) {
-            error_log("XML Load Error: " . $error->message);
+        libxml_use_internal_errors(true);
+        if (!$doc->loadXML($xmlContent)) {
+            foreach (libxml_get_errors() as $error) {
+                error_log("XML Load Error: " . $error->message);
+            }
+            libxml_clear_errors();
+            return $xmlContent;
         }
         libxml_clear_errors();
-        return $xmlContent;
-    }
-    libxml_clear_errors();
 
-    $xpath = new DOMXPath($doc);
+        $xpath = new DOMXPath($doc);
 
-    // Generate values
-    $year = date('Y');
-    $messageNumber = 'KE-PPB-' . $year . '-' . $ce2b['Ce2b']['id'];
-    $reportId = 'KE-PPB-' . $ce2b['Ce2b']['reference_no'];
-    $authorityNumb = 'KE-PPB-' . $ce2b['Ce2b']['reference_no'];
+        // Generate values
+        $year = date('Y');
+        $messageNumber = 'KE-PPB-' . $year . '-' . $ce2b['Ce2b']['id'];
+        $reportId = 'KE-PPB-' . $ce2b['Ce2b']['reference_no'];
+        $authorityNumb = 'KE-PPB-' . $ce2b['Ce2b']['reference_no'];
 
-    // === Update or create <messagenumb>
-    $nodes = $xpath->query('//messagenumb');
-    if ($nodes->length > 0) {
-        $nodes->item(0)->nodeValue = $messageNumber;
-    } else {
-        $this->appendElement($doc, $xpath, 'messagenumb', $messageNumber);
-    }
+        // === Update or create <messagenumb>
+        $nodes = $xpath->query('//messagenumb');
+        if ($nodes->length > 0) {
+            $nodes->item(0)->nodeValue = $messageNumber;
+        } else {
+            $this->appendElement($doc, $xpath, 'messagenumb', $messageNumber);
+        }
 
-    // === Update or create <safetyreportid>
-    $nodes = $xpath->query('//safetyreportid');
-    if ($nodes->length > 0) {
-        $nodes->item(0)->nodeValue = $reportId;
-    } else {
-        $this->appendElement($doc, $xpath, 'safetyreportid', $reportId);
-    }
+        // === Update or create <safetyreportid>
+        $nodes = $xpath->query('//safetyreportid');
+        if ($nodes->length > 0) {
+            $nodes->item(0)->nodeValue = $reportId;
+        } else {
+            $this->appendElement($doc, $xpath, 'safetyreportid', $reportId);
+        }
 
-    // === Update or insert <authoritynumb> before <companynumb> inside <safetyreport>
-    $existingAuthorityNode = $xpath->query('//safetyreport/authoritynumb')->item(0);
-    if ($existingAuthorityNode) {
-        $existingAuthorityNode->nodeValue = $authorityNumb;
-    } else {
-        $safetyReportNode = $xpath->query('//safetyreport')->item(0);
-        $companyNumbNode = $xpath->query('//safetyreport/companynumb')->item(0);
+        // === Update or insert <authoritynumb> before <companynumb> inside <safetyreport>
+        $existingAuthorityNode = $xpath->query('//safetyreport/authoritynumb')->item(0);
+        if ($existingAuthorityNode) {
+            $existingAuthorityNode->nodeValue = $authorityNumb;
+        } else {
+            $safetyReportNode = $xpath->query('//safetyreport')->item(0);
+            $companyNumbNode = $xpath->query('//safetyreport/companynumb')->item(0);
 
-        if ($safetyReportNode) {
-            $newAuthorityNode = $doc->createElement('authoritynumb', $authorityNumb);
+            if ($safetyReportNode) {
+                $newAuthorityNode = $doc->createElement('authoritynumb', $authorityNumb);
 
-            if ($companyNumbNode) {
-                $safetyReportNode->insertBefore($newAuthorityNode, $companyNumbNode);
-            } else {
-                $safetyReportNode->appendChild($newAuthorityNode);
+                if ($companyNumbNode) {
+                    $safetyReportNode->insertBefore($newAuthorityNode, $companyNumbNode);
+                } else {
+                    $safetyReportNode->appendChild($newAuthorityNode);
+                }
             }
         }
+
+        return $doc->saveXML();
     }
 
-    return $doc->saveXML();
-}
+    private function appendElement($doc, $xpath, $tagName, $value)
+    {
+        $parentNode = $doc->getElementsByTagName('ichicsr')->item(0);
+        if (!$parentNode) {
+            $parentNode = $doc->documentElement;
+        }
 
-private function appendElement($doc, $xpath, $tagName, $value)
-{
-    $parentNode = $doc->getElementsByTagName('ichicsr')->item(0);
-    if (!$parentNode) {
-        $parentNode = $doc->documentElement;
+        $newElement = $doc->createElement($tagName, $value);
+        $parentNode->appendChild($newElement);
     }
-
-    $newElement = $doc->createElement($tagName, $value);
-    $parentNode->appendChild($newElement);
-}
 
 
 
@@ -1517,62 +1517,68 @@ private function appendElement($doc, $xpath, $tagName, $value)
                 // exit;
 
                 $validate = 'first';
-                // try {
+                try {
 
-                // Manipulate R3
-                $file = $this->request->data['Ce2b']['e2b_file_data'];
-                $xmlRaw = file_get_contents($file['tmp_name']);
-                $xmlUtf8 = mb_convert_encoding($xmlRaw, 'UTF-8', 'ISO-8859-1');
-                $xml = Xml::build($xmlUtf8);
-                $xmlString = $xml->asXML();
-                // debug($xmlString);
-                // exit;
+                    // Manipulate R3
+                    $file = $this->request->data['Ce2b']['e2b_file_data'];
+                    $xmlRaw = file_get_contents($file['tmp_name']);
+                    $xmlUtf8 = mb_convert_encoding($xmlRaw, 'UTF-8', 'ISO-8859-1');
 
-                $xmlString = preg_replace('/[\x{00A0}\x{200B}\x{FEFF}]/u', ' ', $xmlString);
+                    // Remove UTF-8 BOM if present
+                    if (substr($xmlUtf8, 0, 3) === "\xEF\xBB\xBF") {
+                        $xmlUtf8 = substr($xmlUtf8, 3);
+                    }
 
-                $this->Ce2b->saveField('e2b_content', $xmlString, false);
-
-                $filePath = WWW_ROOT . 'files' . DS . 'ce2bs' . DS . $file['name'];
-                move_uploaded_file($file['tmp_name'], $filePath);
-
-                $xmlArray = Xml::toArray(Xml::build($filePath));
-
-                $declaration1 = '<?xml version="1.0" encoding="utf-8"?>';
-                $rootElement1 = '<MCCI_IN200100UV01 ITSVersion="XML_1.0" xsi:schemaLocation="urn:hl7-org:v3 http://eudravigilance.ema.europa.eu/XSD/multicacheschemas/MCCI_IN200100UV01.xsd" xmlns="urn:hl7-org:v3" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mif="urn:hl7-org:v3/mif">';
-                $declaration2 = '<?xml version="1.0" encoding="ISO-8859-1"?>';
-                $doctype = '<!DOCTYPE ichicsr SYSTEM "http://eudravigilance.ema.europa.eu/dtd/icsr21xml.dtd">';
-                $rootElement2 = '<ichicsr lang="en">';
-
-
-
-                if (strpos($xmlString, 'MCCI_IN200100UV01') !== false) {
-                    $this->request->data['Ce2b']['e2b_type'] = "R3";
-                    $flattenedData = $this->flattenXml($xmlArray);
-                    $reactions = $this->manipulate_reaction_information($xmlString);
-                    $reactions = $this->map_full_reaction_details($reactions);
-
-                    $this->request->data['Ce2bReaction'] = $reactions;
-                    $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
-                } else {
-                    $this->request->data['Ce2b']['e2b_type'] = "R2";
-                    $flattenedData = $this->handle_r2_flattened($xmlArray);
-                    // debug($xmlArray);
-                    // debug($flattened);
-                    // debug($flattenedData);
-                    $drugs = $this->manipulate_r2_drugs($flattenedData['Patient']['Drugs']);
-                    $reactions = $this->manipulate_r2_reactions($flattenedData['Patient']['Reactions']);
-                    // debug($drugs);
-                    // debug($reactions);
-                    $this->request->data['Ce2bReaction'] = $reactions;
-                    $this->request->data['Ce2bListOfDrug'] = $drugs;
+                    $xml = Xml::build($xmlUtf8);
+                    $xmlString = $xml->asXML();
+                    // debug($xmlString);
                     // exit;
-                }
-                $this->Ce2b->saveField('submitted', 2);
-                $this->Ce2b->saveField('e2b_content', $xmlString, false);
-                // } catch (Exception $e) {
 
-                //     $this->request->data['Ce2b']['e2b_type'] = "R2";
-                // }
+                    $xmlString = preg_replace('/[\x{00A0}\x{200B}\x{FEFF}]/u', ' ', $xmlString);
+
+                    $this->Ce2b->saveField('e2b_content', $xmlString, false);
+
+                    $filePath = WWW_ROOT . 'files' . DS . 'ce2bs' . DS . $file['name'];
+                    move_uploaded_file($file['tmp_name'], $filePath);
+
+                    $xmlArray = Xml::toArray(Xml::build($filePath));
+
+                    $declaration1 = '<?xml version="1.0" encoding="utf-8"?>';
+                    $rootElement1 = '<MCCI_IN200100UV01 ITSVersion="XML_1.0" xsi:schemaLocation="urn:hl7-org:v3 http://eudravigilance.ema.europa.eu/XSD/multicacheschemas/MCCI_IN200100UV01.xsd" xmlns="urn:hl7-org:v3" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mif="urn:hl7-org:v3/mif">';
+                    $declaration2 = '<?xml version="1.0" encoding="ISO-8859-1"?>';
+                    $doctype = '<!DOCTYPE ichicsr SYSTEM "http://eudravigilance.ema.europa.eu/dtd/icsr21xml.dtd">';
+                    $rootElement2 = '<ichicsr lang="en">';
+
+
+
+                    if (strpos($xmlString, 'MCCI_IN200100UV01') !== false) {
+                        $this->request->data['Ce2b']['e2b_type'] = "R3";
+                        $flattenedData = $this->flattenXml($xmlArray);
+                        $reactions = $this->manipulate_reaction_information($xmlString);
+                        $reactions = $this->map_full_reaction_details($reactions);
+
+                        $this->request->data['Ce2bReaction'] = $reactions;
+                        $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
+                    } else {
+                        $this->request->data['Ce2b']['e2b_type'] = "R2";
+                        $flattenedData = $this->handle_r2_flattened($xmlArray);
+                        // debug($xmlArray);
+                        // debug($flattened);
+                        // debug($flattenedData);
+                        $drugs = $this->manipulate_r2_drugs($flattenedData['Patient']['Drugs']);
+                        $reactions = $this->manipulate_r2_reactions($flattenedData['Patient']['Reactions']);
+                        // debug($drugs);
+                        // debug($reactions);
+                        $this->request->data['Ce2bReaction'] = $reactions;
+                        $this->request->data['Ce2bListOfDrug'] = $drugs;
+                        // exit;
+                    }
+                    $this->Ce2b->saveField('submitted', 2);
+                    $this->Ce2b->saveField('e2b_content', $xmlString, false);
+                } catch (Exception $e) {
+
+                    $this->request->data['Ce2b']['e2b_type'] = "R2";
+                }
             }
 
             if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
