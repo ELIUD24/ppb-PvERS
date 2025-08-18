@@ -400,7 +400,7 @@ class Ce2bsController extends AppController
                 }
                 $doses[] = [
                     'dosage_text' => (string)$data->text,
-                    'route_id' => (string)$route['code'],
+                    // 'route_id' => (string)$route['code'],
                     'route' => (string)$route['code'],
                     'dose' => $dose,
 
@@ -1463,7 +1463,7 @@ class Ce2bsController extends AppController
                     'drug_name' => $MedicinalProduct,  // Combine ingredients into a single string
                     'brand_name' => $ActiveSubstance,
                     // 'dose' => $dose,
-                    'route_id' => $route_id,
+                    // 'route_id' => $route_id,
                     'start_date' => $StartDate
                 ];
             }

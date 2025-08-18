@@ -180,6 +180,34 @@ echo $this->Session->flash();
                     </td>
                 </tr>
                 <tr>
+                       <td>
+                        <?php
+                        echo $this->Form->input(
+                            'date_of_birth',
+                            array(
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index date_max_today',
+                                'label' => array('class' => 'required', 'text' =>'International Birth Date (IBD)')
+                            )
+                        );
+                        ?>
+                    </td>
+                       <td>
+                        <?php
+                        echo $this->Form->input(
+                            'data_lock',
+                            array(
+                                'div' => false,
+                                'placeholder' => '',
+                                'class' => 'span12 unauthorized_index date_max_today',
+                                'label' => array('class' => 'required', 'text' => 'Data Lock Point (DLP)')
+                            )
+                        );
+                        ?>
+                    </td>
+                    </tr>
+                <tr>
                     <td><label for="PadrPages" class="required">Pages</label></td>
                     <td>
                         <?php
@@ -226,7 +254,7 @@ echo $this->Session->flash();
                     </td>
                     <td>
                         <?php
-                        // echo $this->Html->link('<i class="fa fa-file-excel-o" aria-hidden="true"></i> Excel', array('action' => 'index', 'ext' => 'csv', '?' => $this->request->query), array('class' => 'btn btn-success', 'escape' => false));
+                         echo $this->Html->link('<i class="fa fa-file-excel-o" aria-hidden="true"></i> Excel', array('action' => 'index', 'ext' => 'csv', '?' => $this->request->query), array('class' => 'btn btn-success', 'escape' => false));
                         ?>
                     </td>
                 </tr>
@@ -364,6 +392,17 @@ echo $this->Session->flash();
 
 
 <script type="text/javascript">
+
+     $('.date_max_today').datepicker({
+        minDate: "-100Y",
+        maxDate: 0,
+        dateFormat: 'dd-mm-yy',
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        showAnim: 'show'
+    });
+
     $(function() {
         var adates = $('#AggregateStartDate, #AggregateEndDate').datepicker({
             minDate: "-100Y",
