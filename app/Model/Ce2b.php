@@ -170,6 +170,11 @@ class Ce2b extends AppModel
 		)
 
 	);
+
+
+ 
+	
+	
 	/**
 	 * Validation rules
 	 *
