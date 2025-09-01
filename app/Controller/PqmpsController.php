@@ -27,8 +27,9 @@ class PqmpsController extends AppController
     }
 
 
-    public function getFormulationCode($name)
+    public function getFormulationCode($pqmp)
     {
+        $name=$pqmp['Pqmp']['product_formulation'];
         $formulationCodes = [
             "Injection" => "I",
             "Oral tablets / capsules" => "OT",
@@ -40,7 +41,8 @@ class PqmpsController extends AppController
             "Ear drops" => "EAD",
             "Nebuliser solution" => "NS",
             "Diluent" => "D",
-            "Anticoagulant (for blood and blood products)" => "A"
+            "Anticoagulant (for blood and blood products)" => "A",
+            "Other" => $pqmp['Pqmp']['product_formulation_specify']
         ];
 
         return isset($formulationCodes[$name]) ? $formulationCodes[$name] : null;
@@ -71,8 +73,12 @@ class PqmpsController extends AppController
             "Readings" => "RD",
             "Others" => "OT"
         ];
+         
 
-        return isset($complaintCodes[$name]) ? $complaintCodes[$name] : null;
+        // return isset($complaintCodes[$name]) ? $complaintCodes[$name] : null;
+        if (isset($complaintCodes[$name])) {
+            return $complaintCodes[$name];
+        }
     }
 
     public function getProductCategoryCode($name)
@@ -86,7 +92,10 @@ class PqmpsController extends AppController
             "Cosmeceuticals" => "C"
         ];
 
-        return isset($productCategoryCodes[$name]) ? $productCategoryCodes[$name] : null;
+        // return isset($productCategoryCodes[$name]) ? $productCategoryCodes[$name] : null;
+        if (isset($productCategoryCodes[$name])) {
+            return $productCategoryCodes[$name];
+        }
     }
 
     public function api_pms_feedback()
@@ -178,7 +187,7 @@ class PqmpsController extends AppController
         $complaints = [];
 
         if ($pqmp['Pqmp']['colour_change']) {
-            $complaints[] = $this->getComplaintCode("Colour Change");
+            $complaints[] = $this->getComplaintCode("Color Change");
         }
         if ($pqmp['Pqmp']['separating']) {
             $complaints[] = $this->getComplaintCode("Separating");
@@ -193,10 +202,10 @@ class PqmpsController extends AppController
             $complaints[] = $this->getComplaintCode("Moulding");
         }
         if ($pqmp['Pqmp']['odour_change']) {
-            $complaints[] = $this->getComplaintCode("Change of odour");
+            $complaints[] = $this->getComplaintCode("Change of oduor");
         }
         if ($pqmp['Pqmp']['mislabeling']) {
-            $complaints[] = $this->getComplaintCode("Mislabeling");
+            $complaints[] = $this->getComplaintCode("Mislabelling");
         }
         if ($pqmp['Pqmp']['incomplete_pack']) {
             $complaints[] = $this->getComplaintCode("Incomplete pack");
@@ -208,10 +217,19 @@ class PqmpsController extends AppController
             $complaints[] = $this->getComplaintCode("Particulate matter in infusions/injectables");
         }
         if ($pqmp['Pqmp']['complaint_other']) {
-            $complaints[] = $pqmp['Pqmp']['complaint_other'];
+            $complaints[] = $pqmp['Pqmp']['complaint_other_specify'];
         }
 
         return $complaints;
+    }
+    public function extract_formulation($pqmp)
+    {
+        $data = [];
+        if ($pqmp['Pqmp']['product_formulation']) {
+            $data[] = $this->getFormulationCode($pqmp);
+        }  
+
+        return $data;
     }
     public function extract_device_complaints($pqmp)
     {
@@ -355,8 +373,10 @@ class PqmpsController extends AppController
         // debug($expiry_date_formatted);
         // exit; 
 
-        $productComplaints = $this->extract_complaints($pqmp);
-        $deviceComplaints = $this->extract_device_complaints($pqmp);
+        $productComplaints = array_values($this->extract_complaints($pqmp));
+        $deviceComplaints = array_filter(array_values($this->extract_device_complaints($pqmp))); 
+ 
+        
 
         $payload = array(
             "category" => $this->extract_category($pqmp),
@@ -374,10 +394,27 @@ class PqmpsController extends AppController
 
             "complaintDescription" => $pqmp['Pqmp']['complaint_description'],
             "coldChainMaintained" => isset($pqmp['Pqmp']['cold_chain']) && !empty($pqmp['Pqmp']['cold_chain']), // $pqmp['Pqmp']['cold_chain'], //Boolean
-            "productRequiresRefrigeration" => isset($pqmp['Pqmp']['require_refrigeration']) && !empty($pqmp['Pqmp']['require_refrigeration']), //$pqmp['Pqmp']['require_refrigeration'], //Boolean
-            "productAvailableAtFacility" => isset($pqmp['Pqmp']['product_at_facility']) && !empty($pqmp['Pqmp']['product_at_facility']), //$pqmp['Pqmp']['product_at_facility'], //Boolean
-            "productDispensedAndReturnedByClient" => isset($pqmp['Pqmp']['returned_by_client']) && !empty($pqmp['Pqmp']['returned_by_client']), // $pqmp['Pqmp']['returned_by_client'], //Boolean
-            "productStoredByMOHRecommendation" => isset($pqmp['Pqmp']['stored_to_recommendations']) && !empty($pqmp['Pqmp']['stored_to_recommendations']), // $pqmp['Pqmp']['stored_to_recommendations'], //Boolean
+            // "productRequiresRefrigeration" => isset($pqmp['Pqmp']['require_refrigeration']) && !empty($pqmp['Pqmp']['require_refrigeration']), //$pqmp['Pqmp']['require_refrigeration'], //Boolean
+            // "productAvailableAtFacility" => isset($pqmp['Pqmp']['product_at_facility']) && !empty($pqmp['Pqmp']['product_at_facility']), //$pqmp['Pqmp']['product_at_facility'], //Boolean
+            // "productDispensedAndReturnedByClient" => isset($pqmp['Pqmp']['returned_by_client']) && !empty($pqmp['Pqmp']['returned_by_client']), // $pqmp['Pqmp']['returned_by_client'], //Boolean
+            // "productStoredByMOHRecommendation" => isset($pqmp['Pqmp']['stored_to_recommendations']) && !empty($pqmp['Pqmp']['stored_to_recommendations']), // $pqmp['Pqmp']['stored_to_recommendations'], //Boolean
+         "productRequiresRefrigeration" => (
+    isset($pqmp['Pqmp']['require_refrigeration']) &&
+    strtolower(trim($pqmp['Pqmp']['require_refrigeration'])) === 'yes'
+),
+"productAvailableAtFacility" => (
+    isset($pqmp['Pqmp']['product_at_facility']) &&
+    strtolower(trim($pqmp['Pqmp']['product_at_facility'])) === 'yes'
+),
+"productDispensedAndReturnedByClient" => (
+    isset($pqmp['Pqmp']['returned_by_client']) &&
+    strtolower(trim($pqmp['Pqmp']['returned_by_client'])) === 'yes'
+),
+"productStoredByMOHRecommendation" => (
+    isset($pqmp['Pqmp']['stored_to_recommendations']) &&
+    strtolower(trim($pqmp['Pqmp']['stored_to_recommendations'])) === 'yes'
+),
+
             "initialReporter" => array(
                 "name" => $pqmp['Pqmp']['reporter_name'],
                 "designation" => $pqmp['Designation']['name'],
@@ -404,14 +441,23 @@ class PqmpsController extends AppController
                 "address" => $pqmp['Pqmp']['supplier_address'], // "String (optional)",
                 "telephone" => "", //$pqmp['Pqmp']['name'],//"String (optional)"
             ),
-            "photolist" => $photolist,
-            "productFormulation" => $this->getFormulationCode($pqmp['Pqmp']['product_formulation']),
+            "photolist" => $photolist, 
+            "productFormulation" => $this->getFormulationCode($pqmp),
             "productcomplaint" => $productComplaints,
             "devicecomplaint" => $deviceComplaints,
-            "otherdetails" => $pqmp['Pqmp']['complaint_other_specify'],
+            "otherdetails" => $pqmp['Pqmp']['other_details'],
         );
-
-        //    debug($payload);
+       
+        $payload['productcomplaint'] = array_values(array_filter($payload['productcomplaint'], function ($v) {
+            return !is_null($v);
+        }));
+        
+        $payload['devicecomplaint'] = array_values(array_filter($payload['devicecomplaint'], function ($v) {
+            return !is_null($v);
+        }));
+        
+        $jsonString = json_encode($payload, JSON_PRETTY_PRINT);
+        // debug($jsonString);
         // exit;
 
         $options = array(
@@ -431,7 +477,7 @@ class PqmpsController extends AppController
 
 
         //Request Access Token
-        $initiate = $HttpSocket->post($url, $formData, $header_options);
+        $initiate = $HttpSocket->post($url, $jsonString, $header_options);
         // debug($initiate);
         // exit;
         if ($initiate->isOk()) {
@@ -1131,10 +1177,27 @@ class PqmpsController extends AppController
             "manufacturerCountryOfOrigin" => !empty($pqmp['Country']['name']) ? $pqmp['Country']['name'] : "",
             "complaintDescription" => $pqmp['Pqmp']['complaint_description'],
             "coldChainMaintained" => isset($pqmp['Pqmp']['cold_chain']) && !empty($pqmp['Pqmp']['cold_chain']), // $pqmp['Pqmp']['cold_chain'], //Boolean
-            "productRequiresRefrigeration" => isset($pqmp['Pqmp']['require_refrigeration']) && !empty($pqmp['Pqmp']['require_refrigeration']), //$pqmp['Pqmp']['require_refrigeration'], //Boolean
-            "productAvailableAtFacility" => isset($pqmp['Pqmp']['product_at_facility']) && !empty($pqmp['Pqmp']['product_at_facility']), //$pqmp['Pqmp']['product_at_facility'], //Boolean
-            "productDispensedAndReturnedByClient" => isset($pqmp['Pqmp']['returned_by_client']) && !empty($pqmp['Pqmp']['returned_by_client']), // $pqmp['Pqmp']['returned_by_client'], //Boolean
-            "productStoredByMOHRecommendation" => isset($pqmp['Pqmp']['stored_to_recommendations']) && !empty($pqmp['Pqmp']['stored_to_recommendations']), // $pqmp['Pqmp']['stored_to_recommendations'], //Boolean
+            // "productRequiresRefrigeration" => isset($pqmp['Pqmp']['require_refrigeration']) && !empty($pqmp['Pqmp']['require_refrigeration']), //$pqmp['Pqmp']['require_refrigeration'], //Boolean
+            // "productAvailableAtFacility" => isset($pqmp['Pqmp']['product_at_facility']) && !empty($pqmp['Pqmp']['product_at_facility']), //$pqmp['Pqmp']['product_at_facility'], //Boolean
+            // "productDispensedAndReturnedByClient" => isset($pqmp['Pqmp']['returned_by_client']) && !empty($pqmp['Pqmp']['returned_by_client']), // $pqmp['Pqmp']['returned_by_client'], //Boolean
+            // "productStoredByMOHRecommendation" => isset($pqmp['Pqmp']['stored_to_recommendations']) && !empty($pqmp['Pqmp']['stored_to_recommendations']), // $pqmp['Pqmp']['stored_to_recommendations'], //Boolean
+           
+            "productRequiresRefrigeration" => (
+                isset($pqmp['Pqmp']['require_refrigeration']) &&
+                strtolower(trim($pqmp['Pqmp']['require_refrigeration'])) === 'yes'
+            ),
+            "productAvailableAtFacility" => (
+                isset($pqmp['Pqmp']['product_at_facility']) &&
+                strtolower(trim($pqmp['Pqmp']['product_at_facility'])) === 'yes'
+            ),
+            "productDispensedAndReturnedByClient" => (
+                isset($pqmp['Pqmp']['returned_by_client']) &&
+                strtolower(trim($pqmp['Pqmp']['returned_by_client'])) === 'yes'
+            ),
+            "productStoredByMOHRecommendation" => (
+                isset($pqmp['Pqmp']['stored_to_recommendations']) &&
+                strtolower(trim($pqmp['Pqmp']['stored_to_recommendations'])) === 'yes'
+            ),
             "initialReporter" => array(
                 "name" => $pqmp['Pqmp']['reporter_name'],
                 "designation" => $pqmp['Designation']['name'],
@@ -1163,12 +1226,20 @@ class PqmpsController extends AppController
                 "telephone" => "", //$pqmp['Pqmp']['name'],//"String (optional)"
             ),
             "photolist" => $photolist,
-            "productFormulation" => $this->getFormulationCode($pqmp['Pqmp']['product_formulation']),
+            "productFormulation" => $this->getFormulationCode($pqmp),
             "productcomplaint" => $productComplaints,
             "devicecomplaint" => $deviceComplaints,
-            "otherdetails" => $pqmp['Pqmp']['complaint_other_specify'],
+            "otherdetails" => $pqmp['Pqmp']['other_details'],
         );
-
+        $payload['productcomplaint'] = array_values(array_filter($payload['productcomplaint'], function ($v) {
+            return !is_null($v);
+        }));
+        
+        $payload['devicecomplaint'] = array_values(array_filter($payload['devicecomplaint'], function ($v) {
+            return !is_null($v);
+        }));
+        
+        $jsonString = json_encode($payload, JSON_PRETTY_PRINT);
         $options = array(
             'ssl_verify_peer' => false
         );
@@ -1185,7 +1256,7 @@ class PqmpsController extends AppController
         $HttpSocket = new HttpSocket($options);
 
         //Request Access Token
-        $initiate = $HttpSocket->post($url, $formData, $header_options);
+        $initiate = $HttpSocket->post($url, $jsonString, $header_options);
     }
     public function reporter_edit($id = null)
     {
