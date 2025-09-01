@@ -277,7 +277,7 @@ echo $this->Session->flash();
                         </td>
                         <td><?php echo h($ce2b['Ce2b']['company_name']);
                             if ($ce2b['Ce2b']['report_type'] == 'Followup') {
-                                echo "<br> <b>Initial:</b> ";
+                                echo "<br> <b>Follow Up:</b> ";
                                 echo $this->Html->link(
                                     '<label class="label label-info">' . $ce2b['Ce2b']['reference_no'] . '</label>',
                                     array('action' => 'view', $ce2b['Ce2b']['ce2b_id']),
