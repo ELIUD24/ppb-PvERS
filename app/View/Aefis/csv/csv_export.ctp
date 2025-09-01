@@ -1,7 +1,8 @@
 <?php
 	
 	$header = array('id' => '#', 'reference_no' => 'Reference No.', 'report_type' => 'Type', 'name_of_institution' => 'Institution', 'institution_code' => 'Institution Code',
-		'counties' => 'County','subcounties' => 'Sub County', 'patient_name' => 'Patient Name', 'guardian_name' => 'Guardian Name', 'ip_no' => 'IP/OP No', 'patient_address' => 'Patient Address', 'date_born' => 'Date of birth','age_months' => 'Age in months', 
+		'counties' => 'County','subcounties' => 'Sub County', 'patient_name' => 'Patient Name', 'guardian_name' => 'Guardian Name', 'ip_no' => 'IP/OP No', 'patient_address' => 'Patient Address',
+		 'date_born' => 'Date of birth','age_years'=>'Age in Years','age_months' => 'Age in months', 'age_weeks' => 'Age in weeks', 'age_days' => 'Age in days',
 		'gender' => 'Gender', 'patient_village' => 'Patient Village', 'patient_county' => 'Patient county', 'patient_ward' => 'Patient Ward',
 		'vaccination_center' => 'Vaccination center','vaccination_type' => 'Vaccination service', 'vaccination_county' => 'Vaccination county',
 		'bcg' => 'BCG Lymphadenitis', 'convulsion' => 'Convulsion','urticaria' => 'Generalized urticaria', 'high_fever' => 'High Fever',

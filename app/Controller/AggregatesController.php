@@ -533,10 +533,30 @@ class AggregatesController extends AppController
 			$criteria['Aggregate.archived'] = false;
 		}
 		$this->paginate['conditions'] = $criteria;
-		$this->paginate['order'] = array('Aggregate.submitted_date' => 'desc');
+
+        $this->paginate['order'] = array('Aggregate.submitted_date' => 'desc');
+
+		 if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
+            $data = $this->Aggregate->find('all', [
+                'conditions' => $this->paginate['conditions'],
+                'order' => $this->paginate['order'],
+                // 'contain' => $this->paginate['contain'],
+                'limit' => 1000, 
+            ]);
+            $this->csv_export($data); 
+
+        }
+		
 		$this->set('aggregates', Sanitize::clean($this->paginate(), array('encode' => false)));
-		$this->set('page_options', $this->page_options);
+		$this->set('page_options', $this->page_options); 
 	}
+	  private function csv_export($data = '')
+    {
+        $this->response->download('Aggregates_' . date('Ymd_Hi') . '.csv'); // <= setting the file name
+        $this->set(compact('data'));
+        $this->layout = false;
+        $this->render('csv_export');
+    }
 	public function manager_edit($id = null)
 	{
 		$isValid = array(

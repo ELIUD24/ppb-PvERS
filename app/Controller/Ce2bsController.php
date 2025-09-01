@@ -400,7 +400,7 @@ class Ce2bsController extends AppController
                 }
                 $doses[] = [
                     'dosage_text' => (string)$data->text,
-                    'route_id' => (string)$route['code'],
+                    // 'route_id' => (string)$route['code'],
                     'route' => (string)$route['code'],
                     'dose' => $dose,
 
@@ -420,7 +420,7 @@ class Ce2bsController extends AppController
     }
     public function manipulate_drug_information_alt($cc)
     {
-        $drugs = []; 
+        $drugs = [];
 
         try {
             $xml = new SimpleXMLElement($cc);
@@ -552,9 +552,128 @@ class Ce2bsController extends AppController
         debug($cc);
         exit;
     }
+
+    private function manipulated_vigiflow_content($xmlContent, $ce2b)
+    {
+        $doc = new DOMDocument();
+        $doc->preserveWhiteSpace = false;
+        $doc->formatOutput = true;
+
+        $doctype = '<!DOCTYPE ichicsr SYSTEM "http://eudravigilance.ema.europa.eu/dtd/icsr21xml.dtd">';
+        if (strpos($xmlContent, $doctype) === false) {
+            $xmlContent = preg_replace('/<\s*ichicsr\b/', "$doctype\n<ichicsr", $xmlContent, 1);
+        }
+
+        libxml_use_internal_errors(true);
+        if (!$doc->loadXML($xmlContent)) {
+            foreach (libxml_get_errors() as $error) {
+                error_log("XML Load Error: " . $error->message);
+            }
+            libxml_clear_errors();
+            return $xmlContent;
+        }
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($doc);
+
+        // Generate values
+        $year = date('Y');
+        $messageNumber = 'KE-PPB-' . $year . '-' . $ce2b['Ce2b']['id'];
+        $reportId = 'KE-PPB-' . $ce2b['Ce2b']['reference_no'];
+        $authorityNumb = 'KE-PPB-' . $ce2b['Ce2b']['reference_no'];
+
+        // === Update or create <messagenumb>
+        $nodes = $xpath->query('//messagenumb');
+        if ($nodes->length > 0) {
+            $nodes->item(0)->nodeValue = $messageNumber;
+        } else {
+            $this->appendElement($doc, $xpath, 'messagenumb', $messageNumber);
+        }
+
+        // === Update or create <safetyreportid>
+        $nodes = $xpath->query('//safetyreportid');
+        if ($nodes->length > 0) {
+            $nodes->item(0)->nodeValue = $reportId;
+        } else {
+            $this->appendElement($doc, $xpath, 'safetyreportid', $reportId);
+        }
+
+        // === Update or insert <authoritynumb> before <companynumb> inside <safetyreport>
+        $existingAuthorityNode = $xpath->query('//safetyreport/authoritynumb')->item(0);
+        if ($existingAuthorityNode) {
+            $existingAuthorityNode->nodeValue = $authorityNumb;
+        } else {
+            $safetyReportNode = $xpath->query('//safetyreport')->item(0);
+            $companyNumbNode = $xpath->query('//safetyreport/companynumb')->item(0);
+
+            if ($safetyReportNode) {
+                $newAuthorityNode = $doc->createElement('authoritynumb', $authorityNumb);
+
+                if ($companyNumbNode) {
+                    $safetyReportNode->insertBefore($newAuthorityNode, $companyNumbNode);
+                } else {
+                    $safetyReportNode->appendChild($newAuthorityNode);
+                }
+            }
+        }
+
+        return $doc->saveXML();
+    }
+
+    private function appendElement($doc, $xpath, $tagName, $value)
+    {
+        $parentNode = $doc->getElementsByTagName('ichicsr')->item(0);
+        if (!$parentNode) {
+            $parentNode = $doc->documentElement;
+        }
+
+        $newElement = $doc->createElement($tagName, $value);
+        $parentNode->appendChild($newElement);
+    }
+
+
+
+
+    private function manipulated_vigiflow_content_old($xmlContent, $ce2b)
+    {
+        $doc = new DOMDocument();
+        $doc->preserveWhiteSpace = false;
+        $doc->formatOutput = true;
+
+        // Load XML safely
+        libxml_use_internal_errors(true);
+        if (!$doc->loadXML($xmlContent)) {
+            // Handle loading error
+            foreach (libxml_get_errors() as $error) {
+                error_log($error->message);
+            }
+            libxml_clear_errors();
+            return $xmlContent; // Return unmodified if invalid
+        }
+
+        $xpath = new DOMXPath($doc);
+
+        // Optional: register namespaces if needed, e.g.
+        // $xpath->registerNamespace('ns', 'http://example.com/schema');
+
+        // Update messagenumb
+        $messageNumberNodes = $xpath->query('//messagenumb');
+        if ($messageNumberNodes->length > 0) {
+            $messageNumberNodes->item(0)->nodeValue = 'KE-PPB-' . date('Y') . '-' . $ce2b['Ce2b']['id']; // Replace with your value
+        }
+
+        // Update safetyreportid
+        $reportIdNodes = $xpath->query('//safetyreportid');
+        if ($reportIdNodes->length > 0) {
+            $reportIdNodes->item(0)->nodeValue = 'KE-PPB-' . $ce2b['Ce2b']['reference_no']; // Replace with your value
+        }
+
+        return $doc->saveXML();
+    }
+
     public function vigiflow($id = null)
     {
-        # code...
+        # code... 
         $this->Ce2b->id = $id;
         if (!$this->Ce2b->exists()) {
             $this->Session->setFlash(__('Could not verify the E2b report ID. Please ensure the ID is correct.'), 'flash_error');
@@ -575,6 +694,7 @@ class Ce2bsController extends AppController
 
         if ($version == "R2") {
             $ce2b['Ce2b']['e2b_content'] = $this->manipulated_content($ce2b['Ce2b']['e2b_content']);
+            $ce2b['Ce2b']['e2b_content'] = $this->manipulated_vigiflow_content($ce2b['Ce2b']['e2b_content'], $ce2b);
         }
         if ($version == "R3") {
             $ce2b['Ce2b']['e2b_content'] = $this->manipulated_r3content($ce2b['Ce2b']['e2b_content']);
@@ -613,9 +733,12 @@ class Ce2bsController extends AppController
             $this->redirect($this->referer());
         } else {
             $body = $results->body;
+            //   $this->log("VigiFlow HTTP Error: " . $results->code . ' - ' . $results->body, 'error');
+
             $this->Ce2b->saveField('vigiflow_message', $body);
             $this->Flash->error('Error sending report to vigiflow:');
             $this->Flash->error($body);
+            //  $this->Flash->error($results);
             $this->redirect($this->referer());
         }
         $this->autoRender = false;
@@ -851,6 +974,8 @@ class Ce2bsController extends AppController
             unset($xmlArray['ichicsr']['safetyreport']['sender']); // Remove existing <sender> content
         }
 
+
+
         // Add the new <sender> content
         $xmlArray['ichicsr']['safetyreport']['sender'] = [
             'sendertype' => '3',
@@ -962,6 +1087,7 @@ class Ce2bsController extends AppController
 
         if ($version == "R2") {
             $ce2b['Ce2b']['e2b_content'] = $this->manipulated_content($ce2b['Ce2b']['e2b_content']);
+            $ce2b['Ce2b']['e2b_content'] = $this->manipulated_vigiflow_content($ce2b['Ce2b']['e2b_content'], $ce2b);
         }
         if ($version == "R3") {
             $ce2b['Ce2b']['e2b_content'] = $this->manipulated_r3content($ce2b['Ce2b']['e2b_content']);
@@ -1337,7 +1463,7 @@ class Ce2bsController extends AppController
                     'drug_name' => $MedicinalProduct,  // Combine ingredients into a single string
                     'brand_name' => $ActiveSubstance,
                     // 'dose' => $dose,
-                    'route_id' => $route_id,
+                    // 'route_id' => $route_id,
                     'start_date' => $StartDate
                 ];
             }
@@ -1391,17 +1517,23 @@ class Ce2bsController extends AppController
                 // exit;
 
                 $validate = 'first';
-                // try {
+                try {
 
                     // Manipulate R3
                     $file = $this->request->data['Ce2b']['e2b_file_data'];
                     $xmlRaw = file_get_contents($file['tmp_name']);
                     $xmlUtf8 = mb_convert_encoding($xmlRaw, 'UTF-8', 'ISO-8859-1');
+
+                    // Remove UTF-8 BOM if present
+                    if (substr($xmlUtf8, 0, 3) === "\xEF\xBB\xBF") {
+                        $xmlUtf8 = substr($xmlUtf8, 3);
+                    }
+
                     $xml = Xml::build($xmlUtf8);
                     $xmlString = $xml->asXML();
                     // debug($xmlString);
                     // exit;
-                    
+
                     $xmlString = preg_replace('/[\x{00A0}\x{200B}\x{FEFF}]/u', ' ', $xmlString);
 
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
@@ -1427,8 +1559,7 @@ class Ce2bsController extends AppController
 
                         $this->request->data['Ce2bReaction'] = $reactions;
                         $this->request->data['Ce2bListOfDrug'] = $this->manipulate_drug_information($xmlString);
-                    } 
-                    else {
+                    } else {
                         $this->request->data['Ce2b']['e2b_type'] = "R2";
                         $flattenedData = $this->handle_r2_flattened($xmlArray);
                         // debug($xmlArray);
@@ -1441,13 +1572,13 @@ class Ce2bsController extends AppController
                         $this->request->data['Ce2bReaction'] = $reactions;
                         $this->request->data['Ce2bListOfDrug'] = $drugs;
                         // exit;
-                    } 
+                    }
                     $this->Ce2b->saveField('submitted', 2);
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
-                // } catch (Exception $e) {
+                } catch (Exception $e) {
 
-                //     $this->request->data['Ce2b']['e2b_type'] = "R2";
-                // }
+                    $this->request->data['Ce2b']['e2b_type'] = "R2";
+                }
             }
 
             if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
@@ -2084,7 +2215,7 @@ class Ce2bsController extends AppController
         }
         $this->general_view($id);
     }
-    
+
     public function generateDesiredDateNoTime($input)
     {
 
@@ -2364,7 +2495,7 @@ class Ce2bsController extends AppController
 
             // loop though drugs and update the fields
             foreach ($ce2b['Ce2bListOfDrug'] as $key => $drug) {
-                $ce2b['Ce2bListOfDrug'][$key]['route'] = $drug['route'].'-'.$this->getRouteName($drug['route']);
+                $ce2b['Ce2bListOfDrug'][$key]['route'] = $drug['route'] . '-' . $this->getRouteName($drug['route']);
             }
 
 

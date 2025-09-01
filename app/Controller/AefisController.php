@@ -881,7 +881,7 @@ class AefisController extends AppController
                     'conditions' => $this->paginate['conditions'],
                     'order' => $this->paginate['order'],
                     'contain' => $this->paginate['contain'],
-                    'limit' => 1000
+                    'limit' => 10000
                 )
             );
             // debug($csv_export);
@@ -985,10 +985,7 @@ class AefisController extends AppController
             $this->redirect('/');
         }
 
-        if (strpos($this->request->url, 'pdf') !== false) {
-            $this->pdfConfig = array('filename' => 'AEFI_' . $id,  'orientation' => 'portrait');
-            // $this->response->download('AEFI_'.$aefi['Aefi']['id'].'.pdf');
-        }
+         
 
         if ($this->request->is('post') || $this->request->is('put')) {
             if (isset($this->request->data['continueEditing'])) {
@@ -1028,6 +1025,11 @@ class AefisController extends AppController
         ));
         $this->set('aefi', $aefi);
         // $this->render('pdf/view');
+        if (strpos($this->request->url, 'pdf') !== false) {
+
+            $this->pdfConfig = array('filename' => 'AEFI_' . $id . '.pdf',  'orientation' => 'portrait');
+            $this->response->download('AEFI_' . $aefi['Aefi']['id'] . '.pdf');
+        }
     }
     public function api_view($id = null)
     {
@@ -1088,11 +1090,7 @@ class AefisController extends AppController
             $this->Session->setFlash(__('Could not verify the medical devices report ID. Please ensure the ID is correct.'), 'flash_error');
             $this->redirect('/');
         }
-
-        if (strpos($this->request->url, 'pdf') !== false) {
-            $this->pdfConfig = array('filename' => 'AEFI_' . $id,  'orientation' => 'portrait');
-            // $this->response->download('AEFI_'.$aefi['Aefi']['id'].'.pdf');
-        }
+ 
 
         if ($this->request->is('post') || $this->request->is('put')) {
             if (isset($this->request->data['continueEditing'])) {
@@ -1285,9 +1283,14 @@ class AefisController extends AppController
             if (isset($this->request->data['submitReport'])) {
                 $validate = 'first';
             }
-            if ($this->request->data['Aefi']['serious'] == "No") {
-                $this->request->data['Aefi']['serious_reason'] = null;
+
+            // The if statement below should ensure whenever a report is being edited, the serious reason field is set to null if the serious field is set to No
+            if (isset($this->request->data['Aefi']['serious']) && $this->request->data['Aefi']['serious'] == "No") {
+                $this->request->data['Aefi']['serious_yes'] = '';
             }
+
+          
+          
             if ($this->Aefi->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
                     $this->Aefi->saveField('submitted', 2);
@@ -2156,6 +2159,11 @@ class AefisController extends AppController
         $save_data['Aefi']['user_id'] = $this->Auth->user('id');
         $save_data['Aefi']['submitted'] = 2;
         $save_data['Aefi']['submitted_date'] = date("Y-m-d H:i:s");
+
+        // check if the report_type typoed to intitial then update to initial
+        if (isset($save_data['Aefi']['report_type']) && $save_data['Aefi']['report_type'] == 'Intitial') {
+            $save_data['Aefi']['report_type'] = 'Initial';
+        }
         //lucian
         if (empty($save_data['Aefi']['reference_no'])) {
             $count = $this->Aefi->find('count',  array(
