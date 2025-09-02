@@ -66,6 +66,35 @@ class CommentsController extends AppController
       if ($model) {
         if ($this->Comment->saveAssociated($this->request->data, array('deep' => true))) {
 
+          //Check if the comment has attachments : If so, the function above has saved them, SO PLEASE GET THE LINKS FOR EACH FILES AND APPEND THEM AS LIST SEPARATED NEXT LINIE
+          $comment = $this->Comment->find('first', array(
+            'conditions' => array('Comment.id' => $this->Comment->id),
+            'contain' => array('Attachment')
+          ));
+          // debug($data);
+          // exit;
+
+          // let's get the basename for all attachments
+          $attachment_links = '';
+          if (isset($comment['Attachment'])) {
+            foreach ($comment['Attachment'] as $key => $value) {
+                // Generate full URL to the download link
+                $url = Router::url(array(
+                    'controller' => 'comments',
+                    'action' => 'comment_file_download',
+                    $value['id'],
+                    'admin' => false
+                ), true);
+        
+                // Append to $attachment_links
+                $attachment_links .= '<p>';
+                $attachment_links .= '<a href="' . h($url) . '" class="btn btn-link" target="_blank">' . h($value['basename']) . '</a>';
+                $attachment_links .= '</p>';
+            }
+        }
+
+          // debug($attachment_links);
+          // exit;
           // CHECK IF PQHPT
           if ($data['Comment']['model'] == "Pqmp") {
             $this->submit_surveilance_feedback($data);
@@ -104,6 +133,7 @@ class CommentsController extends AppController
                 'name' => $user['User']['name'], 'reference_no' => $entity[$model]['reference_no'],
                 'comment_subject' => $this->request->data['Comment']['subject'],
                 'comment_content' => $this->request->data['Comment']['content'],
+                'files' => $attachment_links,
                 'reference_link' => $html->link(
                   $entity[$model]['reference_no'],
                   array('controller' => 'sadrs', 'action' => 'view', $entity[$model]['id'], $actioner => true, 'full_base' => true),
