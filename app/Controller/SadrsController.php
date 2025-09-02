@@ -1090,20 +1090,20 @@ class SadrsController extends AppController
         $this->Session->setFlash(__('The SADR has been created'), 'alerts/flash_success');
 
         // Log the activity
-       
+
 
         $user = $this->Auth->user();
         $type = 'New Sadr Report';
         $message = 'A new SADR report with ID: ' . $this->Sadr->id . ' has been created by ' . $user['name'];
-        $this->createAuditTrail($type,$message);
+        $this->createAuditTrail($type, $message);
 
         $this->redirect(array('action' => 'edit', $this->Sadr->id));
     }
-    public function createAuditTrail($type,$message)
+    public function createAuditTrail($type, $message)
     {
 
         $user = $this->Auth->user();
-       
+
         $this->loadModel('Queue.QueuedTask');
         $clientInfo = $this->getRequestClientInfo();
         $this->QueuedTask->createJob('AuditTrail', array_merge([
@@ -1114,32 +1114,33 @@ class SadrsController extends AppController
             'uri'          => $this->request->here(),
             'hostname'     => gethostname()
         ], $clientInfo));
-
     }
-    function getRequestClientInfo() {
+    function getRequestClientInfo()
+    {
         return [
             'refer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
             'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
         ];
     }
-    
-    public function getUserIpAddress() {
+
+    public function getUserIpAddress()
+    {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             // IP from shared internet
             return $_SERVER['HTTP_CLIENT_IP'];
         }
-    
+
         if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             // IP passed from proxy/load balancer
             $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
             return trim($ipList[0]); // return the first IP
         }
-    
+
         if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
             // IP from Cloudflare
             return $_SERVER['HTTP_CF_CONNECTING_IP'];
         }
-    
+
         // Default remote address
         return $_SERVER['REMOTE_ADDR'];
     }
@@ -1310,7 +1311,7 @@ class SadrsController extends AppController
                     $user = $this->Auth->user();
                     $type = 'New Sadr Report';
                     $message = 'A new SADR report with reference no: ' . $sadr['Sadr']['reference_no'] . ' has been submitted by ' . $user['name'];
-                    $this->createAuditTrail($type,$message);
+                    $this->createAuditTrail($type, $message);
                     // If the report is serious sent an alert:
                     $serious = $sadr['Sadr']['serious'];
                     if ($serious == "Yes") {
@@ -1522,7 +1523,7 @@ class SadrsController extends AppController
                 $user = $this->Auth->user();
                 $type = 'New Sadr Report';
                 $message = 'A new SADR report with reference no: ' . $sadr['Sadr']['reference_no'] . ' has been submitted by ' . $user['name'];
-                $this->createAuditTrail($type,$message);
+                $this->createAuditTrail($type, $message);
                 $this->set([
                     'status' => 'success',
                     'message' => 'The SADR has been submitted to PPB',
@@ -1599,7 +1600,7 @@ class SadrsController extends AppController
             $user = $this->Auth->user();
             $type = 'Sadr Copy Created';
             $message = 'A clean copy of SADR report with ID: ' . $this->Sadr->id . ' has been created by ' . $user['name'];
-            $this->createAuditTrail($type,$message);
+            $this->createAuditTrail($type, $message);
             $this->redirect(array('action' => 'edit', $this->Sadr->id));
         } else {
             $this->Session->setFlash(__('The clean copy could not be created. Please, try again.'), 'alerts/flash_error');
@@ -1736,7 +1737,7 @@ class SadrsController extends AppController
             $user = $this->Auth->user();
             $type = 'Sadr Report Deleted';
             $message = 'SADR report with reference no: ' . $sadr['Sadr']['reference_no'] . ' has been deleted by ' . $user['name'];
-            $this->createAuditTrail($type,$message);
+            $this->createAuditTrail($type, $message);
             $this->redirect($this->referer());
         }
         $this->Session->setFlash(__('SADR was not deleted'), 'alerts/flash_error');
@@ -1850,7 +1851,7 @@ class SadrsController extends AppController
                     $user = $this->Auth->user();
                     $type = 'New Sadr Report';
                     $message = 'A new SADR report with reference no: ' . $sadr['Sadr']['reference_no'] . ' has been submitted by ' . $user['name'];
-                    $this->createAuditTrail($type,$message);
+                    $this->createAuditTrail($type, $message);
 
                     $this->Session->setFlash(__('The SADR has been submitted to PPB'), 'alerts/flash_success');
                     $this->redirect(array('controller' => 'pages', 'action' => 'home'));
@@ -1887,6 +1888,10 @@ class SadrsController extends AppController
             throw new NotFoundException(__('Invalid SADR'));
         }
         $sadr = $this->Sadr->read(null, $id);
+
+        $input = $sadr['Sadr']['created'];
+        $created = DateTime::createFromFormat('d-m-Y', $input)->format('Y-m-d H:i:s');
+        $sadr['Sadr']['created'] = $created;
         $sadr['Sadr']['archived'] = true;
         $sadr['Sadr']['archived_date'] = date("Y-m-d H:i:s");
         if ($this->Sadr->save($sadr, array('validate' => false))) {
@@ -1894,7 +1899,7 @@ class SadrsController extends AppController
             $user = $this->Auth->user();
             $type = 'Sadr Report Archived';
             $message = 'SADR report with reference no: ' . $sadr['Sadr']['reference_no'] . ' has been archived by ' . $user['name'];
-            $this->createAuditTrail($type,$message);
+            $this->createAuditTrail($type, $message);
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('SADR was not archied'), 'alerts/flash_error');
@@ -1907,6 +1912,9 @@ class SadrsController extends AppController
             throw new NotFoundException(__('Invalid SADR'));
         }
         $sadr = $this->Sadr->read(null, $id);
+        $input = $sadr['Sadr']['created'];
+        $created = DateTime::createFromFormat('d-m-Y', $input)->format('Y-m-d H:i:s');
+        $sadr['Sadr']['created'] = $created;
         $sadr['Sadr']['archived'] = false;
         // $sadr['Sadr']['archived_date'] = date("Y-m-d H:i:s");
         if ($this->Sadr->save($sadr, array('validate' => false))) {
@@ -1914,7 +1922,7 @@ class SadrsController extends AppController
             $user = $this->Auth->user();
             $type = 'Sadr Report Restored';
             $message = 'SADR report with reference no: ' . $sadr['Sadr']['reference_no'] . ' has been restored by ' . $user['name'];
-            $this->createAuditTrail($type,$message);
+            $this->createAuditTrail($type, $message);
             $this->redirect(array('action' => 'index'));
         }
         $this->Session->setFlash(__('SADR was not restored'), 'alerts/flash_error');
