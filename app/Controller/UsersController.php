@@ -35,10 +35,54 @@ class UsersController extends AppController
         // $this->initDB();
         $this->Auth->allow('register', 'initDb', 'login', 'api_auth', 'api_register', 'api_token', 'api_forgotPassword', 'activate_account', 'forgotPassword', 'resetPassword', 'logout', 'mpublic', 'provider', 'holder', 'guest');
     }
+   
+   public function getUserIpAddress() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            // IP from shared internet
+            return $_SERVER['HTTP_CLIENT_IP'];
+        }
+    
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            // IP passed from proxy/load balancer
+            $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            return trim($ipList[0]); // return the first IP
+        }
+    
+        if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+            // IP from Cloudflare
+            return $_SERVER['HTTP_CF_CONNECTING_IP'];
+        }
+    
+        // Default remote address
+        return $_SERVER['REMOTE_ADDR'];
+    }
+    
+    // Example usage
 
+     
+    
     public function guest()
     {
         // $this->render('guest');
+    }
+    public function create_audit_trail($type, $user,$message){
+        $this->loadModel('AuditTrail');
+
+        $audit = array(
+            'AuditTrail' => array(
+                'foreign_key' => $user['id'],
+                'model' => $type,
+                'message' => $message,
+                'ip' => $this->getUserIpAddress()
+            )
+        ); 
+        $this->AuditTrail->Create();
+        if ($this->AuditTrail->save($audit)) {
+            $this->log($this->request->data, 'audit_success');
+        } else {
+            $this->log('Error creating an audit trail', 'notifications_error');
+            $this->log($this->request->data, 'notifications_error');
+        }
     }
     public function api_auth()
     {
@@ -64,6 +108,8 @@ class UsersController extends AppController
                 $token = JWT::encode($user['id'], Configure::read('Security.salt'));
 
                 if ($user) {
+                    $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged in via API";
+                     $this->create_audit_trail("API Login",$user,$message);
                     // only add the neccessary fields from the user 
                     $datum = array('id' => $user['id'], 'name' => $user['name'], 'created' => $user['created']);
                     $this->set('user', $datum);
@@ -131,7 +177,9 @@ class UsersController extends AppController
                     $this->Session->setFlash('Your account has been deactivated! Please contact PPB.', 'alerts/flash_error');
                     $this->redirect($this->Auth->logout());
                 }
-
+                $user = $this->Auth->User();
+                $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged in via web";
+                $this->create_audit_trail("Web Login",$user,$message);
                 // Check if it's the mini manager::: Check active date
                 if ($this->Auth->User('group_id') == '5') {
                     $active_date = $this->Auth->User('active_date');
@@ -183,6 +231,8 @@ class UsersController extends AppController
                 $user = $this->Auth->User();
                 $token = JWT::encode($user['id'], Configure::read('Security.salt'));;
                 if ($user) {
+                    $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged in via API";
+                    $this->create_audit_trail("API Login",$user,$message);
                     $this->set('user', $user);
                     $this->set('token', $token);
                     $this->set('_serialize', array('user', 'token'));
@@ -288,6 +338,9 @@ class UsersController extends AppController
     public function logout()
     {
         $this->Session->setFlash('Good-Bye', 'flash_info');
+        $user = $this->Auth->User();
+        $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged out from the system";
+        $this->create_audit_trail("Web Logout",$user,$message);
         $this->redirect($this->Auth->logout());
     }
 
