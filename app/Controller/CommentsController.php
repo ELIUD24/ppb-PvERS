@@ -77,6 +77,7 @@ class CommentsController extends AppController
           // let's get the basename for all attachments
           $attachment_links = '';
           if (isset($comment['Attachment'])) {
+             $attachment_links .= '<p> See files below for reference:</p>';
             foreach ($comment['Attachment'] as $key => $value) {
                 // Generate full URL to the download link
                 $url = Router::url(array(

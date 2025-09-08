@@ -35,37 +35,39 @@ class UsersController extends AppController
         // $this->initDB();
         $this->Auth->allow('register', 'initDb', 'login', 'api_auth', 'api_register', 'api_token', 'api_forgotPassword', 'activate_account', 'forgotPassword', 'resetPassword', 'logout', 'mpublic', 'provider', 'holder', 'guest');
     }
-   
-   public function getUserIpAddress() {
+
+    public function getUserIpAddress()
+    {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             // IP from shared internet
             return $_SERVER['HTTP_CLIENT_IP'];
         }
-    
+
         if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             // IP passed from proxy/load balancer
             $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
             return trim($ipList[0]); // return the first IP
         }
-    
+
         if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
             // IP from Cloudflare
             return $_SERVER['HTTP_CF_CONNECTING_IP'];
         }
-    
+
         // Default remote address
         return $_SERVER['REMOTE_ADDR'];
     }
-    
+
     // Example usage
 
-     
-    
+
+
     public function guest()
     {
         // $this->render('guest');
     }
-    public function create_audit_trail($type, $user,$message){
+    public function create_audit_trail($type, $user, $message)
+    {
         $this->loadModel('AuditTrail');
 
         $audit = array(
@@ -73,9 +75,13 @@ class UsersController extends AppController
                 'foreign_key' => $user['id'],
                 'model' => $type,
                 'message' => $message,
-                'ip' => $this->getUserIpAddress()
+                'ip' => $this->getUserIpAddress(),
+                'uri' => $this->request->here(),
+                'hostname' => gethostname(),
+                'refer' => isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '',
+                'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
             )
-        ); 
+        );
         $this->AuditTrail->Create();
         if ($this->AuditTrail->save($audit)) {
             $this->log($this->request->data, 'audit_success');
@@ -108,8 +114,8 @@ class UsersController extends AppController
                 $token = JWT::encode($user['id'], Configure::read('Security.salt'));
 
                 if ($user) {
-                    $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged in via API";
-                     $this->create_audit_trail("API Login",$user,$message);
+                    $message = "A user with ID " . $user['id'] . " and name  " . $user['name'] . " logged in via API";
+                    $this->create_audit_trail("API Login", $user, $message);
                     // only add the neccessary fields from the user 
                     $datum = array('id' => $user['id'], 'name' => $user['name'], 'created' => $user['created']);
                     $this->set('user', $datum);
@@ -178,8 +184,8 @@ class UsersController extends AppController
                     $this->redirect($this->Auth->logout());
                 }
                 $user = $this->Auth->User();
-                $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged in via web";
-                $this->create_audit_trail("Web Login",$user,$message);
+                $message = "A user with ID " . $user['id'] . " and name  " . $user['name'] . " logged in via web";
+                $this->create_audit_trail("Web Login", $user, $message);
                 // Check if it's the mini manager::: Check active date
                 if ($this->Auth->User('group_id') == '5') {
                     $active_date = $this->Auth->User('active_date');
@@ -231,8 +237,8 @@ class UsersController extends AppController
                 $user = $this->Auth->User();
                 $token = JWT::encode($user['id'], Configure::read('Security.salt'));;
                 if ($user) {
-                    $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged in via API";
-                    $this->create_audit_trail("API Login",$user,$message);
+                    $message = "A user with ID " . $user['id'] . " and name  " . $user['name'] . " logged in via API";
+                    $this->create_audit_trail("API Login", $user, $message);
                     $this->set('user', $user);
                     $this->set('token', $token);
                     $this->set('_serialize', array('user', 'token'));
@@ -339,8 +345,8 @@ class UsersController extends AppController
     {
         $this->Session->setFlash('Good-Bye', 'flash_info');
         $user = $this->Auth->User();
-        $message="A user with ID " . $user['id'] . " and name  ". $user['name'] . " logged out from the system";
-        $this->create_audit_trail("Web Logout",$user,$message);
+        $message = "A user with ID " . $user['id'] . " and name  " . $user['name'] . " logged out from the system";
+        $this->create_audit_trail("Web Logout", $user, $message);
         $this->redirect($this->Auth->logout());
     }
 
@@ -871,8 +877,8 @@ class UsersController extends AppController
             'order' => array('Sadr.created' => 'desc'),
             'conditions' => array(
                 // only show SADRs that have been not been deleted 
-                'Sadr.deleted' => false, 
-                 'Sadr.archived' => false,
+                'Sadr.deleted' => false,
+                'Sadr.archived' => false,
                 'Sadr.user_id' => $this->Auth->User('id')
             ),
         ));
@@ -891,26 +897,28 @@ class UsersController extends AppController
             'Sadr.user_id' => $user_id
         );
         $cmed = array(
-            'Medication.deleted' => false,  
+            'Medication.deleted' => false,
             'Medication.archived' => false,
             'Medication.user_id' => $user_id
         );
         $cpq = array(
-            'Pqmp.deleted' => false,  'Pqmp.archived' => false,
+            'Pqmp.deleted' => false,
+            'Pqmp.archived' => false,
             'Pqmp.user_id' => $user_id
         );
         $cdev = array(
-            'Device.deleted' => false,  
+            'Device.deleted' => false,
             'Device.archived' => false,
             'Device.user_id' => $user_id
         );
         $caggregates = array(
-            'Aggregate.deleted' => false,  
+            'Aggregate.deleted' => false,
             'Aggregate.archived' => false,
             'Aggregate.user_id' => $user_id
         );
         $cblood = array(
-            'Transfusion.deleted' => false,  'Transfusion.archived' => false,
+            'Transfusion.deleted' => false,
+            'Transfusion.archived' => false,
             'Transfusion.user_id' => $user_id
         );
         $aefis = $this->User->Aefi->find('all', array(
@@ -1143,8 +1151,8 @@ class UsersController extends AppController
         $this->set('ce2bs', $ce2bs);
 
 
-          // Aggregate
-          $aggregates = $this->User->Aggregate->find('all', array(
+        // Aggregate
+        $aggregates = $this->User->Aggregate->find('all', array(
             'limit' => 7,
             'contain' => array(),
             'fields' => array('Aggregate.id', 'Aggregate.user_id', 'Aggregate.created', 'Aggregate.submitted', 'Aggregate.reference_no'),
@@ -1238,9 +1246,11 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.reference_no', 'Transfusion.diagnosis', 'Transfusion.submitted', 'Transfusion.created', 'Transfusion.created'),
             'order' => array('Transfusion.created' => 'desc'),
-            'conditions' => array('Transfusion.submitted >' => 1,
-            'Transfusion.deleted' => false,
-            'Transfusion.archived' => false),
+            'conditions' => array(
+                'Transfusion.submitted >' => 1,
+                'Transfusion.deleted' => false,
+                'Transfusion.archived' => false
+            ),
         ));
         $this->set('transfusions', $transfusions);
 
@@ -1250,9 +1260,10 @@ class UsersController extends AppController
             'fields' => array('Padr.id', 'Padr.reporter_name', 'Padr.patient_name', 'Padr.reference_no', 'Padr.created'),
             'order' => array('Padr.created' => 'desc'),
             'conditions' => array(
-            'Padr.deleted' => false,
-            'Padr.archived' => false),
-        
+                'Padr.deleted' => false,
+                'Padr.archived' => false
+            ),
+
         ));
         $this->set('padrs', $padrs);
 
@@ -1270,7 +1281,7 @@ class UsersController extends AppController
         $ce2bs = $this->User->Ce2b->find('all', array(
             'limit' => 7,
             'contain' => array(),
-            'fields' => array('Ce2b.id', 'Ce2b.user_id','Ce2b.company_name', 'Ce2b.created', 'Ce2b.submitted', 'Ce2b.reference_no'),
+            'fields' => array('Ce2b.id', 'Ce2b.user_id', 'Ce2b.company_name', 'Ce2b.created', 'Ce2b.submitted', 'Ce2b.reference_no'),
             'order' => array('Ce2b.created' => 'desc'),
             'conditions' => array(
                 // only show Reports that have been not been deleted
@@ -1282,11 +1293,11 @@ class UsersController extends AppController
         $this->set('ce2bs', $ce2bs);
 
 
-          // Aggregate
-          $aggregates = $this->User->Aggregate->find('all', array(
+        // Aggregate
+        $aggregates = $this->User->Aggregate->find('all', array(
             'limit' => 7,
             'contain' => array(),
-            'fields' => array('Aggregate.id', 'Aggregate.user_id','Aggregate.brand_name', 'Aggregate.created', 'Aggregate.submitted', 'Aggregate.reference_no'),
+            'fields' => array('Aggregate.id', 'Aggregate.user_id', 'Aggregate.brand_name', 'Aggregate.created', 'Aggregate.submitted', 'Aggregate.reference_no'),
             'order' => array('Aggregate.created' => 'desc'),
             'conditions' => array(
                 // only show Reports that have been not been deleted
@@ -1312,7 +1323,7 @@ class UsersController extends AppController
             'fields' => array('Sadr.id', 'Sadr.user_id', 'Sadr.report_title', 'Sadr.submitted', 'Sadr.reference_no', 'Sadr.created', 'Sadr.serious'),
             'order' => array('Sadr.created' => 'desc'),
             'conditions' => array(
-                'Sadr.submitted >' => 1, 
+                'Sadr.submitted >' => 1,
                 'Sadr.assigned_to' => $this->Auth->User('id'),
                 'Sadr.deleted' => false,
                 'Sadr.archived' => false
@@ -1326,9 +1337,12 @@ class UsersController extends AppController
             'fields' => array('Aefi.id', 'Aefi.user_id', 'Aefi.submitted', 'Aefi.reference_no', 'Aefi.created', 'Aefi.serious'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Aefi.created' => 'desc'),
-            'conditions' => array('Aefi.submitted >' => 1, 'Aefi.assigned_to' => $this->Auth->User('id'),
-            'Aefi.deleted' => false,
-            'Aefi.archived' => false),
+            'conditions' => array(
+                'Aefi.submitted >' => 1,
+                'Aefi.assigned_to' => $this->Auth->User('id'),
+                'Aefi.deleted' => false,
+                'Aefi.archived' => false
+            ),
         ));
         $this->set('aefis', $aefis);
 
@@ -1337,9 +1351,12 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Pqmp.id', 'Pqmp.user_id', 'Pqmp.submitted', 'Pqmp.brand_name', 'Pqmp.reference_no', 'Pqmp.created', 'Pqmp.product_formulation', 'Pqmp.therapeutic_ineffectiveness', 'Pqmp.particulate_matter'),
             'order' => array('Pqmp.created' => 'desc'),
-            'conditions' => array('Pqmp.submitted >' => 1, 'Pqmp.assigned_to' => $this->Auth->User('id'),
-            'Pqmp.deleted' => false,
-            'Pqmp.archived' => false),
+            'conditions' => array(
+                'Pqmp.submitted >' => 1,
+                'Pqmp.assigned_to' => $this->Auth->User('id'),
+                'Pqmp.deleted' => false,
+                'Pqmp.archived' => false
+            ),
         ));
         $this->set('pqmps', $pqmps);
 
@@ -1348,9 +1365,12 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Device.id', 'Device.user_id', 'Device.submitted', 'Device.report_title', 'Device.reference_no', 'Device.created', 'Device.serious'),
             'order' => array('Device.created' => 'desc'),
-            'conditions' => array('Device.submitted >' => 1, 'Device.assigned_to' => $this->Auth->User('id'),
-            'Device.deleted' => false,
-            'Device.archived' => false),
+            'conditions' => array(
+                'Device.submitted >' => 1,
+                'Device.assigned_to' => $this->Auth->User('id'),
+                'Device.deleted' => false,
+                'Device.archived' => false
+            ),
         ));
         $this->set('devices', $devices);
 
@@ -1359,9 +1379,12 @@ class UsersController extends AppController
             'contain' => array('MedicationProduct'),
             'fields' => array('Medication.id', 'Medication.user_id', 'Medication.submitted', 'Medication.reference_no', 'Medication.created'),
             'order' => array('Medication.created' => 'desc'),
-            'conditions' => array('Medication.submitted >' => 1, 'Medication.assigned_to' => $this->Auth->User('id'),
-            'Medication.deleted' => false,
-            'Medication.archived' => false),
+            'conditions' => array(
+                'Medication.submitted >' => 1,
+                'Medication.assigned_to' => $this->Auth->User('id'),
+                'Medication.deleted' => false,
+                'Medication.archived' => false
+            ),
         ));
         $this->set('medications', $medications);
 
@@ -1370,9 +1393,12 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.reference_no', 'Transfusion.diagnosis', 'Transfusion.submitted', 'Transfusion.created', 'Transfusion.created'),
             'order' => array('Transfusion.created' => 'desc'),
-            'conditions' => array('Transfusion.submitted >' => 1, 'Transfusion.assigned_to' => $this->Auth->User('id'),
-            'Transfusion.deleted' => false,
-            'Transfusion.archived' => false),
+            'conditions' => array(
+                'Transfusion.submitted >' => 1,
+                'Transfusion.assigned_to' => $this->Auth->User('id'),
+                'Transfusion.deleted' => false,
+                'Transfusion.archived' => false
+            ),
         ));
         $this->set('transfusions', $transfusions);
 
@@ -1381,9 +1407,11 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Padr.id', 'Padr.reporter_name', 'Padr.patient_name', 'Padr.reference_no', 'Padr.created', 'Padr.assigned_to'),
             'order' => array('Padr.created' => 'desc'),
-            'conditions' => array('Padr.assigned_to' => $this->Auth->User('id'),
-            'Padr.deleted' => false,
-            'Padr.archived' => false),
+            'conditions' => array(
+                'Padr.assigned_to' => $this->Auth->User('id'),
+                'Padr.deleted' => false,
+                'Padr.archived' => false
+            ),
         ));
         $this->set('padrs', $padrs);
 
@@ -1410,9 +1438,11 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Sadr.id', 'Sadr.user_id', 'Sadr.created', 'Sadr.report_title', 'Sadr.submitted', 'Sadr.reference_no', 'Sadr.created', 'Sadr.serious'),
             'order' => array('Sadr.created' => 'desc'),
-            'conditions' => array('Sadr.name_of_institution' => $this->Auth->User('name_of_institution'),
-            'Sadr.deleted' => false,
-            'Sadr.archived' => false),
+            'conditions' => array(
+                'Sadr.name_of_institution' => $this->Auth->User('name_of_institution'),
+                'Sadr.deleted' => false,
+                'Sadr.archived' => false
+            ),
         ));
         $this->set('sadrs', $sadrs);
 
@@ -1422,9 +1452,11 @@ class UsersController extends AppController
             'fields' => array('Aefi.id', 'Aefi.user_id', 'Aefi.created', 'Aefi.submitted', 'Aefi.reference_no', 'Aefi.created', 'Aefi.serious'),
             'contain' => array('AefiListOfVaccine', 'AefiListOfVaccine.Vaccine'),
             'order' => array('Aefi.created' => 'desc'),
-            'conditions' => array('Aefi.name_of_institution' => $this->Auth->User('name_of_institution'),
-            'Aefi.deleted' => false,
-            'Aefi.archived' => false),
+            'conditions' => array(
+                'Aefi.name_of_institution' => $this->Auth->User('name_of_institution'),
+                'Aefi.deleted' => false,
+                'Aefi.archived' => false
+            ),
         ));
         $this->set('aefis', $aefis);
 
@@ -1433,9 +1465,11 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Pqmp.id', 'Pqmp.user_id', 'Pqmp.created', 'Pqmp.submitted', 'Pqmp.brand_name', 'Pqmp.reference_no', 'Pqmp.created', 'Pqmp.product_formulation', 'Pqmp.therapeutic_ineffectiveness', 'Pqmp.particulate_matter'),
             'order' => array('Pqmp.created' => 'desc'),
-            'conditions' => array('Pqmp.facility_name' => $this->Auth->User('name_of_institution'),
-            'Pqmp.deleted' => false,
-            'Pqmp.archived' => false),
+            'conditions' => array(
+                'Pqmp.facility_name' => $this->Auth->User('name_of_institution'),
+                'Pqmp.deleted' => false,
+                'Pqmp.archived' => false
+            ),
         ));
         $this->set('pqmps', $pqmps);
 
@@ -1444,9 +1478,11 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Device.id', 'Device.user_id', 'Device.created', 'Device.submitted', 'Device.report_title', 'Device.reference_no', 'Device.created', 'Device.serious'),
             'order' => array('Device.created' => 'desc'),
-            'conditions' => array('Device.name_of_institution' => $this->Auth->User('name_of_institution'),
-            'Device.deleted' => false,
-            'Device.archived' => false),
+            'conditions' => array(
+                'Device.name_of_institution' => $this->Auth->User('name_of_institution'),
+                'Device.deleted' => false,
+                'Device.archived' => false
+            ),
         ));
         $this->set('devices', $devices);
 
@@ -1455,9 +1491,11 @@ class UsersController extends AppController
             'contain' => array('MedicationProduct'),
             'fields' => array('Medication.id', 'Medication.user_id', 'Medication.submitted', 'Medication.created', 'Medication.reference_no', 'Medication.created'),
             'order' => array('Medication.created' => 'desc'),
-            'conditions' => array('Medication.name_of_institution' => $this->Auth->User('name_of_institution'),
-            'Medication.deleted' => false,
-            'Medication.archived' => false),
+            'conditions' => array(
+                'Medication.name_of_institution' => $this->Auth->User('name_of_institution'),
+                'Medication.deleted' => false,
+                'Medication.archived' => false
+            ),
         ));
         $this->set('medications', $medications);
 
@@ -1466,9 +1504,11 @@ class UsersController extends AppController
             'contain' => array(),
             'fields' => array('Transfusion.id', 'Transfusion.user_id', 'Transfusion.reference_no', 'Transfusion.diagnosis', 'Transfusion.submitted', 'Transfusion.created', 'Transfusion.created'),
             'order' => array('Transfusion.created' => 'desc'),
-            'conditions' => array('Transfusion.user_id' => $this->Auth->User('id'),
-            'Transfusion.deleted' => false,
-            'Transfusion.archived' => false),
+            'conditions' => array(
+                'Transfusion.user_id' => $this->Auth->User('id'),
+                'Transfusion.deleted' => false,
+                'Transfusion.archived' => false
+            ),
         ));
         $this->set('transfusions', $transfusions);
 
