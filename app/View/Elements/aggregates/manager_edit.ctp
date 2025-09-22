@@ -306,7 +306,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10 available',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label', 'text' => '1 Introduction <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label', 'text' => '1 Introduction '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -315,7 +315,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10 available',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label', 'text' => '1.2 Worldwide Marketing Approval Status <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label', 'text' => '1.2 Worldwide Marketing Approval Status '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -328,7 +328,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '1.3.1 Actions Taken in the Reporting Interval for Safety Reasons <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '1.3.1 Actions Taken in the Reporting Interval for Safety Reasons '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -337,7 +337,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '1.3.2 Changes to Reference Safety Information <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '1.3.2 Changes to Reference Safety Information '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -346,7 +346,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '1.3.3 Estimated Exposure and Use Patterns<span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '1.3.3 Estimated Exposure and Use Patterns'),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -356,7 +356,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '1.3.4 Findings from clinical trials and other sources<span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '1.3.4 Findings from clinical trials and other sources'),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -365,7 +365,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '1.3.5 Lack of efficacy in controlled clinical trials<span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '1.3.5 Lack of efficacy in controlled clinical trials'),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -374,7 +374,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '1.3.6 Late-breaking information<span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '1.3.6 Late-breaking information'),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -394,7 +394,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '2.1 Summary of safety concerns <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '2.1 Summary of safety concerns '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     ); ?>
@@ -418,7 +418,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '2.3 Evaluation of risks and new information <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '2.3 Evaluation of risks and new information  '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -427,7 +427,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '2.4 Characterisation of risks <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '2.4 Characterisation of risks  '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -446,7 +446,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '3 Benefit evaluation <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '3 Benefit evaluation '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
@@ -455,7 +455,7 @@ $this->Html->script('ckeditor/adapters/jquery', array('inline' => false));
                                         array(
                                             'class' => 'span10',
                                             'rows' => '3',
-                                            'label' => array('class' => 'control-label ', 'text' => '4 Benefit-risk balance <span style="color:red;">*</span>'),
+                                            'label' => array('class' => 'control-label ', 'text' => '4 Benefit-risk balance '),
                                             'after' => '<p class="help-block"> </p></div>',
                                         )
                                     );
