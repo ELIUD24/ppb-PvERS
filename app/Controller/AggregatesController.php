@@ -97,68 +97,68 @@ class AggregatesController extends AppController
 			'message' => ''
 		);
 
-		if (empty($data['Aggregate']['introduction'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide a Brief Introduction<br>";
-		}
+		// if (empty($data['Aggregate']['introduction'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide a Brief Introduction<br>";
+		// }
 
-		if (empty($data['Aggregate']['worldwide_marketing'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide worldwide marketing<br>";
-		}
+		// if (empty($data['Aggregate']['worldwide_marketing'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide worldwide marketing<br>";
+		// }
 
-		if (empty($data['Aggregate']['action_taken'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide action taken<br>";
-		}
+		// if (empty($data['Aggregate']['action_taken'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide action taken<br>";
+		// }
 
-		if (empty($data['Aggregate']['reference_changes'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide reference changes<br>";
-		}
+		// if (empty($data['Aggregate']['reference_changes'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide reference changes<br>";
+		// }
 
-		if (empty($data['Aggregate']['estimated_exposure'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide estimated exposure<br>";
-		}
+		// if (empty($data['Aggregate']['estimated_exposure'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide estimated exposure<br>";
+		// }
 
-		if (empty($data['Aggregate']['clinical_findings'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide clinical findings<br>";
-		}
+		// if (empty($data['Aggregate']['clinical_findings'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide clinical findings<br>";
+		// }
 
-		if (empty($data['Aggregate']['efficacy'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide efficacy<br>";
-		}
+		// if (empty($data['Aggregate']['efficacy'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide efficacy<br>";
+		// }
 
-		if (empty($data['Aggregate']['late_breaking'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide late breaking<br>";
-		}
+		// if (empty($data['Aggregate']['late_breaking'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide late breaking<br>";
+		// }
 
-		if (empty($data['Aggregate']['safety_concerns'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide safety concerns<br>";
-		}
+		// if (empty($data['Aggregate']['safety_concerns'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide safety concerns<br>";
+		// }
 
-		if (empty($data['Aggregate']['risks_evaluation'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide risks evaluation<br>";
-		}
+		// if (empty($data['Aggregate']['risks_evaluation'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide risks evaluation<br>";
+		// }
 
-		if (empty($data['Aggregate']['risks_characterisation'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide risks characterisation<br>";
-		}
-		if (empty($data['Aggregate']['benefit_evaluation'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide benefit evaluation<br>";
-		}
-		if (empty($data['Aggregate']['risk_balance'])) {
-			$response['valid'] = false;
-			$response['message'] .= "Please provide risk balance<br>";
-		}
+		// if (empty($data['Aggregate']['risks_characterisation'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide risks characterisation<br>";
+		// }
+		// if (empty($data['Aggregate']['benefit_evaluation'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide benefit evaluation<br>";
+		// }
+		// if (empty($data['Aggregate']['risk_balance'])) {
+		// 	$response['valid'] = false;
+		// 	$response['message'] .= "Please provide risk balance<br>";
+		// }
 		if (empty($data['Aggregate']['recommendation'])) {
 			$response['valid'] = false;
 			$response['message'] .= "Please provide recommendation<br>";
