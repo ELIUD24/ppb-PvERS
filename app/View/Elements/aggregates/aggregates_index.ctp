@@ -138,7 +138,8 @@ echo $this->Session->flash();
                                 'interval_code',
                                 array(
                                     'div' => false,
-                                    'type' => 'number', 'min' => 1,         // Set minimum value to 1
+                                    'type' => 'number',
+                                    'min' => 1,         // Set minimum value to 1
                                     'max' => 50,
                                     'class' => 'input-small submission_frequency',
                                     'after' => '   ',
@@ -163,13 +164,23 @@ echo $this->Session->flash();
                                     'placeHolder' => ''
                                 )
                             );
-                         
+
                             ?>
                     </td>
                     <td>
+
                         <?php
                         if ($redir == 'manager') { ?>
-                            <h6>Archived Status:</h6>
+                            <h6>Feedback Status</h6>
+
+                        <?php
+                            echo $this->Form->input('has_review', [
+                                'type' => 'checkbox',
+                                'hiddenField' => false,
+                                'label' => 'Show',
+                            ]);
+                         ?>
+                            <h6>Archived Status</h6>
                         <?php
                             echo $this->Form->input('archived', [
                                 'type' => 'checkbox',
@@ -180,7 +191,7 @@ echo $this->Session->flash();
                     </td>
                 </tr>
                 <tr>
-                       <td>
+                    <td>
                         <?php
                         echo $this->Form->input(
                             'date_of_birth',
@@ -188,12 +199,12 @@ echo $this->Session->flash();
                                 'div' => false,
                                 'placeholder' => '',
                                 'class' => 'span12 unauthorized_index date_max_today',
-                                'label' => array('class' => 'required', 'text' =>'International Birth Date (IBD)')
+                                'label' => array('class' => 'required', 'text' => 'International Birth Date (IBD)')
                             )
                         );
                         ?>
                     </td>
-                       <td>
+                    <td>
                         <?php
                         echo $this->Form->input(
                             'data_lock',
@@ -206,7 +217,7 @@ echo $this->Session->flash();
                         );
                         ?>
                     </td>
-                    </tr>
+                </tr>
                 <tr>
                     <td><label for="PadrPages" class="required">Pages</label></td>
                     <td>
@@ -224,6 +235,8 @@ echo $this->Session->flash();
                     </td>
                     <td>
                     <td>
+
+
                         <h5>Report Status</h5>
                         <?php
 
@@ -254,7 +267,7 @@ echo $this->Session->flash();
                     </td>
                     <td>
                         <?php
-                         echo $this->Html->link('<i class="fa fa-file-excel-o" aria-hidden="true"></i> Excel', array('action' => 'index', 'ext' => 'csv', '?' => $this->request->query), array('class' => 'btn btn-success', 'escape' => false));
+                        echo $this->Html->link('<i class="fa fa-file-excel-o" aria-hidden="true"></i> Excel', array('action' => 'index', 'ext' => 'csv', '?' => $this->request->query), array('class' => 'btn btn-success', 'escape' => false));
                         ?>
                     </td>
                 </tr>
@@ -392,8 +405,7 @@ echo $this->Session->flash();
 
 
 <script type="text/javascript">
-
-     $('.date_max_today').datepicker({
+    $('.date_max_today').datepicker({
         minDate: "-100Y",
         maxDate: 0,
         dateFormat: 'dd-mm-yy',

@@ -147,20 +147,20 @@ echo $this->Session->flash();
                             'inn',
                             array('div' => false, 'placeholder' => 'Brand Name', 'class' => 'span12 unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Brand Name'))
                         );
-                        ?> 
-            <h5>Vigiflow status:</h5> 
-            <?php
-            echo $this->Form->input('vigiflow', array(
-              'type' => 'select',
-              'options' => [
-                '0' => 'Uploaded',
-                '1' => 'Pending',
-              ],
-              'empty' => true,
-              'label' => array('class' => 'control-label', 'text' => ''),
-              'class' => 'input-xlarge'
-            ));
-            ?> 
+                        ?>
+                        <h5>Vigiflow status:</h5>
+                        <?php
+                        echo $this->Form->input('vigiflow', array(
+                            'type' => 'select',
+                            'options' => [
+                                '0' => 'Uploaded',
+                                '1' => 'Pending',
+                            ],
+                            'empty' => true,
+                            'label' => array('class' => 'control-label', 'text' => ''),
+                            'class' => 'input-xlarge'
+                        ));
+                        ?>
                     </td>
                     <td>
                         <?php
@@ -183,7 +183,20 @@ echo $this->Session->flash();
                     <td>
                         <?php
                         if ($redir == 'manager') { ?>
-                            <h6>Archived Status:</h6>
+                            <h6>Feedback Status</h6>
+
+                        <?php
+                            echo $this->Form->input('has_review', [
+                                'type' => 'checkbox',
+                                'hiddenField' => false,
+                                'label' => 'Show',
+                            ]);
+                        } ?>
+                    </td>
+                    <td>
+                        <?php
+                        if ($redir == 'manager') { ?>
+                            <h6>Archived Status</h6>
                         <?php
                             echo $this->Form->input('archived', [
                                 'type' => 'checkbox',

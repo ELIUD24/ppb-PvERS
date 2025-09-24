@@ -310,7 +310,17 @@ $this->assign('DEV', 'active');
               ),
               'label' => array('class' => 'required', 'text' => 'Device usage')
             ));
-            ?>
+            
+            if ($redir == 'manager') { ?>
+              <h6>Feedback Status</h6>
+            
+            <?php
+              echo $this->Form->input('has_review', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+            } ?>
           </td>
           <td>
             <?php

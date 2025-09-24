@@ -37,7 +37,8 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
     <?php
     echo $this->Form->create('Pqmp', array(
       'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-      'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+      'class' => 'ctr-groups',
+      'style' => array('padding:9px;', 'background-color: #F5F5F5'),
     ));
     ?>
     <table class="table table-condensed" style="margin-bottom: 2px;">
@@ -50,7 +51,8 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'pqmp/2020',
-                'class' => 'input', 'label' => array('class' => 'required', 'text' => 'Reference No.')
+                'class' => 'input',
+                'label' => array('class' => 'required', 'text' => 'Reference No.')
               )
             );
             ?>
@@ -62,7 +64,8 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'rash',
-                'class' => 'unauthorized_index span10', 'label' => array('class' => 'required', 'text' => 'Brand name')
+                'class' => 'unauthorized_index span10',
+                'label' => array('class' => 'required', 'text' => 'Brand name')
               )
             );
             ?>
@@ -72,24 +75,31 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             echo $this->Form->input(
               'start_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index', 'after' => '-to-',
-                'label' => array('class' => 'required', 'text' => 'Report Dates'), 'placeHolder' => 'Start Date'
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
+                'after' => '-to-',
+                'label' => array('class' => 'required', 'text' => 'Report Dates'),
+                'placeHolder' => 'Start Date'
               )
             );
             echo $this->Form->input(
               'end_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index',
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index',
                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                               <em class="accordion-toggle">clear!</em></a>',
-                'label' => false, 'placeHolder' => 'End Date'
+                'label' => false,
+                'placeHolder' => 'End Date'
               )
             );
             echo $this->Form->input('filter_by', [
               'type' => 'checkbox',
               'hiddenField' => false,
               'label' => 'Filter by date reported',
-          ]);
+            ]);
             ?>
           </td>
           <td>
@@ -97,8 +107,10 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             echo $this->Form->input(
               'facility_name',
               array(
-                'div' => false, 'placeholder' => 'facility',
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Faciliy')
+                'div' => false,
+                'placeholder' => 'facility',
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Faciliy')
               )
             );
             ?>
@@ -110,7 +122,8 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
               array(
                 'div' => false,
                 'placeholder' => 'rash',
-                'class' => 'unauthorized_index span10', 'label' => array('class' => 'required', 'text' => 'Supplier name')
+                'class' => 'unauthorized_index span10',
+                'label' => array('class' => 'required', 'text' => 'Supplier name')
               )
             );
             ?>
@@ -120,8 +133,10 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             echo $this->Form->input(
               'county_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'County')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'County')
               )
             );
             ?>
@@ -133,8 +148,10 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             echo $this->Form->input(
               'generic_name',
               array(
-                'div' => false, 'placeholder' => 'Generic name',
-                'class' => 'input', 'label' => array('class' => 'required', 'text' => 'Generic Name')
+                'div' => false,
+                'placeholder' => 'Generic name',
+                'class' => 'input',
+                'label' => array('class' => 'required', 'text' => 'Generic Name')
               )
             );
             ?>
@@ -174,8 +191,10 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             echo $this->Form->input(
               'country_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Country')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Country')
               )
             );
             ?>
@@ -186,7 +205,8 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             <?php
             echo $this->Form->input('product_formulation', array(
               'type' => 'select',
-              'empty' => true, 'class' => 'input',
+              'empty' => true,
+              'class' => 'input',
               'options' => array(
                 'Oral tablets / capsules' => 'Oral tablets / capsules',
                 'Oral suspension / syrup' => 'Oral suspension / syrup',
@@ -215,11 +235,17 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             ));
 
             echo $this->Form->input('health_program', array(
-              'type' => 'select', 'options' => [
-                'Malaria program' => 'Malaria program', 'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
-                'Neglected tropical diseases program' => 'Neglected tropical diseases program', 'MNCAH Priority Medicines' => 'MNCAH Priority Medicines', 'TB program' => 'TB program',
-                'NASCOP program' => 'NASCOP program', 'Cancer/Oncology program' => 'Cancer/Oncology program'
-              ], 'empty' => true,
+              'type' => 'select',
+              'options' => [
+                'Malaria program' => 'Malaria program',
+                'National Vaccines and immunisation program' => 'National Vaccines and immunisation program',
+                'Neglected tropical diseases program' => 'Neglected tropical diseases program',
+                'MNCAH Priority Medicines' => 'MNCAH Priority Medicines',
+                'TB program' => 'TB program',
+                'NASCOP program' => 'NASCOP program',
+                'Cancer/Oncology program' => 'Cancer/Oncology program'
+              ],
+              'empty' => true,
               'label' => array('class' => 'control-label', 'text' => 'Public Health Program'),
               'class' => 'input-xlarge'
             ));
@@ -237,10 +263,12 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             ?>
             <?php
             echo $this->Form->input('sending_device', array(
-              'type' => 'select', 'options' => [
+              'type' => 'select',
+              'options' => [
                 '1' => 'Web',
                 '2' => 'Mobile',
-              ], 'empty' => true,
+              ],
+              'empty' => true,
               'label' => array('class' => 'control-label', 'text' => '<b>Sending Device</b>'),
               'class' => 'input-xlarge'
             ));  ?>
@@ -285,7 +313,7 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             echo $this->Form->input('results', array('label' => 'Results', 'hiddenField' => false));
             echo $this->Form->input('readings', array('label' => 'Readings', 'hiddenField' => false));
 
-            ?> 
+            ?>
           </td>
           <td>
             <?php
@@ -294,24 +322,41 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
               array('div' => false, 'class' => 'input-small unauthorized_index', 'label' => array('class' => 'required', 'text' => 'Reporter'), 'placeholder' => 'Name/Email')
             );
             ?>
-             <?php
-              if ($redir == 'manager') { ?>
-            <h6>Archived Status:</h6>
-          <?php
-                echo $this->Form->input('archived', [
-                  'type' => 'checkbox',
-                  'hiddenField' => false,
-                  'label' => 'Show',
-                ]);
-              } ?>
+
+
+
+            <?php
+            if ($redir == 'manager') { ?>
+              <h6>Feedback Status:</h6>
+
+              <?php
+              echo $this->Form->input('has_review', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+              ?>
+
+
+
+              <h6>Archived Status:</h6>
+            <?php
+              echo $this->Form->input('archived', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+            } ?>
           </td>
           <td>
             <?php
             echo $this->Form->input(
               'designation_id',
               array(
-                'div' => false, 'empty' => true,
-                'class' => 'input-small', 'label' => array('class' => 'required', 'text' => 'Designation')
+                'div' => false,
+                'empty' => true,
+                'class' => 'input-small',
+                'label' => array('class' => 'required', 'text' => 'Designation')
               )
             );
             ?>
@@ -322,7 +367,10 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
           <td>
             <?php
             echo $this->Form->input('pages', array(
-              'type' => 'select', 'div' => false, 'class' => 'input-small', 'selected' => $this->request->params['paging']['Pqmp']['limit'],
+              'type' => 'select',
+              'div' => false,
+              'class' => 'input-small',
+              'selected' => $this->request->params['paging']['Pqmp']['limit'],
               'empty' => true,
               'options' => $page_options,
               'label' => false,
@@ -337,13 +385,15 @@ $this->assign('Poor-Quality Health Products and Technologies', 'active');
             //   'label' => array('class' => '', 'text' => 'Include Unsubmitted?')
             // ));
             ?>
-            
+
           </td>
           <td></td>
           <td>
             <?php
             echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-              'class' => 'btn btn-primary', 'div' => 'control-group', 'div' => false,
+              'class' => 'btn btn-primary',
+              'div' => 'control-group',
+              'div' => false,
               'formnovalidate' => 'formnovalidate',
               'style' => array('margin-bottom: 5px')
             ));

@@ -222,29 +222,46 @@ echo $this->Session->flash();
             'class' => 'input-xlarge'
           ));  ?>
         </td>
-        <td> <?php
-              echo $this->Form->input('device', array(
-                'type' => 'select',
-                'options' => [
-                  '0' => 'Web',
-                  '1' => 'Mobile',
-                  '2' => 'USSD',
-                  '3' => 'USSD 2',
-                ],
-                'empty' => true,
-                'label' => array('class' => 'control-label', 'text' => 'Sending Device'),
-                'class' => 'input-xlarge'
-              ));  ?></td>
-        <td> <?php
-              if ($redir == 'manager') { ?>
-            <h6>Archived Status:</h6>
+        <td>
           <?php
-                echo $this->Form->input('archived', [
-                  'type' => 'checkbox',
-                  'hiddenField' => false,
-                  'label' => 'Show',
-                ]);
-              } ?>
+          echo $this->Form->input('device', array(
+            'type' => 'select',
+            'options' => [
+              '0' => 'Web',
+              '1' => 'Mobile',
+              '2' => 'USSD',
+              '3' => 'USSD 2',
+            ],
+            'empty' => true,
+            'label' => array('class' => 'control-label', 'text' => 'Sending Device'),
+            'class' => 'input-xlarge'
+          ));  ?></td>
+        <td>
+          <?php
+          if ($redir == 'manager') { ?>
+            <h6>Feedback Status</h6>
+
+          <?php
+            echo $this->Form->input('has_review', [
+              'type' => 'checkbox',
+              'hiddenField' => false,
+              'label' => 'Show',
+            ]);
+          } ?>
+
+        </td>
+        <td>
+
+          <?php
+          if ($redir == 'manager') { ?>
+            <h6>Archived Status</h6>
+          <?php
+            echo $this->Form->input('archived', [
+              'type' => 'checkbox',
+              'hiddenField' => false,
+              'label' => 'Show',
+            ]);
+          } ?>
         </td>
         <td></td>
         <td></td>

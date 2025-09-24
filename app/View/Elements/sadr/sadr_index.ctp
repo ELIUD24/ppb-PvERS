@@ -368,7 +368,7 @@ echo $this->Session->flash();
           <td>
             <?php
             if ($redir == 'manager') { ?>
-              <h6>Feedback Status:</h6>
+              <h6>Feedback Status</h6>
             
             <?php
               echo $this->Form->input('has_review', [
@@ -380,7 +380,7 @@ echo $this->Session->flash();
           <td>
             <?php
             if ($redir == 'manager') { ?>
-              <h6>Archived Status:</h6>
+              <h6>Archived Status</h6>
             <?php
               echo $this->Form->input('archived', [
                 'type' => 'checkbox',

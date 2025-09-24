@@ -373,7 +373,20 @@ $this->assign('TRN', 'active');
           <td>
             <?php
             if ($redir == 'manager') { ?>
-              <h6>Archived Status:</h6>
+              <h6>Feedback Status</h6>
+
+            <?php
+              echo $this->Form->input('has_review', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+            } ?>
+          </td>
+          <td>
+            <?php
+            if ($redir == 'manager') { ?>
+              <h6>Archived Status</h6>
             <?php
               echo $this->Form->input('archived', [
                 'type' => 'checkbox',
