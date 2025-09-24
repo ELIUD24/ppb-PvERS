@@ -69,13 +69,14 @@ $this->assign('Dashboard', 'active');
 
   </div>
   <div class="span4">
-    <h4><img alt="" src="/img/user_group.ico" style="width: 25px;">&nbsp;<?php
-                                                                          echo $this->Html->link(
-                                                                            'User Management',
-                                                                            array('controller' => 'users', 'action' => 'index', 'admin' => true),
-                                                                            array('escape' => false)
-                                                                          );
-                                                                          ?></h4>
+    <h4><img alt="" src="/img/user_group.ico" style="width: 25px;">
+      &nbsp;<?php
+            echo $this->Html->link(
+              'User Management',
+              array('controller' => 'users', 'action' => 'index', 'admin' => true),
+              array('escape' => false)
+            );
+            ?></h4>
     <small class="muted">Add, edit, deactivate users.</small>
     <ul class="nav nav-tabs nav-stacked">
       <li>
@@ -101,9 +102,29 @@ $this->assign('Dashboard', 'active');
       </li>
     </ul>
     <hr>
-    <h4><img alt="" src="/img/comments.ico" style="width: 25px;">&nbsp;<?php
-                                                                        echo $this->Html->link('User Feedback', array('controller' => 'feedbacks'), array('escape' => false));
-                                                                        ?><small class="muted">&nbsp;(From Contact Us page)</small></h4>
+    <!-- Notifications -->
+      <h4><img alt="" src="/img/image.png" style="width: 25px;">
+      &nbsp;<?php
+            echo $this->Html->link(
+              'System Notifications',
+              array('controller' => 'notifications', 'action' => 'index', 'admin' => true),
+              array('escape' => false)
+            );
+            ?></h4>
+      <ul class="nav nav-tabs nav-stacked">
+      <li>
+        <?php echo $this->Html->link(
+          '<i class="icon-user"></i> All',
+          array('controller' => 'notifications', 'action' => 'index', 'admin' => true),
+          array('escape' => false)
+        ); ?>
+      </li>
+      </ul>
+    <hr>
+    <h4><img alt="" src="/img/comments.ico" style="width: 25px;">&nbsp;
+      <?php
+      echo $this->Html->link('User Feedback', array('controller' => 'feedbacks'), array('escape' => false));
+      ?><small class="muted">&nbsp;(From Contact Us page)</small></h4>
     <div style="margin-left: 20px;">
       <?php if (count($previous_messages) > 0) { ?>
         <dl>
@@ -257,6 +278,7 @@ $this->assign('Dashboard', 'active');
 <div class="row-fluid" style="margin-bottom: 9px;">
   <div class="span4">
     <!-- SOME CONDEND HERE -->
+
   </div>
   <div class="span4">
     <!-- SOME OTHER CONDEND HERE -->
