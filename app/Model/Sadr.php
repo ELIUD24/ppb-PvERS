@@ -156,8 +156,10 @@ class Sadr extends AppModel
 
         $sadrIdsWithComments = $this->ExternalComment->find('list', [
             'fields' => ['ExternalComment.foreign_key', 'ExternalComment.foreign_key'],
-            'conditions' => ['ExternalComment.model' => 'Sadr'],
-            'group' => ['ExternalComment.foreign_key'],
+            'conditions' => array(
+                'ExternalComment.model' => 'Sadr', 'ExternalComment.category' => 'external'
+            ),
+            // 'group' => ['ExternalComment.foreign_key'],
             'recursive' => -1
         ]);
 

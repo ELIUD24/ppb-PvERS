@@ -19,7 +19,7 @@ class Aefi extends AppModel
         'report_title' => array('type' => 'like', 'encode' => true),
         'name_of_institution' => array('type' => 'like', 'encode' => true),
         'serious' => array('type' => 'like', 'encode' => true),
-        'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Aefi.submitted_date as DATE) BETWEEN ? AND ?'), 
+        'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Aefi.submitted_date as DATE) BETWEEN ? AND ?'),
         'reportrange' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Aefi.reporter_date as DATE) BETWEEN ? AND ?'),
         'filter_by' => array('type' => 'query', 'method' => 'dummy'),
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
@@ -30,9 +30,9 @@ class Aefi extends AppModel
         'county' => array('type' => 'query', 'method' => 'dummy'),
         'sub_county' => array('type' => 'query', 'method' => 'dummy'),
         'ward' => array('type' => 'query', 'method' => 'dummy'),
-        'county_id' => array('type' => 'value'), 
+        'county_id' => array('type' => 'value'),
         'archived' => array('type' => 'value'),
-        'vaccine_name' => array('type' => 'query', 'method' => 'findByVaccineName', 'encode' => true), 
+        'vaccine_name' => array('type' => 'query', 'method' => 'findByVaccineName', 'encode' => true),
         'health_program' => array('type' => 'query', 'method' => 'findByHealthProgram', 'encode' => true),
         'mah' => array('type' => 'query', 'method' => 'findByMarketAuthority', 'encode' => true),
         'bcg' => array('type' => 'value'),
@@ -57,17 +57,40 @@ class Aefi extends AppModel
         'submitted' => array('type' => 'value'),
         'submit' => array('type' => 'query', 'method' => 'orConditions', 'encode' => true),
         'vigiflow' => array('type' => 'query', 'method' => 'findByVigiflowStatus', 'encode' => true),
+        'has_review' => array('type' => 'query', 'method' => 'findByHasReview', 'encode' => true),
     );
+
+    public function findByHasReview($data = [])
+    {
+        $conditions = [];
+
+        $sadrIdsWithComments = $this->ExternalComment->find('list', [
+            'fields' => ['ExternalComment.foreign_key', 'ExternalComment.foreign_key'],
+            'conditions' => array(
+                'ExternalComment.model' => 'Aefi', 'ExternalComment.category' => 'external'
+            ),
+            // 'group' => ['ExternalComment.foreign_key'],
+            'recursive' => -1
+        ]);
+
+        if (!empty($sadrIdsWithComments)) {
+            $conditions[$this->alias . '.id'] = array_values($sadrIdsWithComments);
+        } else {
+            $conditions[$this->alias . '.id'] = 0; // Match nothing
+        }
+
+        return $conditions;
+    }
     public function findByVigiflowStatus($data = array())
-    { 
-        $cond = array(); 
-        if (isset($data['vigiflow'])) { 
+    {
+        $cond = array();
+        if (isset($data['vigiflow'])) {
             if ($data['vigiflow'] == 0) {
                 $cond = array(
                     $this->alias . '.vigiflow_ref IS NOT NULL'
                 );
             } else {
-                $cond=array(
+                $cond = array(
                     $this->alias . '.vigiflow_ref IS NULL'
                 );
             }
@@ -131,7 +154,7 @@ class Aefi extends AppModel
         $cond = array($this->alias . '.id' => $this->AefiListOfVaccine->find('list', array(
             'conditions' => array(
                 'OR' => array(
-                    'AefiListOfVaccine.vaccine_id' => $vdrugs, 
+                    'AefiListOfVaccine.vaccine_id' => $vdrugs,
                     'AefiListOfVaccine.vaccine_manufacturer' => $vdrugs,
                 )
             ),
@@ -563,7 +586,7 @@ class Aefi extends AppModel
         // $age_months=$this->data['Aefi']['age_months'];
         // $age_weeks=$this->data['Aefi']['age_weeks'];
         // $age_days=$this->data['Aefi']['age_days']; 
-        
+
         // return !empty() ||
         //     !empty() ||
         //     !empty($this->data['Aefi']['age_months']) ||
@@ -581,26 +604,26 @@ class Aefi extends AppModel
         if (!empty($this->data['Aefi']['date_aefi_started'])) {
             $date_aefi_started = $this->data['Aefi']['date_aefi_started'];
             $today = date('Ymd');
-    
+
             $start_date = date('Ymd', strtotime($today));
             $date1 = date_create($date_aefi_started);
             $date2 = date_create($start_date);
-    
+
             $diff = date_diff($date1, $date2);
             $answ = $diff->format("%R%a");
-    
+
             if ($answ >= 0) {
                 $proceed = true;
             } else {
                 $proceed = false;
             }
-    
+
             return $proceed;
         }
-    
+
         return false;
     }
-    
+
     public function afterVaccination($field = null)
     {
         if (!empty($this->data['AefiListOfVaccine'])) {
