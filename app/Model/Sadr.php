@@ -26,6 +26,7 @@ class Sadr extends AppModel
         'start_date' => array('type' => 'query', 'method' => 'dummy'),
         'end_date' => array('type' => 'query', 'method' => 'dummy'),
         'archived' => array('type' => 'value'),
+        'has_review' => array('type' => 'query', 'method' => 'findByHasReview', 'encode' => true),
         'county_id' => array('type' => 'value'),
         'mah' => array('type' => 'query', 'method' => 'findByMarketAuthority', 'encode' => true),
         'drug_name' => array('type' => 'query', 'method' => 'findByDrugName', 'encode' => true),
@@ -112,17 +113,7 @@ class Sadr extends AppModel
 
     public function findByDrugINNName($data = array())
     {
-        // suspected_drug
 
-        // // add a check in condirion to check if suspected_drug is supplied then check that field as well
-        // $cond = array($this->alias . '.id' => $this->SadrListOfDrug->find('list', array(
-        //     'conditions' => array( 
-        //             'SadrListOfDrug.drug_name LIKE' => '%' . $data['inn'] . '%',
-
-        //     ),
-        //     'fields' => array('sadr_id', 'sadr_id')
-        // )));
-        // return $cond;
         $conditions = array();
 
         // Check if 'suspected_drug' is supplied
@@ -158,6 +149,26 @@ class Sadr extends AppModel
         return $cond;
     }
 
+
+    public function findByHasReview($data = [])
+    {
+        $conditions = [];
+
+        $sadrIdsWithComments = $this->ExternalComment->find('list', [
+            'fields' => ['ExternalComment.foreign_key', 'ExternalComment.foreign_key'],
+            'conditions' => ['ExternalComment.model' => 'Sadr'],
+            'group' => ['ExternalComment.foreign_key'],
+            'recursive' => -1
+        ]);
+
+        if (!empty($sadrIdsWithComments)) {
+            $conditions[$this->alias . '.id'] = array_values($sadrIdsWithComments);
+        } else {
+            $conditions[$this->alias . '.id'] = 0; // Match nothing
+        }
+
+        return $conditions;
+    }
     public function findByVigiflowStatus($data = array())
     {
         $cond = array();
@@ -649,6 +660,7 @@ class Sadr extends AppModel
         }
         return true;
     }
+
 
 
 

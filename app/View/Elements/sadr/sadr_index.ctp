@@ -192,7 +192,7 @@ echo $this->Session->flash();
             ?>
           </td>
           <td>
-            <h5>category</h5>
+            <h5>Category</h5>
             <?php
             echo $this->Form->input('herbal_product', array('label' => 'Herbal product', 'hiddenField' => false));
             echo $this->Form->input('cosmeceuticals', array('label' => 'Cosmeceuticals', 'hiddenField' => false));
@@ -286,6 +286,7 @@ echo $this->Session->flash();
               )
             );
             ?>
+            
           </td>
           <td>
             <h5>Gender</h5>
@@ -365,6 +366,17 @@ echo $this->Session->flash();
             ?>
           </td>
           <td>
+            <?php
+            if ($redir == 'manager') { ?>
+              <h6>Feedback Status:</h6>
+            
+            <?php
+              echo $this->Form->input('has_review', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Show',
+              ]);
+            } ?>
           <td>
             <?php
             if ($redir == 'manager') { ?>
