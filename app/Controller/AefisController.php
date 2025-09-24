@@ -985,7 +985,7 @@ class AefisController extends AppController
             $this->redirect('/');
         }
 
-         
+
 
         if ($this->request->is('post') || $this->request->is('put')) {
             if (isset($this->request->data['continueEditing'])) {
@@ -1090,7 +1090,7 @@ class AefisController extends AppController
             $this->Session->setFlash(__('Could not verify the medical devices report ID. Please ensure the ID is correct.'), 'flash_error');
             $this->redirect('/');
         }
- 
+
 
         if ($this->request->is('post') || $this->request->is('put')) {
             if (isset($this->request->data['continueEditing'])) {
@@ -1256,10 +1256,17 @@ class AefisController extends AppController
             $data_save = $aefi['Aefi'];
             if (isset($aefi['AefiListOfVaccine']))  $data_save['AefiListOfVaccine'] = $aefi['AefiListOfVaccine'];
             $data_save['aefi_id'] = $id;
-            $data_save['user_id'] = $this->Auth->User('id');;
+            $data_save['user_id'] = $this->Auth->User('id');
             $this->Aefi->saveField('copied', 1);
             $data_save['copied'] = 2;
-            $now = date('Y-m-d H:i:s');
+
+
+            if (!empty($aefi['Aefi']['created'])) {
+                $rawDate = $aefi['Aefi']['created'];
+            } else {
+                $rawDate = date('Y-m-d H:i:s');
+            }
+            $now = date('Y-m-d H:i:s', strtotime($rawDate));
             $data_save['created'] = $now;
             $data_save['modified'] = $now;
 
@@ -1289,8 +1296,8 @@ class AefisController extends AppController
                 $this->request->data['Aefi']['serious_yes'] = '';
             }
 
-          
-          
+
+
             if ($this->Aefi->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
                 if (isset($this->request->data['submitReport'])) {
                     $this->Aefi->saveField('submitted', 2);

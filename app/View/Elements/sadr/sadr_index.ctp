@@ -286,7 +286,7 @@ echo $this->Session->flash();
               )
             );
             ?>
-            
+
           </td>
           <td>
             <h5>Gender</h5>
@@ -369,7 +369,7 @@ echo $this->Session->flash();
             <?php
             if ($redir == 'manager') { ?>
               <h6>Feedback Status</h6>
-            
+
             <?php
               echo $this->Form->input('has_review', [
                 'type' => 'checkbox',
@@ -470,12 +470,19 @@ echo $this->Session->flash();
           <th><?php echo $this->Paginator->sort('submitted_date', 'Date Submitted'); ?></th>
           <th class="actions"><?php echo __('Actions'); ?></th>
         </tr>
+        <th colspan="9">
+          <input type="checkbox" id="select-all" />
+        </th>
+
       </thead>
       <tbody>
         <?php
         foreach ($sadrs as $sadr) : ?>
           <tr class="">
-            <td><?php echo h($sadr['Sadr']['id']); ?>&nbsp;</td>
+            <td>
+
+              <?php echo $this->Form->checkbox('SadrIds[]', ['value' => $sadr['Sadr']['id'], 'hiddenField' => false]); ?>
+              <?php echo h($sadr['Sadr']['id']); ?>&nbsp;
             <td>
               <?php
               // echo h($sadr['Sadr']['reference_no']);             
@@ -577,10 +584,18 @@ echo $this->Session->flash();
     </table>
   </div>
 </div>
+ 
 
 
 <script type="text/javascript">
   $(function() {
+
+
+  $('#select-all').on('change', function () {
+      const checked = $(this).prop('checked');
+      $('.bulk-checkbox').prop('checked', checked);
+    });
+    
     var adates = $('#SadrStartDate, #SadrEndDate').datepicker({
       minDate: "-100Y",
       maxDate: "-0D",

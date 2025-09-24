@@ -1591,7 +1591,12 @@ class SadrsController extends AppController
         $data_save['user_id'] = $this->Auth->User('id');;
         $this->Sadr->saveField('copied', 1);
         $data_save['copied'] = 2;
-        $now = date('Y-m-d H:i:s');
+        if (!empty($sadr['Sadr']['created'])) {
+            $rawDate = $sadr['Sadr']['created'];
+        } else {
+            $rawDate = date('Y-m-d H:i:s');
+        }
+        $now = date('Y-m-d H:i:s', strtotime($rawDate));
         $data_save['created'] = $now;
         $data_save['modified'] = $now;
 
