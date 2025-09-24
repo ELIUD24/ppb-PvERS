@@ -17,6 +17,7 @@ class Notification extends AppModel
 
 		'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Notification.created as DATE) BETWEEN ? AND ?'),
 		'model' => array('type' => 'like', 'encode' => true),
+		'notification_source'=> array('type' => 'query', 'method' => 'dummy'),
 		'start_date' => array('type' => 'query', 'method' => 'dummy'),
 		'end_date' => array('type' => 'query', 'method' => 'dummy'),
 	);

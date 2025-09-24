@@ -18,7 +18,8 @@ $this->Html->script('highcharts/modules/data', array('inline' => false));
     <?php
     echo $this->Form->create('Notification', array(
       'url' => array_merge(array('action' => 'index'), $this->params['pass']),
-      'class' => 'ctr-groups', 'style' => array('padding:9px;', 'background-color: #F5F5F5'),
+      'class' => 'ctr-groups',
+      'style' => array('padding:9px;', 'background-color: #F5F5F5'),
     ));
     ?>
     <table class="table table-condensed table-bordered" style="margin-bottom: 2px;">
@@ -28,7 +29,8 @@ $this->Html->script('highcharts/modules/data', array('inline' => false));
           <th>
             <?php
             echo $this->Form->input('protocol_no', array(
-              'div' => false, 'class' => 'span12 unauthorized_index',
+              'div' => false,
+              'class' => 'span12 unauthorized_index',
               'label' => array('class' => 'required', 'text' => 'Reference No.'),
               'type' => 'text',
             ));
@@ -40,18 +42,25 @@ $this->Html->script('highcharts/modules/data', array('inline' => false));
             echo $this->Form->input(
               'start_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index start_date', 'after' => '-to-',
-                'label' => array('class' => 'required', 'text' => 'Notification Create Dates'), 'placeHolder' => 'Start Date'
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index start_date',
+                'after' => '-to-',
+                'label' => array('class' => 'required', 'text' => 'Notification Create Dates'),
+                'placeHolder' => 'Start Date'
               )
             );
 
             echo $this->Form->input(
               'end_date',
               array(
-                'div' => false, 'type' => 'text', 'class' => 'input-small unauthorized_index end_date',
+                'div' => false,
+                'type' => 'text',
+                'class' => 'input-small unauthorized_index end_date',
                 'after' => '<a style="font-weight:normal" onclick="$(\'.unauthorized_index\').val(\'\');" >
                             <em class="accordion-toggle">clear!</em></a>',
-                'label' => false, 'placeHolder' => 'End Date'
+                'label' => false,
+                'placeHolder' => 'End Date'
               )
             );
             ?>
@@ -59,30 +68,55 @@ $this->Html->script('highcharts/modules/data', array('inline' => false));
           <th>
             <?php
             echo $this->Form->input('model', array(
-              'div' => false, 'class' => 'span12 unauthorized_index',
+              'div' => false,
+              'class' => 'span12 unauthorized_index',
               'label' => array('class' => 'required', 'text' => 'Report Type.'),
               'type' => 'select',
               'empty' => true,
               'options' => array(
-                'User'=>'User Registration',
-                'Sadr'=>'SADR',
-                'Padr' => 'PADR', 
-                'Aefi' =>'AEFI',
-                'Saefi' =>'Investigation Reports',
+                'User' => 'User Registration',
+                'Sadr' => 'SADR',
+                'Padr' => 'PADR',
+                'Aefi' => 'AEFI',
+                'Saefi' => 'Investigation Reports',
                 'Pqmp' => 'PQHPT',
                 'Ce2b' => 'E2B',
                 'Device' => 'Devices',
-                'Medication' =>'Medication Errors',
-                'Transfusion' =>'Transfusion Reaction'
+                'Medication' => 'Medication Errors',
+                'Transfusion' => 'Transfusion Reaction'
               ),
             ));
             ?>
 
           </th>
+          <th> 
+
+          <!-- Can we add a filter here so that someone can choose to view either notifications from other users apart from manager or both. -->
+
+            <?php
+           if ($redir == 'manager') {
+            echo $this->Form->input('notification_source', array(
+              'div' => false,
+              'class' => 'span12 unauthorized_index',
+              'label' => array('class' => 'required', 'text' => 'Notification From'),
+              'type' => 'select',
+              'empty' => true,
+              'options' => array(
+                '0' => 'Own Notifications',
+                '1' => 'Other User Notifications',
+                '2' => 'All Notifications',
+              ),
+            ));
+          }
+            ?>
+          </th>
           <th>
             <?php
             echo $this->Form->input('pages', array(
-              'type' => 'select', 'div' => false, 'class' => 'span12', 'selected' => $this->request->params['paging']['Notification']['limit'],
+              'type' => 'select',
+              'div' => false,
+              'class' => 'span12',
+              'selected' => $this->request->params['paging']['Notification']['limit'],
               'empty' => true,
               'options' => $page_options,
               'label' => array('class' => 'required', 'text' => 'Pages'),
@@ -92,7 +126,9 @@ $this->Html->script('highcharts/modules/data', array('inline' => false));
           <th rowspan="2" style="width: 14%;">
             <?php
             echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
-              'class' => 'btn btn-inverse', 'div' => 'control-group', 'div' => false,
+              'class' => 'btn btn-inverse',
+              'div' => 'control-group',
+              'div' => false,
               'style' => array('margin-bottom: 5px')
             ));
 
