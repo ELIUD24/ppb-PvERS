@@ -149,28 +149,55 @@ class Sadr extends AppModel
         return $cond;
     }
 
-
     public function findByHasReview($data = [])
     {
         $conditions = [];
 
-        $sadrIdsWithComments = $this->ExternalComment->find('list', [
-            'fields' => ['ExternalComment.foreign_key', 'ExternalComment.foreign_key'],
-            'conditions' => array(
-                'ExternalComment.model' => 'Sadr', 'ExternalComment.category' => 'external'
-            ),
-            // 'group' => ['ExternalComment.foreign_key'],
-            'recursive' => -1
+        $sadrIds = $this->ExternalComment->find('all', [
+            'fields' => ['ExternalComment.foreign_key'],
+            'conditions' => [
+                'ExternalComment.model' => 'Sadr',
+                'ExternalComment.category' => 'external',
+            ],
+            'group' => ['ExternalComment.foreign_key'],
+            'recursive' => -1,
+            'contain' => false
         ]);
 
+        $sadrIdsWithComments = Hash::extract($sadrIds, '{n}.ExternalComment.foreign_key');
+
         if (!empty($sadrIdsWithComments)) {
-            $conditions[$this->alias . '.id'] = array_values($sadrIdsWithComments);
+            $conditions[$this->alias . '.id'] = $sadrIdsWithComments;
         } else {
-            $conditions[$this->alias . '.id'] = 0; // Match nothing
+            $conditions[$this->alias . '.id'] = 0;
         }
 
         return $conditions;
     }
+
+
+
+    // public function findByHasReview($data = [])
+    // {
+    //     $conditions = [];
+
+    //     $sadrIdsWithComments = $this->ExternalComment->find('list', [
+    //         'fields' => ['ExternalComment.foreign_key', 'ExternalComment.foreign_key'],
+    //         'conditions' => array(
+    //             'ExternalComment.model' => 'Sadr', 'ExternalComment.category' => 'external'
+    //         ),
+    //         // 'group' => ['ExternalComment.foreign_key'],
+    //         'recursive' => -1
+    //     ]);
+
+    //     if (!empty($sadrIdsWithComments)) {
+    //         $conditions[$this->alias . '.id'] = array_values($sadrIdsWithComments);
+    //     } else {
+    //         $conditions[$this->alias . '.id'] = 0; // Match nothing
+    //     }
+
+    //     return $conditions;
+    // }
     public function findByVigiflowStatus($data = array())
     {
         $cond = array();

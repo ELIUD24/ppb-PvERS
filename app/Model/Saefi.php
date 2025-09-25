@@ -20,39 +20,44 @@ class Saefi extends AppModel
 
 	public $filterArgs = array(
 		'reference_no' => array('type' => 'like', 'encode' => true),
-		// 'report_title' => array('type' => 'like', 'encode' => true),
-		// 'name_of_institution' => array('type' => 'like', 'encode' => true),
-		// 'serious' => array('type' => 'like', 'encode' => true),
 		'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Saefi.submitted_date as DATE) BETWEEN ? AND ?'),
 		'reportrange' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Saefi.reporter_date as DATE) BETWEEN ? AND ?'),
-        'filter_by' => array('type' => 'query', 'method' => 'dummy'),
+		'filter_by' => array('type' => 'query', 'method' => 'dummy'),
 		'start_date' => array('type' => 'query', 'method' => 'dummy'),
 		'end_date' => array('type' => 'query', 'method' => 'dummy'),
 		'county_id' => array('type' => 'value'),
 		'archived' => array('type' => 'value'),
-		// 'vaccine_name' => array('type' => 'query', 'method' => 'findByVaccineName', 'encode' => true),
-		// 'health_program' => array('type' => 'query', 'method' => 'findByHealthProgram', 'encode' => true),
-		// 'bcg' => array('type' => 'value'),
-		// 'convulsion' => array('type' => 'value'),
-		// 'urticaria' => array('type' => 'value'),
-		// 'high_fever' => array('type' => 'value'),
-		// 'abscess' => array('type' => 'value'),
-		// 'local_reaction' => array('type' => 'value'),
-		// 'anaphylaxis' => array('type' => 'value'),
-		// 'paralysis' => array('type' => 'value'),
-		// 'toxic_shock' => array('type' => 'value'),
-		// 'complaint_other' => array('type' => 'value'),
-		// 'complaint_other_specify' => array('type' => 'like', 'encode' => true),
-		// 'patient_name' => array('type' => 'like', 'encode' => true),
-		// 'report_type' => array('type' => 'value'),
-		// 'serious_yes' => array('type' => 'value'),
-		// 'outcome' => array('type' => 'value'),
-		// 'reporter' => array('type' => 'query', 'method' => 'reporterFilter', 'encode' => true),
+		'has_review' => array('type' => 'query', 'method' => 'findByHasReview', 'encode' => true),
 		'designation_id' => array('type' => 'value'),
-		// 'gender' => array('type' => 'value'),
 		'submitted' => array('type' => 'value'),
-		// 'submit' => array('type' => 'query', 'method' => 'orConditions', 'encode' => true),
 	);
+
+	public function findByHasReview($data = [])
+	{
+		$conditions = [];
+
+		$sadrIds = $this->ExternalComment->find('all', [
+			'fields' => ['ExternalComment.foreign_key'],
+			'conditions' => [
+				'ExternalComment.model' => 'Saefi',
+				'ExternalComment.category' => 'external',
+			],
+			'group' => ['ExternalComment.foreign_key'],
+			'recursive' => -1,
+			'contain' => false
+		]);
+
+		$sadrIdsWithComments = Hash::extract($sadrIds, '{n}.ExternalComment.foreign_key');
+
+		if (!empty($sadrIdsWithComments)) {
+			$conditions[$this->alias . '.id'] = $sadrIdsWithComments;
+		} else {
+			$conditions[$this->alias . '.id'] = 0;
+		}
+
+		return $conditions;
+	}
+
 	/**
 	 * Validation rules
 	 *
@@ -79,7 +84,8 @@ class Saefi extends AppModel
 				'rule' => array('numeric'),
 				'message' => 'Please select a sub county',
 			),
-		), 'name_of_vaccination_site' => array(
+		),
+		'name_of_vaccination_site' => array(
 			'notBlank' => array(
 				'rule'     => 'notBlank',
 				'required' => true,
@@ -142,7 +148,8 @@ class Saefi extends AppModel
 				'required' => true,
 				'message'  => 'Please provide vaccination type'
 			),
-		), 'report_date' => array(
+		),
+		'report_date' => array(
 			'notBlank' => array(
 				'rule'     => 'notBlank',
 				'required' => true,
