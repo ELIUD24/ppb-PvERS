@@ -27,8 +27,14 @@ class SadrsController extends AppController
     public function beforeFilter()
     {
         parent::beforeFilter();
-        $this->Auth->allow('yellowcard', 'guest_add', 'guest_edit', 'manager_check_missing');
+        $this->Auth->allow('yellowcard','manager_bulk_action', 'guest_add', 'guest_edit', 'manager_check_missing');
     }
+
+    public function manager_bulk_action() {
+// debug($this->request->data);
+// exit;
+$this->manager_index();
+	}
 
     public function admin_file_upload()
     {
