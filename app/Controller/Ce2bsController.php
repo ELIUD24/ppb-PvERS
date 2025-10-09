@@ -1490,6 +1490,174 @@ class Ce2bsController extends AppController
     }
     public function general_editor($id = null)
     {
+        $this->Ce2b->id = $id;
+        if (!$this->Ce2b->exists()) {
+            throw new NotFoundException(__('Invalid E2b'));
+        }
+        $ce2b = $this->Ce2b->read(null, $id);
+        if ($ce2b['Ce2b']['submitted'] > 1) {
+            $this->Session->setFlash(__('The E2b has been submitted'), 'alerts/flash_info');
+            $this->redirect(array('action' => 'view', $this->Ce2b->id));
+        }
+        if ($ce2b['Ce2b']['user_id'] !== $this->Auth->user('id')) {
+            $this->Session->setFlash(__('You don\'t have permission to edit this E2b!!'), 'alerts/flash_error');
+            $this->redirect(array('controller' => 'users', 'action' => 'dashboard'));
+        }
+
+        // Start of Post 
+        if ($this->request->is('post') || $this->request->is('put')) {
+
+            $flattenedData = null;
+            $xmlString = null;
+            $validate = false;
+            if (isset($this->request->data['submitReport'])) {
+                $file = $this->request->data['Ce2b']['e2b_file_data'];
+
+                if (!empty($file['tmp_name']) && is_uploaded_file($file['tmp_name'])) {
+                    // Move the file without reading/parsing/modifying
+                    $destinationPath = WWW_ROOT . 'files' . DS . 'ce2bs' . DS . $file['name'];
+                    move_uploaded_file($file['tmp_name'], $destinationPath);
+
+                    // Optionally: save file contents in DB (if needed)
+                    $xmlRaw = file_get_contents($destinationPath);
+                    $this->Ce2b->saveField('e2b_content', $xmlRaw, false);
+
+                //     debug($xmlRaw);
+                // exit;
+
+                    // Optional: save metadata like type or name
+                    $this->Ce2b->saveField('submitted', 2);
+                    $this->request->data['Ce2b']['e2b_type'] = (strpos($xmlRaw, 'MCCI_IN200100UV01') !== false) ? "R3" : "R2";
+                }
+            }
+
+
+            if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
+                if (isset($this->request->data['submitReport'])) {
+ 
+                    try {
+                        //populate other parts::::                       
+
+                        $newReportData = $this->extractReportData($flattenedData);
+
+                        foreach ($newReportData as $key => $value) {
+                            $this->Ce2b->saveField($key, $value, false);
+                        }
+                    } catch (Exception $rr) {
+                        //
+                    }
+                    $this->Ce2b->saveField('submitted', 2);
+                    $this->Ce2b->saveField('submitted_date', date("Y-m-d H:i:s"));
+                    if (!empty($ce2b['Ce2b']['reference_no']) && $ce2b['Ce2b']['reference_no'] == 'new') {
+                        $count = $this->Ce2b->find('count',  array(
+                            'fields' => 'Ce2b.reference_no',
+                            'conditions' => array(
+                                'Ce2b.submitted_date BETWEEN ? and ?' => array(date("Y-01-01 00:00:00"), date("Y-m-d H:i:s")),
+                                'Ce2b.reference_no !=' => 'new'
+                            )
+                        ));
+                        $count++;
+                        $count = ($count < 10) ? "0$count" : $count;
+                        $reference = 'E2B/' . date('Y') . '/' . $count;
+                        $this->Ce2b->saveField('reference_no', $reference);
+                    }
+
+                    $ce2b = $this->Ce2b->read(null, $id);
+
+                    //******************       Send Email and Notifications to Reporter and Managers          *****************************
+                    $this->loadModel('Message');
+                    $html = new HtmlHelper(new ThemeView());
+                    $message = $this->Message->find('first', array('conditions' => array('name' => 'reporter_ce2b_submit')));
+                    $variables = array(
+                        'name' => $this->Auth->User('name'),
+                        'reference_no' => $ce2b['Ce2b']['reference_no'],
+                        'reference_link' => $html->link(
+                            $ce2b['Ce2b']['reference_no'],
+                            array('controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true),
+                            array('escape' => false)
+                        ),
+                        'modified' => $ce2b['Ce2b']['modified']
+                    );
+                    $datum = array(
+                        'email' => $ce2b['Ce2b']['reporter_email'],
+                        'id' => $id,
+                        'user_id' => $this->Auth->User('id'),
+                        'type' => 'reporter_ce2b_submit',
+                        'model' => 'Ce2b',
+                        'subject' => CakeText::insert($message['Message']['subject'], $variables),
+                        'message' => CakeText::insert($message['Message']['content'], $variables)
+                    );
+
+                    $this->loadModel('Queue.QueuedTask');
+                    $this->QueuedTask->createJob('GenericEmail', $datum);
+                    $this->QueuedTask->createJob('GenericNotification', $datum);
+                    // $this->QueuedTask->createJob('Parser', ['ce2b_id' => $this->Ce2b->id]);
+                    $cmd = 'php ' . APP . 'Console' . DS . 'cake.php parser ' . (int)$id . ' > /dev/null 2>&1 &';
+                    exec($cmd);
+
+                    //Send SMS
+                    if (!empty($ce2b['Ce2b']['reporter_phone']) && strlen(substr($ce2b['Ce2b']['reporter_phone'], -9)) == 9 && is_numeric(substr($ce2b['Ce2b']['reporter_phone'], -9))) {
+                        $datum['phone'] = '254' . substr($ce2b['Ce2b']['reporter_phone'], -9);
+                        $variables['reference_url'] = Router::url(['controller' => 'ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'reporter' => true, 'full_base' => true]);
+                        $datum['sms'] = CakeText::insert($message['Message']['sms'], $variables);
+                        $this->QueuedTask->createJob('GenericSms', $datum);
+                    }
+
+                    //Notify managers
+                    $users = $this->Ce2b->User->find('all', array(
+                        'contain' => array(),
+                        'conditions' => array(
+                            'User.group_id' => 2,
+                            'User.is_active' => '1'
+                        )
+                    ));
+                    foreach ($users as $user) {
+                        $variables = array(
+                            'name' => $user['User']['name'],
+                            'reference_no' => $ce2b['Ce2b']['reference_no'],
+                            'reference_link' => $html->link(
+                                $ce2b['Ce2b']['reference_no'],
+                                array('controller' => 'Ce2bs', 'action' => 'view', $ce2b['Ce2b']['id'], 'manager' => true, 'full_base' => true),
+                                array('escape' => false)
+                            ),
+                            'modified' => $ce2b['Ce2b']['modified']
+                        );
+                        $datum = array(
+                            'email' => $user['User']['email'],
+                            'id' => $id,
+                            'user_id' => $user['User']['id'],
+                            'type' => 'reporter_ce2b_submit',
+                            'model' => 'Ce2b',
+                            'subject' => CakeText::insert($message['Message']['subject'], $variables),
+                            'message' => CakeText::insert($message['Message']['content'], $variables)
+                        );
+
+                        $this->QueuedTask->createJob('GenericEmail', $datum);
+                        $this->QueuedTask->createJob('GenericNotification', $datum);
+                    }
+                    // **********************************    END   *********************************
+
+                    $this->Session->setFlash(__('The E2b has been submitted to PPB'), 'alerts/flash_success');
+                    $this->redirect(array('action' => 'view', $this->Ce2b->id));
+                }
+                $this->Session->setFlash(__('The E2b has been saved'), 'alerts/flash_success');
+                $this->redirect($this->referer());
+            } else {
+                $this->Session->setFlash(__('The E2b could not be saved. Please review the error(s) and resubmit and try again.'), 'alerts/flash_error');
+            }
+        } else {
+            $this->request->data = $this->Ce2b->read(null, $id);
+        }
+        // End of Post
+        $counties = $this->Ce2b->County->find('list', array('order' => array('County.county_name' => 'ASC')));
+        $this->set(compact('counties'));
+        $sub_counties = $this->Ce2b->SubCounty->find('list', array('order' => array('SubCounty.sub_county_name' => 'ASC')));
+        $this->set(compact('sub_counties'));
+        $designations = $this->Ce2b->Designation->find('list', array('order' => array('Designation.name' => 'ASC')));
+        $this->set(compact('designations'));
+    }
+    public function general_editor_old($id = null)
+    {
 
         $this->Ce2b->id = $id;
         if (!$this->Ce2b->exists()) {
@@ -1517,7 +1685,7 @@ class Ce2bsController extends AppController
                 // exit;
 
                 $validate = 'first';
-                try {
+                // try {
 
                     // Manipulate R3
                     $file = $this->request->data['Ce2b']['e2b_file_data'];
@@ -1575,10 +1743,10 @@ class Ce2bsController extends AppController
                     }
                     $this->Ce2b->saveField('submitted', 2);
                     $this->Ce2b->saveField('e2b_content', $xmlString, false);
-                } catch (Exception $e) {
+                // } catch (Exception $e) {
 
-                    $this->request->data['Ce2b']['e2b_type'] = "R2";
-                }
+                //     $this->request->data['Ce2b']['e2b_type'] = "R2";
+                // }
             }
 
             if ($this->Ce2b->saveAssociated($this->request->data, array('validate' => $validate, 'deep' => true))) {
