@@ -21,12 +21,40 @@ class Aggregate extends AppModel
 		'range' => array('type' => 'expression', 'method' => 'makeRangeCondition', 'field' => 'CAST(Aggregate.submitted_date as DATE) BETWEEN ? AND ?'),
 		'start_date' => array('type' => 'query', 'method' => 'dummy'),
 		'archived' => array('type' => 'value'),
-			'date_of_birth' => array('type' => 'value'),
-				'data_lock' => array('type' => 'value'),
-		'interval_code'=> array('type' => 'value'),
+		'date_of_birth' => array('type' => 'value'),
+		'data_lock' => array('type' => 'value'),
+		'interval_code' => array('type' => 'value'),
 		'end_date' => array('type' => 'query', 'method' => 'dummy'),
 		'submission_frequency' => array('type' => 'like', 'encode' => true),
+		'has_review' => array('type' => 'query', 'method' => 'findByHasReview', 'encode' => true),
 	);
+
+	public function findByHasReview($data = [])
+	{
+		$conditions = [];
+
+		$sadrIds = $this->ExternalComment->find('all', [
+			'fields' => ['ExternalComment.foreign_key'],
+			'conditions' => [
+				'ExternalComment.model' => 'Aggregate',
+				'ExternalComment.category' => 'external',
+			],
+			'group' => ['ExternalComment.foreign_key'],
+			'recursive' => -1,
+			'contain' => false
+		]);
+
+		$sadrIdsWithComments = Hash::extract($sadrIds, '{n}.ExternalComment.foreign_key');
+
+		if (!empty($sadrIdsWithComments)) {
+			$conditions[$this->alias . '.id'] = $sadrIdsWithComments;
+		} else {
+			$conditions[$this->alias . '.id'] = 0;
+		}
+
+		return $conditions;
+	}
+
 	public function makeRangeCondition($data = array())
 	{
 		if (!empty($data['start_date'])) $start_date = date('Y-m-d', strtotime($data['start_date']));
@@ -83,7 +111,7 @@ class Aggregate extends AppModel
 				'message'  => 'Please provide authorised indications',
 				'required'  => true,
 				'allowEmpty' => false,
-				 
+
 			),
 		),
 		'form_strength' => array(

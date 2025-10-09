@@ -28,7 +28,35 @@ class Ce2b extends AppModel
 		'drug_name' => array('type' => 'query', 'method' => 'findByDrugName', 'encode' => true),
 		'inn' => array('type' => 'query', 'method' => 'findByDrugINNName', 'encode' => true),
         'vigiflow' => array('type' => 'query', 'method' => 'findByVigiflowStatus', 'encode' => true),
+		'has_review' => array('type' => 'query', 'method' => 'findByHasReview', 'encode' => true),
 	);
+
+
+	  public function findByHasReview($data = [])
+	{
+		$conditions = [];
+
+		$sadrIds = $this->ExternalComment->find('all', [
+			'fields' => ['ExternalComment.foreign_key'],
+			'conditions' => [
+				'ExternalComment.model' => 'Ce2b',
+				'ExternalComment.category' => 'external',
+			],
+			'group' => ['ExternalComment.foreign_key'],
+			'recursive' => -1,
+			'contain' => false
+		]);
+
+		$sadrIdsWithComments = Hash::extract($sadrIds, '{n}.ExternalComment.foreign_key');
+
+		if (!empty($sadrIdsWithComments)) {
+			$conditions[$this->alias . '.id'] = $sadrIdsWithComments;
+		} else {
+			$conditions[$this->alias . '.id'] = 0;
+		}
+
+		return $conditions;
+	}
 
 	   public function findByVigiflowStatus($data = array())
     {

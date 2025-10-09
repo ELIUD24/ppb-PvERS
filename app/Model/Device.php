@@ -40,7 +40,35 @@ class Device extends AppModel
         'gender' => array('type' => 'value'),
         'submitted' => array('type' => 'value'),
         'submit' => array('type' => 'query', 'method' => 'orConditions', 'encode' => true),
+		'has_review' => array('type' => 'query', 'method' => 'findByHasReview', 'encode' => true),
     );
+
+
+	public function findByHasReview($data = [])
+	{
+		$conditions = [];
+
+		$sadrIds = $this->ExternalComment->find('all', [
+			'fields' => ['ExternalComment.foreign_key'],
+			'conditions' => [
+				'ExternalComment.model' => 'Device',
+				'ExternalComment.category' => 'external',
+			],
+			'group' => ['ExternalComment.foreign_key'],
+			'recursive' => -1,
+			'contain' => false
+		]);
+
+		$sadrIdsWithComments = Hash::extract($sadrIds, '{n}.ExternalComment.foreign_key');
+
+		if (!empty($sadrIdsWithComments)) {
+			$conditions[$this->alias . '.id'] = $sadrIdsWithComments;
+		} else {
+			$conditions[$this->alias . '.id'] = 0;
+		}
+
+		return $conditions;
+	}
     public function findByMarketAuthority($data = array())
     {
         $conditions = array();

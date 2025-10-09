@@ -77,7 +77,17 @@ class CommentsController extends AppController
           // let's get the basename for all attachments
           $attachment_links = '';
           if (isset($comment['Attachment'])) {
-             $attachment_links .= '<p> See files below for reference:</p>';
+            //  $attachment_links .= '<p> See files below for reference:</p>';
+            // check is the attachment is not empty: If empty, it means no files were uploaded else add the message above:
+
+              // Count the number of attachments if more than zero add the message above
+              if (count($comment['Attachment']) > 0) {
+                $attachment_links .= '<p> See files below for reference:</p>';
+              }
+              
+             
+
+
             foreach ($comment['Attachment'] as $key => $value) {
                 // Generate full URL to the download link
                 $url = Router::url(array(
