@@ -743,7 +743,10 @@ class PadrsController extends AppController
         $results = $HttpSocket->post(
             Configure::read('vigiflow_api'),
             $html,
-            array('header' => array('umc-client-key' => Configure::read('vigiflow_key')))
+             array('header' => array(
+                'umc-vigiflow-web-radr-access-key' => Configure::read('vigiflow_key'),
+                'Content-Type' => 'application/xml'
+            ))
         );
  
         if ($results->isOk()) {
