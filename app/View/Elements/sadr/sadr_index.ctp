@@ -392,8 +392,8 @@ echo $this->Session->flash();
           <td></td>
         </tr>
         <tr>
-          <td><label for="SadrPages" class="required">Pages</label></td>
-          <td>
+          <td><label for="SadrPages" class="required">Pages</label>
+
             <?php
             echo $this->Form->input('pages', array(
               'type' => 'select',
@@ -408,11 +408,40 @@ echo $this->Session->flash();
           </td>
           <td>
 
+            <?php
 
+          
+            ?>
           </td>
-          <td></td>
           <td>
             <?php
+            echo $this->Form->input('bulk_action', [
+              'type' => 'select',
+              'options' => [
+                'archive' => 'Archive Selected',
+                'delete' => 'Delete Selected'
+              ],
+              'label' => false,
+              'empty' => 'Choose bulk action',
+              'class' => 'form-control'
+            ]);
+            ?>
+          </td>
+
+          <td>
+            <?php
+            echo $this->Form->button('<i class="icon-refresh icon-white"></i> Bulk Action', array(
+              'class' => 'btn btn-warning',
+              'div' => 'control-group',
+              'div' => false,
+              'formnovalidate' => 'formnovalidate',
+              'style' => array('margin-bottom: 5px')
+            ));
+            ?>
+          </td>
+          <td>
+            <?php
+
             echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
               'class' => 'btn btn-primary',
               'div' => 'control-group',
@@ -456,7 +485,8 @@ echo $this->Session->flash();
         ?>
       </ul>
     </div>
-
+    <?php
+    echo $this->Form->create('Sadr', ['url' => ['action' => 'bulk_action'], 'type' => 'post']); ?>
     <table class="table  table-bordered table-striped">
       <thead>
         <tr>
@@ -470,9 +500,20 @@ echo $this->Session->flash();
           <th><?php echo $this->Paginator->sort('submitted_date', 'Date Submitted'); ?></th>
           <th class="actions"><?php echo __('Actions'); ?></th>
         </tr>
-        <th colspan="9">
-          <input type="checkbox" id="select-all" />
-        </th>
+        <tr>
+          <th colspan="9">
+            <?php
+              echo $this->Form->input('bulk_select', [
+                'type' => 'checkbox',
+                'hiddenField' => false,
+                'label' => 'Select All',
+                'id' => 'select-all',
+                'class' => 'bulk-master'
+              ]);
+            
+            ?>
+          </th>
+        </tr>
 
       </thead>
       <tbody>
@@ -481,7 +522,14 @@ echo $this->Session->flash();
           <tr class="">
             <td>
 
-              <?php echo $this->Form->checkbox('SadrIds[]', ['value' => $sadr['Sadr']['id'], 'hiddenField' => false]); ?>
+              <?php
+
+              echo $this->Form->checkbox('SadrIds[]', [
+                'value' => $sadr['Sadr']['id'],
+                'hiddenField' => false,
+                'class' => 'bulk-checkbox'
+              ]);
+              ?>
               <?php echo h($sadr['Sadr']['id']); ?>&nbsp;
             <td>
               <?php
@@ -581,21 +629,36 @@ echo $this->Session->flash();
           </tr>
         <?php endforeach; ?>
       </tbody>
+      <tfoot>
+         
+
+      </tfoot>
     </table>
+
+    <!-- Bulk button -->
+    <?php echo $this->Form->button('<i class="icon-refresh icon-white"></i> Bulk Action', [
+      'type' => 'submit',
+      'escape' => false,
+      'class' => 'btn btn-warning',
+      'formnovalidate' => true,
+      'style' => 'margin-bottom: 5px'
+    ]); ?>
+    <?php echo $this->Form->end(); ?>
   </div>
 </div>
- 
+
 
 
 <script type="text/javascript">
   $(function() {
 
 
-  $('#select-all').on('change', function () {
+    $('#select-all').on('change', function() {
       const checked = $(this).prop('checked');
+      console.log('checked', checked);
       $('.bulk-checkbox').prop('checked', checked);
     });
-    
+
     var adates = $('#SadrStartDate, #SadrEndDate').datepicker({
       minDate: "-100Y",
       maxDate: "-0D",

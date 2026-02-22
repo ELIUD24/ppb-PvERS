@@ -3,7 +3,7 @@
     $this->Html->script('dashboard', array('inline' => false));
 ?>
 
-<section>
+<section class="dashboard-modern">
     <div class="row-fluid">
         <div class="span8">
             <h4 class="text-success">Reports</h4>
