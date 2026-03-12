@@ -421,7 +421,7 @@ echo $this->Session->flash();
             changeYear: true,
             showAnim: 'show',
             onSelect: function(selectedDate) {
-                var option = this.id == "PadrStartDate" ? "minDate" : "maxDate",
+                var option = this.id == "Ce2bStartDate" ? "minDate" : "maxDate",
                     instance = $(this).data("datepicker"),
                     date = $.datepicker.parseDate(
                         instance.settings.dateFormat ||
