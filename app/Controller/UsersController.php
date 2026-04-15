@@ -343,11 +343,15 @@ class UsersController extends AppController
 
     public function logout()
     {
-        $this->Session->setFlash('Good-Bye', 'flash_info');
         $user = $this->Auth->User();
-        $message = "A user with ID " . $user['id'] . " and name  " . $user['name'] . " logged out from the system";
-        $this->create_audit_trail("Web Logout", $user, $message);
-        $this->redirect($this->Auth->logout());
+        if ($user) {
+            $message = "A user with ID " . $user['id'] . " and name " . $user['name'] . " logged out from the system";
+            $this->create_audit_trail("Web Logout", $user, $message);
+        }
+        $this->Session->delete('Auth');
+        $this->Session->delete('Config');
+        $this->Session->destroy();
+        $this->redirect($this->Auth->loginAction);
     }
 
     public function changePassword()
@@ -689,50 +693,53 @@ class UsersController extends AppController
                         array('escape' => false)
                     ),
                 );
-                $datum = array(
-                    'email' => $user['User']['email'],
-                    'id' => $id,
-                    'user_id' => $user['User']['id'],
-                    'type' => 'user_registration',
-                    'model' => 'User',
-                    'subject' => CakeText::insert($user_email['Message']['subject'], $variables),
-                    'message' => CakeText::insert($user_email['Message']['content'], $variables)
-                );
-                // In your controller
-                $this->loadModel('Queue.QueuedTask');
-                $this->QueuedTask->createJob('GenericEmail', $datum);
-                $this->QueuedTask->createJob('GenericNotification', $datum);
-                // CakeResque::enqueue('default', 'GenericEmailShell', array('sendEmail', $datum));
-                // CakeResque::enqueue('default', 'GenericNotificationShell', array('sendNotification', $datum));
+
+                // Only send email if template exists
+                if (!empty($user_email['Message'])) {
+                    $datum = array(
+                        'email' => $user['User']['email'],
+                        'id' => $id,
+                        'user_id' => $user['User']['id'],
+                        'type' => 'user_registration',
+                        'model' => 'User',
+                        'subject' => CakeText::insert($user_email['Message']['subject'], $variables),
+                        'message' => CakeText::insert($user_email['Message']['content'], $variables),
+                    );
+                    // In your controller
+                    $this->loadModel('Queue.QueuedTask');
+                    $this->QueuedTask->createJob('GenericEmail', $datum);
+                    $this->QueuedTask->createJob('GenericNotification', $datum);
+                }
 
                 //Notify Managers
                 $managers = $this->User->find('all', array(
                     'contain' => array(),
                     'conditions' => array('group_id' => 2, 'User.is_active' => '1')
                 ));
-                foreach ($managers as $manager) {
-                    $variables = array(
-                        'name' => $user['User']['name'],
-                        'username' => $user['User']['username'],
-                        'email' => $user['User']['email'],
-                        'reference_link' => $html->link(
-                            'Activate',
-                            array('controller' => 'users', 'action' => 'activate_account', $id, $this->Auth->password($user['User']['email']), 'full_base' => true),
-                            array('escape' => false)
-                        ),
-                    );
-                    $datum = array(
-                        'email' => $user['User']['email'],
-                        'id' => $manager['User']['id'],
-                        'user_id' => $manager['User']['id'],
-                        'type' => 'manager_registration',
-                        'model' => 'User',
-                        'subject' => CakeText::insert($manager_nt['Message']['subject'], $variables),
-                        'message' => CakeText::insert($manager_nt['Message']['content'], $variables)
-                    );
+                if (!empty($manager_nt['Message'])) {
+                    foreach ($managers as $manager) {
+                        $variables = array(
+                            'name' => $user['User']['name'],
+                            'username' => $user['User']['username'],
+                            'email' => $user['User']['email'],
+                            'reference_link' => $html->link(
+                                'Activate',
+                                array('controller' => 'users', 'action' => 'activate_account', $id, $this->Auth->password($user['User']['email']), 'full_base' => true),
+                                array('escape' => false)
+                            ),
+                        );
+                        $datum = array(
+                            'email' => $user['User']['email'],
+                            'id' => $manager['User']['id'],
+                            'user_id' => $manager['User']['id'],
+                            'type' => 'manager_registration',
+                            'model' => 'User',
+                            'subject' => CakeText::insert($manager_nt['Message']['subject'], $variables),
+                            'message' => CakeText::insert($manager_nt['Message']['content'], $variables),
+                        );
 
-                    $this->QueuedTask->createJob('GenericNotification', $datum);
-                    // CakeResque::enqueue('default', 'GenericNotificationShell', array('sendNotification', $datum));
+                        $this->QueuedTask->createJob('GenericNotification', $datum);
+                    }
                 }
                 $this->Session->setFlash(__('You have successfully registered. Please click on the link sent to your email address to
                     activate your account. <small><span class="label label-info">Note</span> Check your spam folder if you
@@ -1685,144 +1692,426 @@ class UsersController extends AppController
         $this->redirect(array('action' => 'index'));
     }
 
-    /**/
+    /**
+     * Initialize ACL permissions.
+     *
+     * This method sets up the complete ACL system:
+     * 1. Seeds the groups table with the 5 system roles
+     * 2. Creates ARO nodes for each group
+     * 3. Creates ACO nodes for all controllers
+     * 4. Assigns permissions based on role definitions
+     *
+     * NOTE: For full initialization, prefer using the CLI: `cake Acl init`
+     *
+     * Role definitions:
+     *   - Admin (1):     Full system access
+     *   - Manager (2):   Report management and oversight
+     *   - Reporter (3):  Submit and manage own reports
+     *   - Partner (4):   Institution-level access
+     *   - Reviewer (5):  Review and evaluate reports
+     *
+     * @return void
+     */
     public function initDB()
     {
         $group = $this->User->Group;
-        //Allow admins to everything
+
+        // ========================================
+        // ADMIN (group_id = 1)
+        // Full access to everything
+        // ========================================
         $group->id = 1;
         $this->Acl->allow($group, 'controllers');
 
-        //Allow managers to some
+        // ========================================
+        // MANAGER (group_id = 2)
+        // Report management and oversight
+        // ========================================
         $group->id = 2;
         $this->Acl->deny($group, 'controllers');
+
+        // Dashboard
         $this->Acl->allow($group, 'controllers/Users/manager_dashboard');
-        $this->Acl->allow($group, 'controllers/Sadrs');
-        $this->Acl->allow($group, 'controllers/Aefis');
-        $this->Acl->allow($group, 'controllers/Aefis/yellowcard');
-        $this->Acl->allow($group, 'controllers/SadrFollowups');
-        $this->Acl->allow($group, 'controllers/Pqmps');
-        $this->Acl->allow($group, 'controllers/Devices');
-        $this->Acl->allow($group, 'controllers/Medications');
-        $this->Acl->allow($group, 'controllers/Transfusions');
-        $this->Acl->allow($group, 'controllers/Padrs');
-        $this->Acl->allow($group, 'controllers/Saes');
-        $this->Acl->allow($group, 'controllers/Ce2bs');
-        $this->Acl->allow($group, 'controllers/Attachments');
-        $this->Acl->allow($group, 'controllers/Counties');
-        $this->Acl->allow($group, 'controllers/Countries');
-        $this->Acl->allow($group, 'controllers/Designations');
-        $this->Acl->allow($group, 'controllers/Doses');
-        $this->Acl->allow($group, 'controllers/DrugDictionaries');
-        $this->Acl->allow($group, 'controllers/FacilityCodes');
-        $this->Acl->allow($group, 'controllers/Feedbacks');
-        $this->Acl->allow($group, 'controllers/Frequencies');
-        $this->Acl->allow($group, 'controllers/HelpInfos');
-        $this->Acl->allow($group, 'controllers/Messages');
-        $this->Acl->allow($group, 'controllers/Routes');
-        $this->Acl->allow($group, 'controllers/SadrListOfDrugs');
-        $this->Acl->allow($group, 'controllers/SadrListOfMedicines');
-        $this->Acl->allow($group, 'controllers/AefiListOfVaccines');
-        $this->Acl->allow($group, 'controllers/ListOfDevices');
-        $this->Acl->allow($group, 'controllers/MedicationProducts');
-        $this->Acl->allow($group, 'controllers/Pints');
-        $this->Acl->allow($group, 'controllers/WhoDrugs');
-        $this->Acl->allow($group, 'controllers/Pages');
-        $this->Acl->allow($group, 'controllers/Users/changePassword');
-        $this->Acl->allow($group, 'controllers/Users/edit');
+
+        // Report types - full management
+        $reportControllers = array(
+            'Sadrs', 'Aefis', 'Pqmps', 'Devices', 'Medications',
+            'Transfusions', 'Padrs', 'Saes', 'Ce2bs', 'Saefis',
+            'SadrFollowups',
+        );
+        foreach ($reportControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller);
+        }
+
+        // Lookup/reference data
+        $lookupControllers = array(
+            'Counties', 'Countries', 'Designations', 'Doses',
+            'DrugDictionaries', 'FacilityCodes', 'Frequencies',
+            'HelpInfos', 'Messages', 'Routes', 'Sites',
+            'Vaccines', 'WhoDrugs', 'AutoDrugs', 'Authorities',
+            'Meddras', 'SubCounties', 'Khis',
+        );
+        foreach ($lookupControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller);
+        }
+
+        // Report-related sub-controllers
+        $subControllers = array(
+            'SadrListOfDrugs', 'SadrListOfMedicines',
+            'AefiListOfVaccines', 'ListOfDevices',
+            'MedicationProducts', 'Pints',
+        );
+        foreach ($subControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller);
+        }
+
+        // User management
         $this->Acl->allow($group, 'controllers/Users/admin_index');
         $this->Acl->allow($group, 'controllers/Users/admin_add');
-        $this->Acl->allow($group, 'controllers/Notifications');
-        $this->Acl->allow($group, 'controllers/Comments');
-        $this->Acl->allow($group, 'controllers/Reports');
-        $this->Acl->allow($group, 'controllers/Saefis');
-        $this->Acl->allow($group, 'controllers/Khis');
-
-        //Allow reporters to some
-        $group->id = 3;
-        $this->Acl->deny($group, 'controllers');
-        $this->Acl->allow($group, 'controllers/Users/reporter_dashboard');
+        $this->Acl->allow($group, 'controllers/Users/admin_edit');
+        $this->Acl->allow($group, 'controllers/Users/admin_delete');
+        $this->Acl->allow($group, 'controllers/Users/admin_user_activate');
+        $this->Acl->allow($group, 'controllers/Users/changePassword');
         $this->Acl->allow($group, 'controllers/Users/edit');
 
+        // Groups management
+        $this->Acl->allow($group, 'controllers/Groups');
+
+        // Reports, notifications, communication
+        $this->Acl->allow($group, 'controllers/Reports');
+        $this->Acl->allow($group, 'controllers/Notifications');
+        $this->Acl->allow($group, 'controllers/Comments');
+        $this->Acl->allow($group, 'controllers/Feedbacks');
+        $this->Acl->allow($group, 'controllers/Attachments');
+        $this->Acl->allow($group, 'controllers/Pages');
+        $this->Acl->allow($group, 'controllers/Aggregates');
+        $this->Acl->allow($group, 'controllers/Reminders');
+        $this->Acl->allow($group, 'controllers/Reviews');
+        $this->Acl->allow($group, 'controllers/Pockets');
+
+        // ========================================
+        // REPORTER (group_id = 3)
+        // Submit and manage own reports
+        // ========================================
+        $group->id = 3;
+        $this->Acl->deny($group, 'controllers');
+
+        // Dashboard
+        $this->Acl->allow($group, 'controllers/Users/reporter_dashboard');
+
+        // SADR reports
         $this->Acl->allow($group, 'controllers/Sadrs/sadrIndex');
         $this->Acl->allow($group, 'controllers/Sadrs/reporter_index');
         $this->Acl->allow($group, 'controllers/Sadrs/reporter_add');
         $this->Acl->allow($group, 'controllers/Sadrs/reporter_followup');
         $this->Acl->allow($group, 'controllers/Sadrs/reporter_edit');
         $this->Acl->allow($group, 'controllers/Sadrs/reporter_view');
-        $this->Acl->allow($group, 'controllers/Sadrs/institutionCodes');
         $this->Acl->allow($group, 'controllers/Sadrs/reporter_delete');
         $this->Acl->allow($group, 'controllers/Sadrs/reporter_addfrompqmp');
+        $this->Acl->allow($group, 'controllers/Sadrs/institutionCodes');
 
+        // AEFI reports
         $this->Acl->allow($group, 'controllers/Aefis/aefiIndex');
-        $this->Acl->allow($group, 'controllers/Aefis/institutionCodes');
         $this->Acl->allow($group, 'controllers/Aefis/reporter_index');
         $this->Acl->allow($group, 'controllers/Aefis/reporter_add');
         $this->Acl->allow($group, 'controllers/Aefis/reporter_followup');
         $this->Acl->allow($group, 'controllers/Aefis/reporter_edit');
         $this->Acl->allow($group, 'controllers/Aefis/reporter_view');
         $this->Acl->allow($group, 'controllers/Aefis/reporter_delete');
+        $this->Acl->allow($group, 'controllers/Aefis/institutionCodes');
 
+        // PQR reports
         $this->Acl->allow($group, 'controllers/Pqmps/reporter_index');
         $this->Acl->allow($group, 'controllers/Pqmps/reporter_add');
         $this->Acl->allow($group, 'controllers/Pqmps/reporter_edit');
         $this->Acl->allow($group, 'controllers/Pqmps/reporter_view');
         $this->Acl->allow($group, 'controllers/Pqmps/reporter_delete');
+        $this->Acl->allow($group, 'controllers/Pqmps/pqmpIndex');
 
+        // Device reports
         $this->Acl->allow($group, 'controllers/Devices/reporter_index');
         $this->Acl->allow($group, 'controllers/Devices/reporter_add');
         $this->Acl->allow($group, 'controllers/Devices/reporter_followup');
         $this->Acl->allow($group, 'controllers/Devices/reporter_edit');
         $this->Acl->allow($group, 'controllers/Devices/reporter_view');
 
+        // Medication reports
         $this->Acl->allow($group, 'controllers/Medications/reporter_index');
         $this->Acl->allow($group, 'controllers/Medications/reporter_add');
         $this->Acl->allow($group, 'controllers/Medications/reporter_followup');
         $this->Acl->allow($group, 'controllers/Medications/reporter_edit');
         $this->Acl->allow($group, 'controllers/Medications/reporter_view');
 
+        // Transfusion reports
         $this->Acl->allow($group, 'controllers/Transfusions/reporter_index');
         $this->Acl->allow($group, 'controllers/Transfusions/reporter_add');
         $this->Acl->allow($group, 'controllers/Transfusions/reporter_followup');
         $this->Acl->allow($group, 'controllers/Transfusions/reporter_edit');
         $this->Acl->allow($group, 'controllers/Transfusions/reporter_view');
 
+        // SADR Follow-ups
         $this->Acl->allow($group, 'controllers/SadrFollowups/sadrIndex');
         $this->Acl->allow($group, 'controllers/SadrFollowups/followupIndex');
 
-        $this->Acl->allow($group, 'controllers/Pqmps/pqmpIndex');
-        $this->Acl->allow($group, 'controllers/Users/changePassword');
-
-        $this->Acl->allow($group, 'controllers/Notifications/reporter_index');
-        $this->Acl->allow($group, 'controllers/Notifications/delete');
-
+        // Report item deletions
         $this->Acl->allow($group, 'controllers/SadrListOfDrugs/delete');
         $this->Acl->allow($group, 'controllers/SadrListOfMedicines/delete');
-
-
         $this->Acl->allow($group, 'controllers/AefiListOfVaccines/delete');
         $this->Acl->allow($group, 'controllers/ListOfDevices/delete');
         $this->Acl->allow($group, 'controllers/MedicationProducts/delete');
         $this->Acl->allow($group, 'controllers/Pints/delete');
-        $this->Acl->allow($group, 'controllers/Comments');
+
+        // User actions
+        $this->Acl->allow($group, 'controllers/Users/changePassword');
+        $this->Acl->allow($group, 'controllers/Users/edit');
+
+        // Notifications
+        $this->Acl->allow($group, 'controllers/Notifications/reporter_index');
+        $this->Acl->allow($group, 'controllers/Notifications/delete');
+
+        // Reports and communication
         $this->Acl->allow($group, 'controllers/Reports');
         $this->Acl->allow($group, 'controllers/Saefis');
+        $this->Acl->allow($group, 'controllers/Comments');
 
-        //Allow institution administrators to some
+        // ========================================
+        // PARTNER (group_id = 4)
+        // Institution-level access
+        // ========================================
+        $group->id = 4;
+        $this->Acl->deny($group, 'controllers');
+
+        // Dashboard
+        $this->Acl->allow($group, 'controllers/Users/partner_dashboard');
+
+        // SADR reports (institution view)
+        $this->Acl->allow($group, 'controllers/Sadrs/sadrIndex');
+        $this->Acl->allow($group, 'controllers/Sadrs/partner_index');
+        $this->Acl->allow($group, 'controllers/Sadrs/partner_view');
+        $this->Acl->allow($group, 'controllers/Sadrs/institutionCodes');
+
+        // AEFI reports
+        $this->Acl->allow($group, 'controllers/Aefis/aefiIndex');
+        $this->Acl->allow($group, 'controllers/Aefis/partner_index');
+        $this->Acl->allow($group, 'controllers/Aefis/partner_view');
+        $this->Acl->allow($group, 'controllers/Aefis/institutionCodes');
+
+        // PQR reports
+        $this->Acl->allow($group, 'controllers/Pqmps/pqmpIndex');
+        $this->Acl->allow($group, 'controllers/Pqmps/partner_index');
+        $this->Acl->allow($group, 'controllers/Pqmps/partner_view');
+
+        // Device reports
+        $this->Acl->allow($group, 'controllers/Devices/partner_index');
+        $this->Acl->allow($group, 'controllers/Devices/partner_view');
+
+        // Medication reports
+        $this->Acl->allow($group, 'controllers/Medications/partner_index');
+        $this->Acl->allow($group, 'controllers/Medications/partner_view');
+
+        // Transfusion reports
+        $this->Acl->allow($group, 'controllers/Transfusions/partner_index');
+        $this->Acl->allow($group, 'controllers/Transfusions/partner_view');
+
+        // SADR Follow-ups
+        $this->Acl->allow($group, 'controllers/SadrFollowups/sadrIndex');
+        $this->Acl->allow($group, 'controllers/SadrFollowups/followupIndex');
+
+        // User management (institution users)
+        $this->Acl->allow($group, 'controllers/Users/partner_index');
+        $this->Acl->allow($group, 'controllers/Users/changePassword');
+        $this->Acl->allow($group, 'controllers/Users/edit');
+
+        // Notifications
+        $this->Acl->allow($group, 'controllers/Notifications/partner_index');
+        $this->Acl->allow($group, 'controllers/Notifications/delete');
+
+        // Reports and communication
+        $this->Acl->allow($group, 'controllers/Reports');
+        $this->Acl->allow($group, 'controllers/Saefis');
+        $this->Acl->allow($group, 'controllers/Comments');
+
+        // ========================================
+        // REVIEWER (group_id = 5)
+        // Review and evaluate reports
+        // ========================================
+        $group->id = 5;
+        $this->Acl->deny($group, 'controllers');
+
+        // Dashboard
+        $this->Acl->allow($group, 'controllers/Users/reviewer_dashboard');
+
+        // View reports for review (all types)
+        $reviewControllers = array(
+            'Sadrs', 'Aefis', 'Pqmps', 'Devices', 'Medications',
+            'Transfusions', 'Padrs', 'Saes', 'Ce2bs', 'Saefis',
+            'SadrFollowups',
+        );
+        foreach ($reviewControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller . '/reviewer_index');
+            $this->Acl->allow($group, 'controllers/' . $controller . '/reviewer_view');
+            $this->Acl->allow($group, 'controllers/' . $controller . '/index');
+            $this->Acl->allow($group, 'controllers/' . $controller . '/view');
+        }
+
+        // Reviews
+        $this->Acl->allow($group, 'controllers/Reviews');
+
+        // User actions
+        $this->Acl->allow($group, 'controllers/Users/changePassword');
+        $this->Acl->allow($group, 'controllers/Users/edit');
+
+        // Notifications
+        $this->Acl->allow($group, 'controllers/Notifications/reviewer_index');
+        $this->Acl->allow($group, 'controllers/Notifications/delete');
+
+        // Reports
+        $this->Acl->allow($group, 'controllers/Reports');
+        $this->Acl->allow($group, 'controllers/Comments');
+
+        $this->Session->setFlash(__('ACL initialization complete. You can now use the system.'));
+        $this->redirect(array('action' => 'index'));
+    }
+
+    /**
+     * Initialize ACL via CLI (no redirect)
+     *
+     * @return void
+     */
+    public function admin_init_acl() {
+        $this->autoRender = false;
+        $this->layout = null;
+
+        $group = $this->User->Group;
+
+        // Admin - allow everything
+        $group->id = 1;
+        $this->Acl->allow($group, 'controllers');
+
+        // Manager - deny root, then allow specifics
+        $group->id = 2;
+        $this->Acl->deny($group, 'controllers');
+
+        $this->Acl->allow($group, 'controllers/Users/manager_dashboard');
+
+        $reportControllers = array(
+            'Sadrs', 'Aefis', 'Pqmps', 'Devices', 'Medications',
+            'Transfusions', 'Padrs', 'Saes', 'Ce2bs', 'Saefis',
+            'SadrFollowups',
+        );
+        foreach ($reportControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller);
+        }
+
+        $lookupControllers = array(
+            'Counties', 'Countries', 'Designations', 'Doses',
+            'DrugDictionaries', 'FacilityCodes', 'Frequencies',
+            'HelpInfos', 'Messages', 'Routes', 'Sites',
+            'Vaccines', 'WhoDrugs', 'AutoDrugs', 'Authorities',
+            'Meddras', 'SubCounties', 'Khis',
+        );
+        foreach ($lookupControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller);
+        }
+
+        $subControllers = array(
+            'SadrListOfDrugs', 'SadrListOfMedicines',
+            'AefiListOfVaccines', 'ListOfDevices',
+            'MedicationProducts', 'Pints',
+        );
+        foreach ($subControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller);
+        }
+
+        $this->Acl->allow($group, 'controllers/Users/admin_index');
+        $this->Acl->allow($group, 'controllers/Users/admin_add');
+        $this->Acl->allow($group, 'controllers/Users/admin_edit');
+        $this->Acl->allow($group, 'controllers/Users/admin_delete');
+        $this->Acl->allow($group, 'controllers/Users/admin_user_activate');
+        $this->Acl->allow($group, 'controllers/Users/changePassword');
+        $this->Acl->allow($group, 'controllers/Users/edit');
+        $this->Acl->allow($group, 'controllers/Groups');
+        $this->Acl->allow($group, 'controllers/Reports');
+        $this->Acl->allow($group, 'controllers/Notifications');
+        $this->Acl->allow($group, 'controllers/Comments');
+        $this->Acl->allow($group, 'controllers/Feedbacks');
+        $this->Acl->allow($group, 'controllers/Attachments');
+        $this->Acl->allow($group, 'controllers/Pages');
+        $this->Acl->allow($group, 'controllers/Aggregates');
+        $this->Acl->allow($group, 'controllers/Reminders');
+        $this->Acl->allow($group, 'controllers/Reviews');
+        $this->Acl->allow($group, 'controllers/Pockets');
+
+        // Reporter
+        $group->id = 3;
+        $this->Acl->deny($group, 'controllers');
+        $this->Acl->allow($group, 'controllers/Users/reporter_dashboard');
+        $this->Acl->allow($group, 'controllers/Sadrs/sadrIndex');
+        $this->Acl->allow($group, 'controllers/Sadrs/reporter_index');
+        $this->Acl->allow($group, 'controllers/Sadrs/reporter_add');
+        $this->Acl->allow($group, 'controllers/Sadrs/reporter_followup');
+        $this->Acl->allow($group, 'controllers/Sadrs/reporter_edit');
+        $this->Acl->allow($group, 'controllers/Sadrs/reporter_view');
+        $this->Acl->allow($group, 'controllers/Sadrs/reporter_delete');
+        $this->Acl->allow($group, 'controllers/Sadrs/reporter_addfrompqmp');
+        $this->Acl->allow($group, 'controllers/Sadrs/institutionCodes');
+        $this->Acl->allow($group, 'controllers/Aefis/aefiIndex');
+        $this->Acl->allow($group, 'controllers/Aefis/reporter_index');
+        $this->Acl->allow($group, 'controllers/Aefis/reporter_add');
+        $this->Acl->allow($group, 'controllers/Aefis/reporter_followup');
+        $this->Acl->allow($group, 'controllers/Aefis/reporter_edit');
+        $this->Acl->allow($group, 'controllers/Aefis/reporter_view');
+        $this->Acl->allow($group, 'controllers/Aefis/reporter_delete');
+        $this->Acl->allow($group, 'controllers/Aefis/institutionCodes');
+        $this->Acl->allow($group, 'controllers/Pqmps/reporter_index');
+        $this->Acl->allow($group, 'controllers/Pqmps/reporter_add');
+        $this->Acl->allow($group, 'controllers/Pqmps/reporter_edit');
+        $this->Acl->allow($group, 'controllers/Pqmps/reporter_view');
+        $this->Acl->allow($group, 'controllers/Pqmps/reporter_delete');
+        $this->Acl->allow($group, 'controllers/Pqmps/pqmpIndex');
+        $this->Acl->allow($group, 'controllers/Devices/reporter_index');
+        $this->Acl->allow($group, 'controllers/Devices/reporter_add');
+        $this->Acl->allow($group, 'controllers/Devices/reporter_followup');
+        $this->Acl->allow($group, 'controllers/Devices/reporter_edit');
+        $this->Acl->allow($group, 'controllers/Devices/reporter_view');
+        $this->Acl->allow($group, 'controllers/Medications/reporter_index');
+        $this->Acl->allow($group, 'controllers/Medications/reporter_add');
+        $this->Acl->allow($group, 'controllers/Medications/reporter_followup');
+        $this->Acl->allow($group, 'controllers/Medications/reporter_edit');
+        $this->Acl->allow($group, 'controllers/Medications/reporter_view');
+        $this->Acl->allow($group, 'controllers/Transfusions/reporter_index');
+        $this->Acl->allow($group, 'controllers/Transfusions/reporter_add');
+        $this->Acl->allow($group, 'controllers/Transfusions/reporter_followup');
+        $this->Acl->allow($group, 'controllers/Transfusions/reporter_edit');
+        $this->Acl->allow($group, 'controllers/Transfusions/reporter_view');
+        $this->Acl->allow($group, 'controllers/SadrFollowups/sadrIndex');
+        $this->Acl->allow($group, 'controllers/SadrFollowups/followupIndex');
+        $this->Acl->allow($group, 'controllers/SadrListOfDrugs/delete');
+        $this->Acl->allow($group, 'controllers/SadrListOfMedicines/delete');
+        $this->Acl->allow($group, 'controllers/AefiListOfVaccines/delete');
+        $this->Acl->allow($group, 'controllers/ListOfDevices/delete');
+        $this->Acl->allow($group, 'controllers/MedicationProducts/delete');
+        $this->Acl->allow($group, 'controllers/Pints/delete');
+        $this->Acl->allow($group, 'controllers/Users/changePassword');
+        $this->Acl->allow($group, 'controllers/Users/edit');
+        $this->Acl->allow($group, 'controllers/Notifications/reporter_index');
+        $this->Acl->allow($group, 'controllers/Notifications/delete');
+        $this->Acl->allow($group, 'controllers/Reports');
+        $this->Acl->allow($group, 'controllers/Saefis');
+        $this->Acl->allow($group, 'controllers/Comments');
+
+        // Partner
         $group->id = 4;
         $this->Acl->deny($group, 'controllers');
         $this->Acl->allow($group, 'controllers/Users/partner_dashboard');
         $this->Acl->allow($group, 'controllers/Sadrs/sadrIndex');
-        $this->Acl->allow($group, 'controllers/Sadrs/institutionCodes');
         $this->Acl->allow($group, 'controllers/Sadrs/partner_index');
         $this->Acl->allow($group, 'controllers/Sadrs/partner_view');
         $this->Acl->allow($group, 'controllers/Sadrs/institutionCodes');
         $this->Acl->allow($group, 'controllers/Aefis/aefiIndex');
-        $this->Acl->allow($group, 'controllers/Aefis/institutionCodes');
         $this->Acl->allow($group, 'controllers/Aefis/partner_index');
         $this->Acl->allow($group, 'controllers/Aefis/partner_view');
-        $this->Acl->allow($group, 'controllers/SadrFollowups/sadrIndex');
-        $this->Acl->allow($group, 'controllers/SadrFollowups/followupIndex');
+        $this->Acl->allow($group, 'controllers/Aefis/institutionCodes');
         $this->Acl->allow($group, 'controllers/Pqmps/pqmpIndex');
         $this->Acl->allow($group, 'controllers/Pqmps/partner_index');
         $this->Acl->allow($group, 'controllers/Pqmps/partner_view');
@@ -1832,60 +2121,40 @@ class UsersController extends AppController
         $this->Acl->allow($group, 'controllers/Medications/partner_view');
         $this->Acl->allow($group, 'controllers/Transfusions/partner_index');
         $this->Acl->allow($group, 'controllers/Transfusions/partner_view');
+        $this->Acl->allow($group, 'controllers/SadrFollowups/sadrIndex');
+        $this->Acl->allow($group, 'controllers/SadrFollowups/followupIndex');
+        $this->Acl->allow($group, 'controllers/Users/partner_index');
         $this->Acl->allow($group, 'controllers/Users/changePassword');
         $this->Acl->allow($group, 'controllers/Users/edit');
-        $this->Acl->allow($group, 'controllers/Users/partner_index');
         $this->Acl->allow($group, 'controllers/Notifications/partner_index');
         $this->Acl->allow($group, 'controllers/Notifications/delete');
-        $this->Acl->allow($group, 'controllers/Comments');
         $this->Acl->allow($group, 'controllers/Reports');
         $this->Acl->allow($group, 'controllers/Saefis');
+        $this->Acl->allow($group, 'controllers/Comments');
 
+        // Reviewer
+        $group->id = 5;
+        $this->Acl->deny($group, 'controllers');
+        $this->Acl->allow($group, 'controllers/Users/reviewer_dashboard');
+        $reviewControllers = array(
+            'Sadrs', 'Aefis', 'Pqmps', 'Devices', 'Medications',
+            'Transfusions', 'Padrs', 'Saes', 'Ce2bs', 'Saefis',
+            'SadrFollowups',
+        );
+        foreach ($reviewControllers as $controller) {
+            $this->Acl->allow($group, 'controllers/' . $controller . '/reviewer_index');
+            $this->Acl->allow($group, 'controllers/' . $controller . '/reviewer_view');
+            $this->Acl->allow($group, 'controllers/' . $controller . '/index');
+            $this->Acl->allow($group, 'controllers/' . $controller . '/view');
+        }
+        $this->Acl->allow($group, 'controllers/Reviews');
+        $this->Acl->allow($group, 'controllers/Users/changePassword');
+        $this->Acl->allow($group, 'controllers/Users/edit');
+        $this->Acl->allow($group, 'controllers/Notifications/reviewer_index');
+        $this->Acl->allow($group, 'controllers/Notifications/delete');
+        $this->Acl->allow($group, 'controllers/Reports');
+        $this->Acl->allow($group, 'controllers/Comments');
 
-
-        // Allow mini manager roles 
-        // $group->id = 6;
-        // $this->Acl->deny($group, 'controllers');
-        // $this->Acl->allow($group, 'controllers/Users/mini_dashboard');
-        // $this->Acl->allow($group, 'controllers/Sadrs');
-        // $this->Acl->allow($group, 'controllers/Aefis');
-        // $this->Acl->allow($group, 'controllers/SadrFollowups');
-        // $this->Acl->allow($group, 'controllers/Pqmps');
-        // $this->Acl->allow($group, 'controllers/Devices');
-        // $this->Acl->allow($group, 'controllers/Medications');
-        // $this->Acl->allow($group, 'controllers/Transfusions');
-        // $this->Acl->allow($group, 'controllers/Padrs');
-        // $this->Acl->allow($group, 'controllers/Saes');
-        // $this->Acl->allow($group, 'controllers/Attachments');
-        // $this->Acl->allow($group, 'controllers/Counties');
-        // $this->Acl->allow($group, 'controllers/Countries');
-        // $this->Acl->allow($group, 'controllers/Designations');
-        // $this->Acl->allow($group, 'controllers/Doses');
-        // $this->Acl->allow($group, 'controllers/DrugDictionaries');
-        // $this->Acl->allow($group, 'controllers/FacilityCodes');
-        // $this->Acl->allow($group, 'controllers/Feedbacks');
-        // $this->Acl->allow($group, 'controllers/Frequencies');
-        // $this->Acl->allow($group, 'controllers/HelpInfos');
-        // $this->Acl->allow($group, 'controllers/Messages');
-        // $this->Acl->allow($group, 'controllers/Routes');
-        // $this->Acl->allow($group, 'controllers/SadrListOfDrugs');
-        // $this->Acl->allow($group, 'controllers/SadrListOfMedicines');
-        // $this->Acl->allow($group, 'controllers/AefiListOfVaccines');
-        // $this->Acl->allow($group, 'controllers/ListOfDevices');
-        // $this->Acl->allow($group, 'controllers/MedicationProducts');
-        // $this->Acl->allow($group, 'controllers/Pints');
-        // $this->Acl->allow($group, 'controllers/WhoDrugs');
-        // $this->Acl->allow($group, 'controllers/Pages');
-        // $this->Acl->allow($group, 'controllers/Users/changePassword');
-        // $this->Acl->allow($group, 'controllers/Users/edit');
-        // $this->Acl->allow($group, 'controllers/Users/admin_index');
-        // $this->Acl->allow($group, 'controllers/Users/admin_add');
-        // $this->Acl->allow($group, 'controllers/Notifications');
-        // $this->Acl->allow($group, 'controllers/Comments');
-        // $this->Acl->allow($group, 'controllers/Reports');
-        // $this->Acl->allow($group, 'controllers/Saefis');
-
-        echo "all done";
-        exit;
+        echo "ACL initialization complete\n";
     }
 }

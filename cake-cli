@@ -1,0 +1,9 @@
+#!/bin/bash
+PROJECT_ROOT="/home/nyanaro/VSCODE FILES/ppb-PvERS"
+cd "$PROJECT_ROOT"
+
+# Set PHP include path to project's lib first
+export PHP_INCLUDE_PATH="$PROJECT_ROOT/lib"
+
+# Run with explicit include path to avoid system CakePHP
+/usr/bin/php7.4 -d "include_path=$PROJECT_ROOT/lib:.:/usr/share/php" app/Console/cake.php "$@"

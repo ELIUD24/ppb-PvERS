@@ -5,16 +5,16 @@ services:
       dockerfile: Dockerfile
     platform: linux/amd64
     ports:
-      - "${APP_PORT:-9180}:80"
+      - "${APP_PORT:-8080}:80"
     environment:
       DB_HOST: db
       DB_PORT: "3306"
       DB_USER: "${DB_USER:-root}"
       DB_PASSWORD: "${DB_PASSWORD:-hatua.}"
       DB_NAME: "${DB_NAME:-pvers}"
+      APP_FULL_BASE_URL: http://localhost:8080
     volumes:
       - ./:/var/www/html
-      - ./app/Config/database.php.default:/var/www/html/app/Config/database.php:ro
     depends_on:
       db:
         condition: service_healthy
@@ -30,7 +30,7 @@ services:
       MYSQL_DATABASE: "${DB_NAME:-pvers}"
     volumes:
       - db_data:/var/lib/mysql
-      - ./pvers.sql:/docker-entrypoint-initdb.d/01-pvers.sql:ro
+      - ./staging_pvers.sql:/docker-entrypoint-initdb.d/01-staging_pvers.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
