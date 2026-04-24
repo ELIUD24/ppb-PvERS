@@ -34,16 +34,16 @@ App::uses('Controller', 'Controller');
 class AppController extends Controller
 {
     public $components = array(
-        'Acl',
-        // 'Auth' => array(
-        //     'authorize' => array(
-        //         'Actions' => array('actionPath' => 'controllers')
-        //     )
-        // ),
-        // 'Auth' => array('Jwtoken'),
-        // 'Auth',
-        'RequestHandler' => array('viewClassMap' => array('csv' => 'CsvView.Csv')),
         'Session',
+        'Acl' => array('authorize' => array('Actions' => array('actionPath' => 'controllers'))),
+        'Auth' => array(
+            'authenticate' => array('Form' => array('scope' => array('User.is_active' => 1))),
+            'authorize' => array('Actions'),
+            'loginAction' => array('controller' => 'users', 'action' => 'login'),
+            'logoutRedirect' => array('controller' => 'users', 'action' => 'login'),
+            'loginRedirect' => array('controller' => 'users', 'action' => 'dashboard')
+        ),
+        'RequestHandler' => array('viewClassMap' => array('csv' => 'CsvView.Csv')),
         'Flash',
         'DebugKit.Toolbar'
     );
@@ -52,136 +52,126 @@ class AppController extends Controller
 
     public function isAuthorized($user = null)
     {
-        // Any registered user can access public functions
-        if (!empty($user)) {
-            return (bool) ($user['group_id'] == '3');
+        if (empty($user)) {
+            return false;
         }
-        // return true;
-        return false;
+        $groupId = $user['group_id'];
+        return in_array($groupId, array(1, 2, 3, 4, 5));
     }
+
+    protected function _getRedirectPrefix($groupId)
+    {
+        $prefixes = array(
+            1 => 'admin',
+            2 => 'manager',
+            3 => 'reporter',
+            4 => 'partner',
+            5 => 'reviewer'
+        );
+        return isset($prefixes[$groupId]) ? $prefixes[$groupId] : 'reporter';
+    }
+
     public function beforeFilter()
     {
-        $redir = 'default';
+        $this->Auth->authError = __('<div class="alert alert-error">
+            <button data-dismiss="alert" class="close">&times;</button>
+            <h4><strong>Sorry!</strong> You don\'t have sufficient permissions to access the location.</h4>
+        </div>', true);
+        
+        $this->Auth->loginError = __('<div class="alert alert-error">
+            <button data-dismiss="alert" class="close">&times;</button>
+            <h4>Invalid e-mail / password combination. Please try again.</h4>
+        </div>', true);
+
         if (isset($this->request->prefix) && $this->request->prefix == 'api') {
-            // $this->Auth->authenticate['JwtAuth.JwtToken'] = array(
-            //     'fields' => array(
-            //         'username' => 'username',
-            //         'password' => 'password',
-            //         'token' => 'public_key',
-            //     ),
-            //     'parameter' => '_token',
-            //     'userModel' => 'User',
-            //     // 'scope' => array('User.is_active' => 1),
-            //     'pepper' => Configure::read('API.token.pepper'),
-            // );
             $this->Auth = $this->Components->load('Auth');
             $this->Auth->authenticate = array('Jwtoken');
             $this->Auth->authorize = array('Controller');
-            // $this->Auth->sessionKey = false;
             AuthComponent::$sessionKey = false;
             $this->Auth->initialize($this);
             $this->Auth->authError = 'Not allowed!!';
-            /*$this->Auth = $this->Components->load(
-                'Auth',
-                array('authenticate' => 'Jwtoken', 'authorize' => array('Controller'))
-            );*/
-            // $this->Auth->authenticate = array(
-            //     'Form' => array('userModel' => 'Member')
-            // );
-
             $this->set('redir', 'api');
             $this->set('root', '/');
         } else {
-            $this->Auth = $this->Components->load('Auth');
-            $this->Auth->authorize = array(
-                'Actions' => array('actionPath' => 'controllers')
-            );
+            $redir = $this->_getRedirectPrefix($this->Auth->User('group_id'));
             $this->Auth->initialize($this);
-            $this->Auth->allow('display');
-            //Configure AuthComponent
-            // $this->Auth->loginAction = array('controller' => 'users', 'action' => 'login');
-            // $this->Auth->logoutRedirect = array('controller' => 'users', 'action' => 'login');
-            // $this->Auth->loginRedirect = array('controller' => 'pages', 'action' => 'home', 'admin' => false);
-            // $this->Auth->authenticate = array(
-            //     'all' => array (
-            //         'scope' => array('User.is_active' => 1)   
-            //     ),  
-            //     'Form' 
-            // );
-
-            $this->Auth->authError = __('<div class="alert alert-error">
-                                            <button data-dismiss="alert" class="close">&times;</button>
-                                            <h4><strong>Sorry!</strong> You don\'t have sufficient permissions to access the location.</h4>
-                                         </div>', true);
-            // $this->Auth->loginError = __('Invalid e-mail / password combination.  Please try again', true);
-            $this->Auth->loginError = __('<div class="alert alert-error">
-                                            <button data-dismiss="alert" class="close">&times;</button>
-                                            <h4>Invalid e-mail / password combination.  Please try again.</h4>
-                                         </div>', true);
-
-            if ($this->Auth->User('group_id') == '1')  $redir = 'admin';
-            if ($this->Auth->User('group_id') == '2')  $redir = 'manager';
-            if ($this->Auth->User('group_id') == '3')  $redir = 'reporter';
-            if ($this->Auth->User('group_id') == '4')  $redir = 'partner'; 
-            if ($this->Auth->User('group_id') == '5')  $redir = 'reviewer';
-
-            $this->Auth->loginAction = array('controller' => 'users', 'action' => 'login', 'admin' => false);
-            $this->Auth->logoutRedirect = array('controller' => 'users', 'action' => 'login', 'admin' => false);
+            $this->Auth->allow('display', 'login', 'logout', 'register', 'activate_account', 'forgotPassword', 'resetPassword');
             $this->Auth->loginRedirect = array('controller' => 'users', 'action' => 'dashboard', $redir => true);
-
-            $this->Auth->authError = __('<div class="alert alert-error">
-                          <button data-dismiss="alert" class="close">&times;</button>
-                          <h4><strong>Sorry!</strong> You don\'t have sufficient permissions to access the location.</h4>
-                         </div>', true);
-            $this->Auth->loginError = __('<div class="alert alert-error">
-                          <button data-dismiss="alert" class="close">&times;</button>
-                          <h4>Invalid e-mail / password combination.  Please try again.</h4>
-                         </div>', true);
             $this->set('redir', $redir);
             $this->set('root', '/');
         }
     }
 
-
-
     protected function _attachments($model = null)
     {
-        if (!empty($this->request->data['Attachment'])) {
-            for ($i = 0; $i <= count($this->request->data['Attachment']) - 1; $i++) {
-                $this->request->data['Attachment'][$i]['model'] = $model;
+        if (empty($this->request->data['Attachment'])) {
+            return;
+        }
 
-                $file = explode(',', $this->request->data['Attachment'][$i]['file']);
-                //data:image/jpeg;base64
-                $mystring = $file[0];
-                $end = strpos($mystring, ';');
-                $start2 = strpos($mystring, '/');
-                $start3 = strpos($mystring, ':');
-                $fileExt = substr($mystring, $start2 + 1, $end - $start2 - 1); //jpeg
-                $fileType = substr($mystring, $start3 + 1, $end - $start3 - 1); //image/jpeg
+        $allowedTypes = array('image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $maxFileSize = 10 * 1024 * 1024;
 
-                //decode it
+        $attachmentDir = WWW_ROOT . 'files' . DS . 'Attachments' . DS . 'file' . DS;
+        if (!is_dir($attachmentDir)) {
+            mkdir($attachmentDir, 0755, true);
+        }
+
+        $count = count($this->request->data['Attachment']);
+        for ($i = 0; $i < $count; $i++) {
+            $this->request->data['Attachment'][$i]['model'] = $model;
+            $fileData = $this->request->data['Attachment'][$i]['file'];
+            
+            if (is_string($fileData) && strpos($fileData, 'data:') !== false) {
+                $file = explode(',', $fileData);
+                $meta = $file[0];
                 $data = base64_decode($file[1]);
-
-                $filename =  (isset($this->request->data['Attachment'][$i]['filename'])) ? uniqid() . '-' . $this->request->data['Attachment'][$i]['filename'] :  uniqid() . '.' . $fileExt;
-                $file_dir = WWW_ROOT . 'files' . DS . 'Attachments' . DS . 'file' . DS . $filename;
-                // $file_dir = MEDIA_TRANSFER .DS. $filename;
-                //file create
-                file_put_contents($file_dir, $data);
-                chmod($file_dir, 0777);
-
-                //not necessarily. I write it for use delete function this plugin
-                $filesize = filesize($file_dir);
-
-                //after base64 decode ,file delete
-                $this->request->data['Attachment'][$i]['file'] = null;
-
-                $this->request->data['Attachment'][$i]['file']['name'] = $filename;
-                $this->request->data['Attachment'][$i]['file']['type'] = $fileType;
-                $this->request->data['Attachment'][$i]['file']['tmp_name'] = $file_dir;
-                $this->request->data['Attachment'][$i]['file']['error'] = 0;
-                $this->request->data['Attachment'][$i]['file']['size'] = $filesize;
-                $this->request->data['Attachment'][$i]['group'] = 'attachment';
+                
+                preg_match('/data:([^;]+)/', $meta, $matches);
+                $fileType = isset($matches[1]) ? $matches[1] : 'application/octet-stream';
+                
+                $mimeToExt = array(
+                    'image/jpeg' => 'jpg',
+                    'image/png' => 'png',
+                    'image/gif' => 'gif',
+                    'application/pdf' => 'pdf',
+                    'application/msword' => 'doc',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx'
+                );
+                $fileExt = isset($mimeToExt[$fileType]) ? $mimeToExt[$fileType] : 'bin';
+            } else {
+                $fileType = $fileData['type'];
+                $data = file_get_contents($fileData['tmp_name']);
+                $fileExt = pathinfo($fileData['name'], PATHINFO_EXTENSION);
             }
+
+            if (strlen($data) > $maxFileSize) {
+                $this->Flash->error(__('File size exceeds 10MB limit.'));
+                continue;
+            }
+
+            if (!in_array($fileType, $allowedTypes)) {
+                $this->Flash->error(__('File type not allowed.'));
+                continue;
+            }
+
+            $filename = bin2hex(random_bytes(16)) . '.' . $fileExt;
+            $fileDir = $attachmentDir . $filename;
+
+            if (file_put_contents($fileDir, $data, LOCK_EX) === false) {
+                $this->Flash->error(__('Failed to save file.'));
+                continue;
+            }
+            chmod($fileDir, 0644);
+
+            $this->request->data['Attachment'][$i]['file'] = null;
+            $this->request->data['Attachment'][$i]['file'] = array(
+                'name' => $filename,
+                'type' => $fileType,
+                'tmp_name' => $fileDir,
+                'error' => 0,
+                'size' => strlen($data),
+                'group' => 'attachment'
+            );
         }
     }
 }
