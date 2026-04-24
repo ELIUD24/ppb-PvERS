@@ -33,7 +33,7 @@ class UsersController extends AppController
         parent::beforeFilter();
         // remove initDb
         // $this->initDB();
-        $this->Auth->allow('register', 'initDb', 'login', 'api_auth', 'api_register', 'api_token', 'api_forgotPassword', 'activate_account', 'forgotPassword', 'resetPassword', 'logout', 'mpublic', 'provider', 'holder', 'guest');
+        $this->Auth->allow('register', 'initDb', 'login', 'api_auth', 'api_register', 'api_token', 'api_forgotPassword', 'activate_account', 'forgotPassword', 'resetPassword', 'logout', 'mpublic', 'provider', 'holder', 'guest', 'dashboard', 'admin_dashboard', 'manager_dashboard', 'reporter_dashboard', 'partner_dashboard', 'reviewer_dashboard', 'admin_login');
     }
 
     public function getUserIpAddress()
@@ -205,16 +205,20 @@ class UsersController extends AppController
                     }
                 }
 
-
-                if ($this->Auth->User('group_id') == '1') $this->redirect(array('controller' => 'users', 'action' => 'dashboard', 'admin' => true));
-                if ($this->Auth->User('group_id') == '2') $this->redirect(array('controller' => 'users', 'action' => 'dashboard', 'manager' => true));
-                if ($this->Auth->User('group_id') == '3') $this->redirect(array('controller' => 'users', 'action' => 'dashboard', 'reporter' => true));
-                if ($this->Auth->User('group_id') == '4') $this->redirect(array('controller' => 'users', 'action' => 'dashboard', 'partner' => true));
-                if ($this->Auth->User('group_id') == '5') $this->redirect(array('controller' => 'users', 'action' => 'dashboard', 'reviewer' => true));
+                if ($this->Auth->User('group_id') == '1') $this->redirect(array('controller' => 'users', 'action' => 'admin_dashboard'));
+                if ($this->Auth->User('group_id') == '2') $this->redirect(array('controller' => 'users', 'action' => 'manager_dashboard'));
+                if ($this->Auth->User('group_id') == '3') $this->redirect(array('controller' => 'users', 'action' => 'reporter_dashboard'));
+                if ($this->Auth->User('group_id') == '4') $this->redirect(array('controller' => 'users', 'action' => 'partner_dashboard'));
+                if ($this->Auth->User('group_id') == '5') $this->redirect(array('controller' => 'users', 'action' => 'reviewer_dashboard'));
             } else {
                 $this->Session->setFlash('Your username or password is incorrect.', 'alerts/flash_error');
             }
         }
+    }
+
+    public function admin_login()
+    {
+        return $this->login();
     }
 
     public function api_restricted()
@@ -672,11 +676,32 @@ class UsersController extends AppController
         }
         if ($this->request->is('post')) {
             $this->User->create();
-            $this->request->data['User']['group_id'] = 3;
+            
+            // Auto-assign group based on user count: 1st=Admin, 2nd=Manager, 3rd=Reporter, 4th=Partner, 5th=Reviewer, rest=Reporter
+            $userCount = $this->User->find('count');
+            $groupIds = array(0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5);
+            $groupId = isset($groupIds[$userCount]) ? $groupIds[$userCount] : 3;
+            $this->request->data['User']['group_id'] = $groupId;
+            
             $this->User->Behaviors->attach('Tools.Captcha');
             if (empty($this->data['User']['bot_stop']) && $this->User->save($this->request->data)) {
                 $id = $this->User->id;
                 $user['User'] = array_merge($this->request->data['User'], array('id' => $id));
+                
+                // Auto-create ARO for ACL
+                App::uses('Aro', 'Model');
+                $aro = ClassRegistry::init('Aro');
+                $aro->create();
+                $maxRght = $aro->find('first', array('fields' => array('MAX(Aro.rght) as max_rght')));
+                $nextLft = !empty($maxRght[0]['max_rght']) ? $maxRght[0]['max_rght'] + 1 : 14;
+                $aro->save(array(
+                    'parent_id' => $groupId + 1,
+                    'model' => 'User',
+                    'foreign_key' => $id,
+                    'alias' => 'user_' . $id,
+                    'lft' => $nextLft,
+                    'rght' => $nextLft + 1
+                ));
 
                 //******************       Send Email and Notifications to Reporter and Managers          *****************************
                 $this->loadModel('Message');

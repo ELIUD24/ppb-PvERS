@@ -32,19 +32,60 @@
  */
 	Router::connect('/pages/*', array('controller' => 'pages', 'action' => 'display'));
 
-	//REPORTER ROUTING: DASHBOARD PAGE
-	Router::connect('/reporter', array('controller' => 'users', 'action' => 'dashboard', 'reporter' => true));	
-	//PARTNER ROUTING: DASHBOARD PAGE
-	Router::connect('/partner', array('controller' => 'users', 'action' => 'dashboard', 'partner' => true));	
-	//MANAGER ROUTING: DASHBOARD PAGE
-	Router::connect('/manager', array('controller' => 'users', 'action' => 'dashboard', 'manager' => true));		
-	//ADMIN ROUTING: DASHBOARD PAGE
-	Router::connect('/admin', array('controller' => 'users', 'action' => 'dashboard', 'admin' => true));	
-	//API ROUTING: DASHBOARD PAGE
-	Router::connect('/api', array('controller' => 'users', 'action' => 'dashboard', 'api' => true));	
+	// Role-specific routes - use role-specific dashboard actions
+	Router::connect('/reporter', array('controller' => 'users', 'action' => 'reporter_dashboard'));	
+	Router::connect('/partner', array('controller' => 'users', 'action' => 'partner_dashboard'));	
+	Router::connect('/manager', array('controller' => 'users', 'action' => 'manager_dashboard'));		
+	Router::connect('/admin', array('controller' => 'users', 'action' => 'admin_dashboard'));	
+	Router::connect('/admin/login', array('controller' => 'users', 'action' => 'login'));
+	Router::connect('/api', array('controller' => 'users', 'action' => 'reporter_dashboard'));	
+	Router::connect('/reviewer', array('controller' => 'users', 'action' => 'reviewer_dashboard'));	
 
-	// Add the mini manager role
-	Router::connect('/reviewer', array('controller' => 'users', 'action' => 'dashboard', 'reviewer' => true));	
+	// Role-specific routes for menu items
+	// Reporter routes
+	Router::connect('/reporter/sadrs', array('controller' => 'sadrs', 'action' => 'index', 'reporter' => true));
+	Router::connect('/reporter/aefis', array('controller' => 'aefis', 'action' => 'index', 'reporter' => true));
+	Router::connect('/reporter/pqmps', array('controller' => 'pqmps', 'action' => 'index', 'reporter' => true));
+	Router::connect('/reporter/devices', array('controller' => 'devices', 'action' => 'index', 'reporter' => true));
+	Router::connect('/reporter/medications', array('controller' => 'medications', 'action' => 'index', 'reporter' => true));
+	Router::connect('/reporter/transfusions', array('controller' => 'transfusions', 'action' => 'index', 'reporter' => true));
+	Router::connect('/reporter/notifications', array('controller' => 'notifications', 'action' => 'index', 'reporter' => true));
+
+	// Manager routes
+	Router::connect('/manager/sadrs', array('controller' => 'sadrs', 'action' => 'index', 'manager' => true));
+	Router::connect('/manager/padrs', array('controller' => 'padrs', 'action' => 'index', 'manager' => true));
+	Router::connect('/manager/aefis', array('controller' => 'aefis', 'action' => 'index', 'manager' => true));
+	Router::connect('/manager/pqmps', array('controller' => 'pqmps', 'action' => 'index', 'manager' => true));
+	Router::connect('/manager/reports', array('controller' => 'reports', 'action' => 'index', 'manager' => true));
+
+	// Admin routes - no prefix to avoid ACL issues
+	Router::connect('/admin/users', array('controller' => 'users', 'action' => 'index'));
+	Router::connect('/admin/sadrs', array('controller' => 'sadrs', 'action' => 'index'));
+	Router::connect('/admin/padrs', array('controller' => 'padrs', 'action' => 'index'));
+	Router::connect('/admin/groups', array('controller' => 'groups', 'action' => 'index'));
+	Router::connect('/admin/logout', array('controller' => 'users', 'action' => 'logout'));
+
+	// Partner routes - no prefix
+	Router::connect('/partner/sadrs', array('controller' => 'sadrs', 'action' => 'index'));
+	Router::connect('/partner/aefis', array('controller' => 'aefis', 'action' => 'index'));
+	Router::connect('/partner/pqmps', array('controller' => 'pqmps', 'action' => 'index'));
+	Router::connect('/partner/logout', array('controller' => 'users', 'action' => 'logout'));
+
+	// Reviewer routes - no prefix
+	Router::connect('/reviewer/sadrs', array('controller' => 'sadrs', 'action' => 'index'));
+	Router::connect('/reviewer/padrs', array('controller' => 'padrs', 'action' => 'index'));
+	Router::connect('/reviewer/aefis', array('controller' => 'aefis', 'action' => 'index'));
+	Router::connect('/reviewer/pqmps', array('controller' => 'pqmps', 'action' => 'index'));
+	Router::connect('/reviewer/reports', array('controller' => 'reports', 'action' => 'index'));
+	Router::connect('/reviewer/logout', array('controller' => 'users', 'action' => 'logout'));
+	
+	// Manager routes - no prefix
+	Router::connect('/manager/sadrs', array('controller' => 'sadrs', 'action' => 'index'));
+	Router::connect('/manager/padrs', array('controller' => 'padrs', 'action' => 'index'));
+	Router::connect('/manager/aefis', array('controller' => 'aefis', 'action' => 'index'));
+	Router::connect('/manager/pqmps', array('controller' => 'pqmps', 'action' => 'index'));
+	Router::connect('/manager/reports', array('controller' => 'reports', 'action' => 'index'));
+	Router::connect('/manager/logout', array('controller' => 'users', 'action' => 'logout'));	
 
 /**
  * Load all plugin routes. See the CakePlugin documentation on

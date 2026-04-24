@@ -35,13 +35,13 @@ class AppController extends Controller
 {
     public $components = array(
         'Session',
-        'Acl' => array('authorize' => array('Actions' => array('actionPath' => 'controllers'))),
+        'Acl' => array('authorize' => array('Actions' => array('actionPath' => ''))),
         'Auth' => array(
             'authenticate' => array('Form' => array('scope' => array('User.is_active' => 1))),
-            'authorize' => array('Actions'),
+            'authorize' => array('Controller'),
             'loginAction' => array('controller' => 'users', 'action' => 'login'),
             'logoutRedirect' => array('controller' => 'users', 'action' => 'login'),
-            'loginRedirect' => array('controller' => 'users', 'action' => 'dashboard')
+            'loginRedirect' => array('controller' => 'users', 'action' => 'login')
         ),
         'RequestHandler' => array('viewClassMap' => array('csv' => 'CsvView.Csv')),
         'Flash',
@@ -61,6 +61,8 @@ class AppController extends Controller
 
     protected function _getRedirectPrefix($groupId)
     {
+        if (empty($groupId)) return 'reporter';
+        
         $prefixes = array(
             1 => 'admin',
             2 => 'manager',
@@ -93,10 +95,26 @@ class AppController extends Controller
             $this->set('redir', 'api');
             $this->set('root', '/');
         } else {
-            $redir = $this->_getRedirectPrefix($this->Auth->User('group_id'));
+            // Get group_id safely - default to reporter if not logged in
+            $groupId = $this->Auth->User('group_id');
+            $redir = $this->_getRedirectPrefix($groupId);
             $this->Auth->initialize($this);
             $this->Auth->allow('display', 'login', 'logout', 'register', 'activate_account', 'forgotPassword', 'resetPassword');
-            $this->Auth->loginRedirect = array('controller' => 'users', 'action' => 'dashboard', $redir => true);
+            
+// Map group_id to role-specific dashboard action
+            $groupId = $this->Auth->User('group_id');
+            $dashboardMap = array(
+                1 => 'admin_dashboard',
+                2 => 'manager_dashboard',
+                3 => 'reporter_dashboard',
+                4 => 'partner_dashboard',
+                5 => 'reviewer_dashboard'
+            );
+            $dashAction = !empty($dashboardMap[$groupId]) ? $dashboardMap[$groupId] : 'reporter_dashboard';
+            
+            // Use simple redirect without prefix param to avoid ACL conflicts
+            $this->Auth->loginRedirect = array("controller" => "users", "action" => "login");
+            
             $this->set('redir', $redir);
             $this->set('root', '/');
         }
