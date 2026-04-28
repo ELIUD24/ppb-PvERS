@@ -503,10 +503,10 @@ class PqmpsController extends AppController
      *
      * @return void
      */
-    /*public function index() {
+    public function index() {
         $this->Pqmp->recursive = 0;
         $this->set('pqmps', $this->paginate());
-    }*/
+    }
     public function reporter_index()
     {
         $this->Prg->commonProcess();
