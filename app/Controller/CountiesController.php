@@ -37,7 +37,11 @@ class CountiesController extends AppController {
  */
 	public function index() {
 		$this->County->recursive = -1;
-		$this->set('counties', $this->County->find('list', array('order' => array('County.county_name' => 'asc'))));
+		$this->paginate = array(
+			'limit' => 20,
+			'order' => array('County.county_name' => 'asc')
+		);
+		$this->set('counties', $this->paginate());
 	}
 
 	public function api_index() {

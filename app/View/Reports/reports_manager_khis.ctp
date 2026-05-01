@@ -96,9 +96,9 @@ $filterSummary = $hasDefaultRange
                 <div style="margin-top: 10px;">
                     <?php
                     echo $this->Form->button('<i class="icon-search icon-white"></i> Search', array(
+                        'type' => 'submit',
                         'name' => 'searchReport',
                         'class' => 'btn btn-primary',
-                        'div' => false,
                         'formnovalidate' => 'formnovalidate',
                         'escape' => false
                     ));
@@ -110,10 +110,10 @@ $filterSummary = $hasDefaultRange
                     );
                     echo ' ';
                     echo $this->Form->button('<i class="fa fa-paper-plane-o icon-white"></i> Upload', array(
+                        'type' => 'submit',
                         'name' => 'uploadReport',
                         'onclick' => "return confirm('Are you sure you wish to upload the data?');",
                         'class' => 'btn btn-success',
-                        'div' => false,
                         'formnovalidate' => 'formnovalidate',
                         'escape' => false
                     ));

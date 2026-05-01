@@ -46,10 +46,27 @@ class PadrsController extends AppController
      *
      * @return void
      */
-    public function index()
-    {
-        $this->Padr->recursive = 0;
-        $this->set('padrs', $this->Paginator->paginate());
+    public function index() {
+        $userType = $this->Auth->user('user_type');
+        switch ($userType) {
+            case 'Admin':
+                $this->redirect(array('action' => 'admin_index'));
+                break;
+            case 'Manager':
+                $this->redirect(array('action' => 'manager_index'));
+                break;
+            case 'Reviewer':
+                $this->redirect(array('action' => 'reviewer_index'));
+                break;
+            case 'Partner':
+                $this->redirect(array('action' => 'partner_index'));
+                break;
+            case 'Public Health Program':
+                $this->redirect(array('action' => 'reporter_index'));
+                break;
+            default:
+                $this->redirect(array('action' => 'reporter_index'));
+        }
     }
 
     public function manager_index()
@@ -101,6 +118,37 @@ class PadrsController extends AppController
         $criteria = $this->Padr->parseCriteria($this->passedArgs); 
         $criteria['Padr.archived'] = false;
         $criteria['Padr.assigned_to'] = $this->Auth->User('id');
+        $this->paginate['conditions'] = $criteria;
+        $this->paginate['order'] = array('Padr.id' => 'DESC');
+        $this->paginate['contain'] = array('County');
+
+        //in case of csv export
+        if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
+            $this->csv_export($this->Padr->find(
+                'all',
+                array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'limit' => 10000)
+            ));
+        }
+        //end pdf export
+        $this->set('page_options', $this->page_options);
+        $counties = $this->Padr->County->find('list', array('order' => array('County.county_name' => 'ASC')));
+        $this->set(compact('counties'));
+        $designations = $this->Padr->Designation->find('list', array('order' => array('Designation.name' => 'ASC')));
+        $this->set(compact('designations'));
+        $this->set('padrs', Sanitize::clean($this->paginate(), array('encode' => false)));
+    }
+    public function reporter_index()
+    {
+        # code...
+        $this->Prg->commonProcess();
+        // debug($this->request->query['pages']);
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (!empty($this->request->query['pages'])) $this->paginate['limit'] = $this->request->query['pages'];
+        else $this->paginate['limit'] = reset($this->page_options);
+
+        $criteria = $this->Padr->parseCriteria($this->passedArgs);
+        $criteria['Padr.archived'] = false;
+        $criteria['Padr.reporter_email'] = $this->Auth->User('email');
         $this->paginate['conditions'] = $criteria;
         $this->paginate['order'] = array('Padr.id' => 'DESC');
         $this->paginate['contain'] = array('County');
@@ -323,57 +371,59 @@ class PadrsController extends AppController
                 $html = new HtmlHelper(new ThemeView());
                 $message = $this->Message->find('first', array('conditions' => array('name' => 'reporter_padr_submit')));
                 $padr = $this->Padr->read();
-                $variables = array(
-                    'name' => $padr['Padr']['reporter_name'], 'reference_no' => $padr['Padr']['reference_no'],
-                    'reference_link' => $html->link(
-                        $padr['Padr']['reference_no'],
-                        array('controller' => 'padrs', 'action' => 'view', $padr['Padr']['token'], 'full_base' => true),
-                        array('escape' => false)
-                    ),
-                    'modified' => $padr['Padr']['modified']
-                );
-                $datum = array(
-                    'email' => $padr['Padr']['reporter_email'],
-                    'id' => $this->Padr->id,  'type' => 'reporter_padr_submit', 'model' => 'Padr',
-                    'subject' => CakeText::insert($message['Message']['subject'], $variables),
-                    'message' => CakeText::insert($message['Message']['content'], $variables)
-                );
-
-                $this->loadModel('Queue.QueuedTask');
-                $this->QueuedTask->createJob('GenericEmail', $datum);
-
-                //Send SMS
-                if (!empty($padr['Padr']['reporter_phone']) && strlen(substr($padr['Padr']['reporter_phone'], -9)) == 9 && is_numeric(substr($padr['Padr']['reporter_phone'], -9))) {
-                    $datum['phone'] = '254' . substr($padr['Padr']['reporter_phone'], -9);
-                    $variables['reference_url'] = Router::url(['controller' => 'padrs', 'action' => 'view', $padr['Padr']['token'], 'reporter' => true, 'full_base' => true]);
-                    $datum['sms'] = CakeText::insert($message['Message']['sms'], $variables);
-                    $this->QueuedTask->createJob('GenericSms', $datum);
-                }
-
-                //Notify managers
-                $users = $this->Padr->User->find('all', array(
-                    'contain' => array(),
-                    'conditions' => array('User.group_id' => 2, 'User.is_active' => '1')
-                ));
-                foreach ($users as $user) {
+                if (!empty($message)) {
                     $variables = array(
-                        'name' => $user['User']['name'], 'reference_no' => $padr['Padr']['reference_no'],
+                        'name' => $padr['Padr']['reporter_name'], 'reference_no' => $padr['Padr']['reference_no'],
                         'reference_link' => $html->link(
                             $padr['Padr']['reference_no'],
-                            array('controller' => 'padrs', 'action' => 'view', $padr['Padr']['token'], 'manager' => true, 'full_base' => true),
+                            array('controller' => 'padrs', 'action' => 'view', $padr['Padr']['token'], 'full_base' => true),
                             array('escape' => false)
                         ),
                         'modified' => $padr['Padr']['modified']
                     );
                     $datum = array(
-                        'email' => $user['User']['email'],
-                        'id' => $this->Padr->id, 'user_id' => $user['User']['id'], 'type' => 'reporter_padr_submit', 'model' => 'Padr',
+                        'email' => $padr['Padr']['reporter_email'],
+                        'id' => $this->Padr->id,  'type' => 'reporter_padr_submit', 'model' => 'Padr',
                         'subject' => CakeText::insert($message['Message']['subject'], $variables),
                         'message' => CakeText::insert($message['Message']['content'], $variables)
                     );
 
+                    $this->loadModel('Queue.QueuedTask');
                     $this->QueuedTask->createJob('GenericEmail', $datum);
-                    $this->QueuedTask->createJob('GenericNotification', $datum);
+
+                    //Send SMS
+                    if (!empty($padr['Padr']['reporter_phone']) && strlen(substr($padr['Padr']['reporter_phone'], -9)) == 9 && is_numeric(substr($padr['Padr']['reporter_phone'], -9))) {
+                        $datum['phone'] = '254' . substr($padr['Padr']['reporter_phone'], -9);
+                        $variables['reference_url'] = Router::url(['controller' => 'padrs', 'action' => 'view', $padr['Padr']['token'], 'reporter' => true, 'full_base' => true]);
+                        $datum['sms'] = CakeText::insert($message['Message']['sms'], $variables);
+                        $this->QueuedTask->createJob('GenericSms', $datum);
+                    }
+
+                    //Notify managers
+                    $users = $this->Padr->User->find('all', array(
+                        'contain' => array(),
+                        'conditions' => array('User.group_id' => 2, 'User.is_active' => '1')
+                    ));
+                    foreach ($users as $user) {
+                        $variables = array(
+                            'name' => $user['User']['name'], 'reference_no' => $padr['Padr']['reference_no'],
+                            'reference_link' => $html->link(
+                                $padr['Padr']['reference_no'],
+                                array('controller' => 'padrs', 'action' => 'view', $padr['Padr']['token'], 'manager' => true, 'full_base' => true),
+                                array('escape' => false)
+                            ),
+                            'modified' => $padr['Padr']['modified']
+                        );
+                        $datum = array(
+                            'email' => $user['User']['email'],
+                            'id' => $this->Padr->id, 'user_id' => $user['User']['id'], 'type' => 'reporter_padr_submit', 'model' => 'Padr',
+                            'subject' => CakeText::insert($message['Message']['subject'], $variables),
+                            'message' => CakeText::insert($message['Message']['content'], $variables)
+                        );
+
+                        $this->QueuedTask->createJob('GenericEmail', $datum);
+                        $this->QueuedTask->createJob('GenericNotification', $datum);
+                    }
                 }
                 //**********************************    END   *********************************
 

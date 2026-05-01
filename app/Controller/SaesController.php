@@ -12,7 +12,28 @@ class SaesController extends AppController {
     public $components = array('Search.Prg');
     public $presetVars = true; // using the model configuration
 
-    
+            public function index() {
+        $userType = $this->Auth->user('user_type');
+        switch ($userType) {
+            case 'Admin':
+                $this->redirect(array('action' => 'admin_index'));
+                break;
+            case 'Manager':
+                $this->redirect(array('action' => 'manager_index'));
+                break;
+            case 'Reviewer':
+                $this->redirect(array('action' => 'reviewer_index'));
+                break;
+            case 'Partner':
+                $this->redirect(array('action' => 'partner_index'));
+                break;
+            case 'Public Health Program':
+                $this->redirect(array('action' => 'reporter_index'));
+                break;
+            default:
+                $this->redirect(array('action' => 'reporter_index'));
+        }
+    }
     public function manager_index() {
         $this->Prg->commonProcess();
         $page_options = array('25' => '25', '20' => '20');
@@ -62,6 +83,32 @@ class SaesController extends AppController {
         $this->set('page_options', $page_options);
         $this->set('saes', Sanitize::clean($this->paginate(), array('encode' => false)));
     }
+    public function reporter_index()
+    {
+        # code...
+        $this->Prg->commonProcess();
+        $page_options = array('25' => '25', '20' => '20');
+        if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+        if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
+            else $this->paginate['limit'] = reset($page_options);
+
+        $criteria = $this->Sae->parseCriteria($this->passedArgs);
+        if (!isset($this->passedArgs['approved'])) $criteria['Sae.approved'] = array(0, 1, 2);
+        $criteria['Sae.reporter_id'] = $this->Auth->User('id');
+        $this->paginate['conditions'] = $criteria;
+        $this->paginate['order'] = array('Sae.created' => 'desc');
+        $this->paginate['contain'] = array('SuspectedDrug', 'ConcomittantDrug');
+        //in case of csv export
+        if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
+          $this->csv_export($this->Sae->find('all', 
+                  array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'], 'contain' => $this->paginate['contain'])
+              ));
+        }
+        //end pdf export
+
+        $this->set('page_options', $page_options);
+        $this->set('saes', Sanitize::clean($this->paginate(), array('encode' => false)));
+    }       
     private function csv_export($csaes = ''){
         $this->response->download('SAEs_'.date('Ymd_Hi').'.csv'); // <= setting the file name
         $this->set(compact('csaes'));

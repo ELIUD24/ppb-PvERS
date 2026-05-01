@@ -25,7 +25,11 @@ class CountriesController extends AppController {
  */
 	public function index() {
 		$this->Country->recursive = -1;
-		$this->set('countries', $this->Country->find('list'));
+		$this->paginate = array(
+			'limit' => 20,
+			'order' => array('Country.name' => 'asc')
+		);
+		$this->set('countries', $this->paginate());
 	}
 
 	public function api_index() {

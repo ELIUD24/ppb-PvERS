@@ -26,6 +26,11 @@ class KhisController extends AppController
     public $is_mobile = false;
     protected $khisElementsCache = null;
 
+    protected function isValidKhisUrl($url)
+    {
+        return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
+    }
+
     public function beforeFilter()
     {
         parent::beforeFilter();
@@ -38,6 +43,30 @@ class KhisController extends AppController
         }
         $this->set('is_mobile', $this->is_mobile);
     }
+
+    public function index() {
+        $userType = $this->Auth->user('user_type');
+        if ($userType == 'Manager') {
+            $this->manager_index();
+        } else {
+            switch ($userType) {
+                case 'Admin':
+                    $this->redirect(array('action' => 'admin_index'));
+                    break;
+                case 'Reviewer':
+                    $this->redirect(array('action' => 'reviewer_index'));
+                    break;
+                case 'Partner':
+                    $this->redirect(array('action' => 'partner_index'));
+                    break;
+                case 'Public Health Program':
+                    $this->redirect(array('action' => 'reporter_index'));
+                    break;
+                default:
+                    $this->redirect(array('action' => 'reporter_index'));
+            }
+        }
+    }
     public function update_organizations()
     {
 
@@ -45,6 +74,10 @@ class KhisController extends AppController
         $apiUrl = Configure::read('khis_org_units_url');
         $username = Configure::read('khis_usename');
         $password =  Configure::read('khis_password');
+
+        if (!$this->isValidKhisUrl($apiUrl)) {
+            return;
+        }
 
         //load indicators
         $ch1 = curl_init($apiUrl);
@@ -61,7 +94,7 @@ class KhisController extends AppController
 
         // Check for cURL errors
         if (curl_errno($ch1)) {
-            echo 'Curl error: ' . curl_error($ch1);
+            // KHIS organization unit sync failed. Likely invalid or missing KHIS configuration.
         }
 
         // Close cURL session
@@ -106,6 +139,10 @@ class KhisController extends AppController
         $username = Configure::read('khis_usename');
         $password =  Configure::read('khis_password');
 
+        if (!$this->isValidKhisUrl($apiUrl)) {
+            return;
+        }
+
         //load indicators
         $ch1 = curl_init($apiUrl);
 
@@ -121,7 +158,7 @@ class KhisController extends AppController
 
         // Check for cURL errors
         if (curl_errno($ch1)) {
-            echo 'Curl error: ' . curl_error($ch1);
+            // KHIS indicator sync failed. Likely invalid or missing KHIS configuration.
         }
 
         // Close cURL session
@@ -170,6 +207,9 @@ class KhisController extends AppController
         $currentYear = date('Y');
         $years = range($currentYear, $currentYear - 19);
 
+        $this->loadModel('County');
+        $counties = $this->County->find('list', array('order' => array('County.county_name' => 'ASC')));
+
         $this->set('sadrsSummary', $sadrsSummary);
         $this->set('aefiSummary', $aefiSummary);
         $this->set('devicesSummary', $devicesSummary);
@@ -177,15 +217,41 @@ class KhisController extends AppController
         $this->set('transfusionsSummary', $transfusionsSummary);
         $this->set('years', $years);
         $this->set('reportFilters', $reportFilters);
+        $this->set('counties', $counties);
         if (isset($this->request->data['uploadReport'])) {
             $this->prepare_upload_data();
         }
 
 
         if ($this->Session->read('Auth.User.group_id') == 2) {
-            $this->render('khis_summary');
+            $this->render('index');
         }
     }
+
+    public function reporter_index()
+    {
+        # code...
+        $userType = $this->Auth->user('user_type');
+        switch ($userType) {
+            case 'Admin':
+                $this->redirect(array('action' => 'admin_index'));
+                break;
+            case 'Reviewer':
+                $this->redirect(array('action' => 'reviewer_index'));
+                break;
+            case 'Partner':
+                $this->redirect(array('action' => 'partner_index'));
+                break;
+            case 'Public Health Program':
+                $this->redirect(array('action' => 'reporter_index'));
+                break;
+             case 'Manager':
+                 $this->redirect(array('action' => 'manager_index'));
+                 break;
+             default:
+                 $this->redirect(array('action' => 'reporter_index'));
+        }
+    }   
 
     protected function resolveReportFilters()
     {
@@ -1188,15 +1254,21 @@ class KhisController extends AppController
         $username = Configure::read('khis_usename');
         $password =  Configure::read('khis_password');
 
+        if (!$this->isValidKhisUrl($apiUrl)) {
+            $this->Session->setFlash(__('KHIS data submission URL is not configured. Please check KHIS settings.'), 'alerts/flash_error');
+            $this->redirect($this->referer());
+            return;
+        }
+
         $ch = curl_init($apiUrl);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-        // curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload)); // Convert the payload to a query string
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json', // Set the content type 
+            'Content-Type: application/json',
         ));
 
 

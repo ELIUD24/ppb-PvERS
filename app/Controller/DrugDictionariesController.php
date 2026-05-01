@@ -71,9 +71,51 @@ class DrugDictionariesController extends AppController {
  *
  * @return void
  */
-	public function index() {
-		$this->DrugDictionary->recursive = 0;
-		$this->set('drugDictionaries', $this->paginate());
+        public function index() {
+        $userType = $this->Auth->user('user_type');
+        switch ($userType) {
+            case 'Admin':
+                $this->redirect(array('action' => 'admin_index'));
+                break;
+            case 'Manager':
+                $this->redirect(array('action' => 'manager_index'));
+                break;
+            case 'Reviewer':
+                $this->redirect(array('action' => 'reviewer_index'));
+                break;
+            case 'Partner':
+                $this->redirect(array('action' => 'partner_index'));
+                break;
+            case 'Public Health Program':
+                $this->redirect(array('action' => 'reporter_index'));
+                break;
+            default:
+                $this->redirect(array('action' => 'reporter_index'));
+        }
+    }
+
+	public function reporter_index()
+	{
+		# code...
+		$this->Prg->commonProcess();
+		$page_options = array('25' => '25', '20' => '20');
+		if (!empty($this->passedArgs['start_date']) || !empty($this->passedArgs['end_date'])) $this->passedArgs['range'] = true;
+		if (isset($this->passedArgs['pages']) && !empty($this->passedArgs['pages'])) $this->paginate['limit'] = $this->passedArgs['pages'];
+			else $this->paginate['limit'] = reset($page_options);
+
+		$criteria = $this->DrugDictionary->parseCriteria($this->passedArgs);
+		$this->paginate['conditions'] = $criteria;
+		$this->paginate['order'] = array('DrugDictionary.created' => 'desc');
+		//in case of csv export
+		if (isset($this->request->params['ext']) && $this->request->params['ext'] == 'csv') {
+		  $this->csv_export($this->DrugDictionary->find('all', 
+				  array('conditions' => $this->paginate['conditions'], 'order' => $this->paginate['order'])
+			  ));
+		}
+
+		$this->set('page_options', $page_options);
+		$this->set('drugDictionaries', Sanitize::clean($this->paginate(), array('encode' => false)));
+		$this->set('paging', $this->request->params['paging']);
 	}
 
 	public function admin_index() {

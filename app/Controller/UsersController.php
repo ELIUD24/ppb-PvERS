@@ -567,6 +567,7 @@ class UsersController extends AppController
         $this->User->recursive = 0;
         $this->set('users', $this->paginate());
     }
+    
 
     public function admin_index()
     {
@@ -897,6 +898,24 @@ class UsersController extends AppController
             $this->Session->setFlash(__('Invalid activation token.'), 'alerts/flash_error');
             $this->redirect('/');
         }
+    }
+
+    public function dashboard()
+    {
+        if (!$this->Auth->User('id')) {
+            $this->Session->setFlash(__('Please login to access the dashboard'), 'alerts/flash_error');
+            $this->redirect(array('controller' => 'users', 'action' => 'login'));
+        }
+
+        $group_id = $this->Auth->User('group_id');
+        if ($group_id == '1') $this->redirect(array('controller' => 'users', 'action' => 'admin_dashboard'));
+        if ($group_id == '2') $this->redirect(array('controller' => 'users', 'action' => 'manager_dashboard'));
+        if ($group_id == '3') $this->redirect(array('controller' => 'users', 'action' => 'reporter_dashboard'));
+        if ($group_id == '4') $this->redirect(array('controller' => 'users', 'action' => 'partner_dashboard'));
+        if ($group_id == '5') $this->redirect(array('controller' => 'users', 'action' => 'reviewer_dashboard'));
+
+        $this->Session->setFlash(__('No dashboard found for your account type.'), 'alerts/flash_error');
+        $this->redirect('/');
     }
 
     // Dashboard Methods

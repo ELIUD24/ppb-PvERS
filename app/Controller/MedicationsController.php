@@ -35,6 +35,28 @@ class MedicationsController extends AppController
      *
      * @return void
      */
+        public function index() {
+        $userType = $this->Auth->user('user_type');
+        switch ($userType) {
+            case 'Admin':
+                $this->redirect(array('action' => 'admin_index'));
+                break;
+            case 'Manager':
+                $this->redirect(array('action' => 'manager_index'));
+                break;
+            case 'Reviewer':
+                $this->redirect(array('action' => 'reviewer_index'));
+                break;
+            case 'Partner':
+                $this->redirect(array('action' => 'partner_index'));
+                break;
+            case 'Public Health Program':
+                $this->redirect(array('action' => 'reporter_index'));
+                break;
+            default:
+                $this->redirect(array('action' => 'reporter_index'));
+        }
+    }
     public function reporter_index()
     {
         $this->Prg->commonProcess();

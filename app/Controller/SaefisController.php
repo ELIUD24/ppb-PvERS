@@ -23,7 +23,26 @@ class SaefisController extends AppController
     public $page_options = array('25' => '25', '50' => '50', '100' => '100');
     public function index()
     {
-        $this->Saefi->recursive = 1;
+        $userType = $this->Auth->user('user_type');
+        switch ($userType) {
+            case 'Admin':
+                $this->redirect(array('action' => 'manager_index'));
+                break;
+            case 'Manager':
+                $this->redirect(array('action' => 'manager_index'));
+                break;
+            case 'Reviewer':
+                $this->redirect(array('action' => 'manager_index'));
+                break;
+            case 'Partner':
+                $this->redirect(array('action' => 'partner_index'));
+                break;
+            case 'Public Health Program':
+                $this->redirect(array('action' => 'reporter_index'));
+                break;
+            default:
+                $this->redirect(array('action' => 'reporter_index'));
+        }
     }
 
     public function reporter_index()

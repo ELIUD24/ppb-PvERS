@@ -24,6 +24,10 @@ class DesignationsController extends AppController {
  *
  * @return void
  */
+	public function index() {
+		$this->Designation->recursive = 0;
+		$this->set('designations', $this->Paginator->paginate());
+	}
 
 	public function api_index() {
 		$this->Designation->recursive = -1;
@@ -35,6 +39,10 @@ class DesignationsController extends AppController {
 		$this->Designation->recursive = 0;
 		$this->set('designations', $this->Paginator->paginate());
 	}
+	public function reporter_index() {
+		$this->Designation->recursive = 0;
+		$this->set('designations', $this->Paginator->paginate());
+	}	
 
 /**
  * admin_view method
